@@ -6,4 +6,4 @@ add_library(common
 	${src_files})
 
 find_package(Qt5 REQUIRED COMPONENTS Core)
-target_link_libraries(common PRIVATE Qt5::Core)
+target_link_libraries(common PRIVATE Qt5::Core PRIVATE db)

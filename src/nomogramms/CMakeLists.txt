@@ -6,5 +6,5 @@ add_library(nomogramms
 	${src_files})
 
 find_package(Qt5 REQUIRED COMPONENTS Core)
-target_link_libraries(nomogramms PRIVATE Qt5::Core PRIVATE lua PRIVATE lua_bridge)
+target_link_libraries(nomogramms PRIVATE Qt5::Core PRIVATE lua PRIVATE lua_bridge PRIVATE common)
 target_include_directories(nomogramms PUBLIC ${EXTERNAL_INCLUDES})
