@@ -14,7 +14,7 @@ namespace nomogramms
 		~ExpressionExecutor();
 
 		void SetVariable(const QString& variableName, const SICalculeable& variable);
-		bool WriteResultsTo(IOData& outputData);
+		bool WriteResultsTo(IOData& outputData_);
 
 		bool Exec();
 

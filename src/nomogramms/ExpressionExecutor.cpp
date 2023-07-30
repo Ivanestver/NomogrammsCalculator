@@ -22,9 +22,9 @@ namespace nomogramms
 		luabridge::setGlobal(L, variable, variableName.toLocal8Bit().constData());
 	}
 
-	bool ExpressionExecutor::WriteResultsTo(IOData& outputData)
+	bool ExpressionExecutor::WriteResultsTo(IOData& outputData_)
 	{
-		outputData += this->outputData;
+		outputData_ += this->outputData;
 
 		return true;
 	}
@@ -55,6 +55,7 @@ namespace nomogramms
 			return 0;
 		}
 
+		error.clear();
 		IOData input(*inputData), output;
 		for (int i = 2; i <= args; ++i)
 		{
@@ -65,7 +66,6 @@ namespace nomogramms
 				if (!calculeable)
 					continue;
 
-				QString error;
 				if (!calculeable->Calculate(input, output, error))
 				{
 					lua_pushstring(L, error.toLocal8Bit().constData());

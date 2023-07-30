@@ -7,7 +7,7 @@ namespace db
 {
 	namespace db_state
 	{
-		class MSAccessDBState : public IDBState
+		class MSAccessDBState : public DBState
 		{
 		public:
 			MSAccessDBState(const QString& pathToFile);
@@ -18,6 +18,8 @@ namespace db
 
 		private:
 			const QString pathToMSAccessFile;
+			MSAccessDBState(const MSAccessDBState&) = delete;
+			MSAccessDBState& operator=(const MSAccessDBState&) = delete;
 		};
 	}
 }

@@ -3,6 +3,8 @@
 #include <QString>
 #include <QUuid>
 #include "common/macros.h"
+#include <memory>
+#include "db/DataBaseWrapper.h"
 
 DECL_SHARED(DBObject);
 

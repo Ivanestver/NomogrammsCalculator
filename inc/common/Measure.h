@@ -18,7 +18,7 @@ namespace nomogramms
 
 		const SMeasureUnit GetMeasureUnit() const;
 
-		void SetValue(double value);
+		void SetValue(double value_);
 		double GetValue() const;
 
 		bool operator==(const DBObject& other) override;
