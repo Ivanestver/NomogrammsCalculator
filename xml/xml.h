@@ -5,7 +5,7 @@
 
 namespace xml
 {
-	class XmlConfigure
+	class XmlConfiguration
 	{
 	public:
 		static const QString GetConfigPath()
@@ -13,6 +13,14 @@ namespace xml
 			return QString("%1/config.xml").arg(QDir::currentPath());
 		}
 
-		XmlConfigure() = default;
+		XmlConfiguration();
+
+		const QString& GetValueByTag(const QString& tag) const;
+
+	private:
+		void readData();
+
+	private:
+		std::map<QString, QString> configAttributes;
 	};
 }
