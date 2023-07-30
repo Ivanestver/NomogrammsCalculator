@@ -8,7 +8,7 @@
 
 #define DECL_UNIQUE(__class__) \
 	class __class__; \
-	using U##__class__ = std::shared_ptr<__class__>
+	using U##__class__ = std::unique_ptr<__class__>
 
 #define DECL_DCBASECLASS \
 protected: \

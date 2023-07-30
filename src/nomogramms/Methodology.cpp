@@ -21,7 +21,7 @@ namespace nomogramms
 
 	void Methodology::initFromDB()
 	{
-		const auto* db = db::DataBaseWrapper::GetInstance();
+		auto db = db::DataBaseWrapper::GetDatabase();
 		QString queryString = "select [slave_id] from [template_template] where master_id = :1";
 		std::vector<QVariant> params{ QVariant(GetId()) };
 		QString error;
@@ -33,11 +33,11 @@ namespace nomogramms
 
 		for (const auto& v : result)
 		{
-			for (const auto& id : v)
+			for (const auto& itemID : v)
 			{
-				if (id.type() == QVariant::Uuid)
+				if (itemID.type() == QVariant::Uuid)
 				{
-					auto nomogramm = std::make_shared<Nomogramm>(id.value<QUuid>());
+					auto nomogramm = std::make_shared<Nomogramm>(itemID.value<QUuid>());
 					nomogramms.push_back(nomogramm);
 				}
 			}

@@ -76,7 +76,7 @@ SDBObject DBObject::CreateDBObject(const QUuid& class_id, const QUuid& template_
 
 void DBObject::initialize()
 {
-	const auto* dbInstance = db::DataBaseWrapper::GetInstance();
+	auto dbInstance = db::DataBaseWrapper::GetDatabase();
 	if (!dbInstance)
 		return;
 

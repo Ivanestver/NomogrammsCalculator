@@ -25,9 +25,9 @@ namespace nomogramms
 		return measureUnit;
 	}
 
-	void Measure::SetValue(double value)
+	void Measure::SetValue(double value_)
 	{
-		this->value = value;
+		this->value = value_;
 	}
 
 	double Measure::GetValue() const
@@ -62,7 +62,7 @@ namespace nomogramms
 
 	void Measure::initFromDB()
 	{
-		const auto* db = db::DataBaseWrapper::GetInstance();
+		auto db = db::DataBaseWrapper::GetDatabase();
 		value = db->GetAttributeByIdAndTemplateID(db::properties::measure_value, GetId()).toDouble();
 
 		QString queryString = "select slave_id from template_template where master_id = :1";

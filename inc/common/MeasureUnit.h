@@ -16,6 +16,12 @@ namespace nomogramms
 		MeasureUnit(const MeasureUnit& other);
 		~MeasureUnit() override;
 
+
+		bool operator==(const DBObject& other) override;
+		bool operator!=(const DBObject& other) override;
+		DBObject& operator=(const DBObject& other) override;
+
+
 	protected:
 		virtual void initFromDB() override;
 	};

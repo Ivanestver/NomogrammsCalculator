@@ -13,6 +13,21 @@ namespace nomogramms
 
 	MeasureUnit::~MeasureUnit() = default;
 
+	bool MeasureUnit::operator==(const DBObject& other)
+	{
+		return base::operator==(other);
+	}
+
+	bool MeasureUnit::operator!=(const DBObject& other)
+	{
+		return base::operator!=(other);
+	}
+
+	DBObject& MeasureUnit::operator=(const DBObject& other)
+	{
+		return base::operator=(other);
+	}
+
 	void MeasureUnit::initFromDB()
 	{}
 }

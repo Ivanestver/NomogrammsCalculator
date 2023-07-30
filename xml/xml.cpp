@@ -5,6 +5,18 @@ namespace xml
 {
 	XmlConfiguration::XmlConfiguration()
 	{
+		readData();
+	}
+
+	const QString XmlConfiguration::GetConfigPath()
+	{
+		return QString("%1/config.xml").arg(QDir::currentPath());
+	}
+
+	const XmlConfiguration* XmlConfiguration::GetInstance()
+	{
+		static XmlConfiguration instance;
+		return &instance;
 	}
 
 	const QString& XmlConfiguration::GetValueByTag(const QString& tag) const

@@ -1,26 +1,37 @@
 #pragma once
 #include <QString>
+#include <memory>
+#include "common/macros.h"
 
 namespace db
 {
 	namespace db_state
 	{
-		class IDBState
+		enum StateType
+		{
+			MSAccess,
+			MySQL,
+			MSSQLServer
+		};
+
+		DECL_SHARED(DBState);
+
+		class DBState
 		{
 		public:
-			virtual ~IDBState() = 0 {};
+			virtual ~DBState() = 0 {};
 
 			virtual const QString GetDBName() const = 0;
 			virtual const QString GetConnectionString() const = 0;
 
 		protected:
-			IDBState() = default;
+			DBState() = default;
 
 		private:
-			IDBState(const IDBState& other) = default;
-			IDBState& operator=(const IDBState& other) = default;
-			IDBState(IDBState&& other) = default;
-			IDBState& operator=(IDBState&& other) = default;
+			DBState(const DBState& other) = default;
+			DBState& operator=(const DBState& other) = default;
+			DBState(DBState&& other) = default;
+			DBState& operator=(DBState&& other) = default;
 		};
 	}
 }

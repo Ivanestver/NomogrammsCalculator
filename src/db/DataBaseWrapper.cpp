@@ -5,10 +5,11 @@
 #include <QSqlRecord>
 #include <QStringBuilder>
 #include "xml/xml.h"
+#include "db/db_state_factory.h"
 
 namespace db
 {
-	DataBaseWrapper::DataBaseWrapper(const db_state::IDBState* state)
+	DataBaseWrapper::DataBaseWrapper(const db_state::SDBState& state)
 	{
 		db = QSqlDatabase::addDatabase(state->GetDBName());
 		db.setDatabaseName(state->GetConnectionString());
@@ -23,12 +24,11 @@ namespace db
 		return s;
 	}
 
-	std::unique_ptr<DataBaseWrapper> DataBaseWrapper::Create(const db_state::IDBState* state)
+	SDataBaseWrapper DataBaseWrapper::GetDatabase()
 	{
-		if (!state)
-			return std::unique_ptr<DataBaseWrapper>();
+		auto state = db_state::DBStateFactory::GetState();
 
-		return std::make_unique<DataBaseWrapper>(state);
+		return SDataBaseWrapper(new DataBaseWrapper(state));
 	}
 
 	DataBaseWrapper::~DataBaseWrapper()
@@ -61,6 +61,8 @@ namespace db
 
 	QString DataBaseWrapper::GetAttributeByIdAndTemplateID(const QUuid& attributeID, const QUuid& templateID) const
 	{
+		Q_UNUSED(attributeID);
+		Q_UNUSED(templateID);
 		return QString();
 	}
 
@@ -100,7 +102,7 @@ namespace db
 		QSqlQuery q(db);
 		q.prepare(query);
 		for (size_t i = 0; i < params.size(); i++)
-			q.bindValue(i, params[i]);
+			q.bindValue((int)i, params[i]);
 
 		if (!q.exec())
 			return q.lastError().text();
@@ -120,7 +122,7 @@ namespace db
 		}
 
 		for (size_t i = 0; i < params.size(); i++)
-			q.bindValue(i, params[i]);
+			q.bindValue((int)i, params[i]);
 
 		if (!q.exec())
 		{
