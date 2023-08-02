@@ -1,10 +1,11 @@
-#include "NomogrammCalculator.h"
+#include "ui/main_ui.h"
 #include <QtWidgets/QApplication>
+#include <QString>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    NomogrammCalculator w;
+    MainUI w;
     w.show();
     return a.exec();
 }
