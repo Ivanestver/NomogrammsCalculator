@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <db>
-  <db_id></db_id>
+	<db_state_type>0</db_state_type>
+	<db_path>D:/VSProjects/NomogrammsCalculator/db.accdb</db_path>
 </db>

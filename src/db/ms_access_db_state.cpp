@@ -15,7 +15,7 @@ namespace db
 
 		const QString MSAccessDBState::GetConnectionString() const
 		{
-			return QString("DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};FIL={MS Access};DBQ=D:\\VSProjects\\NomogrammCalculator\\NomogrammCalculator\\nomogramdb.accdb")
+			return QString("DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};FIL={MS Access};DBQ=%1")
 				.arg(pathToMSAccessFile);
 		}
 	}

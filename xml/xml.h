@@ -12,7 +12,7 @@ namespace xml
 		static const XmlConfiguration* GetInstance();
 
 
-		const QString& GetValueByTag(const QString& tag) const;
+		QString GetValueByTag(const QString& tag) const;
 
 	private:
 		XmlConfiguration();

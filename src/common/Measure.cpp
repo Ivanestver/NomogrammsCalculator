@@ -63,7 +63,7 @@ namespace nomogramms
 	void Measure::initFromDB()
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
-		value = db->GetAttributeByIdAndTemplateID(db::properties::measure_value, GetId()).toDouble();
+		value = db->GetPropertyValueByIdAndTemplateID(db::properties::measure_value, GetId()).toDouble();
 
 		QString queryString = "select slave_id from template_template where master_id = :1";
 		std::vector<QVariant> params{QVariant(GetId())};

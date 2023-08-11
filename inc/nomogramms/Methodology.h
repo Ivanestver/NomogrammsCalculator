@@ -16,13 +16,19 @@ namespace nomogramms
 	public:
 		Methodology(const QUuid& id);
 		Methodology(const Methodology& other);
-		~Methodology() override;
-		// Унаследовано через DBObject
-		virtual void initFromDB() override;
+		~Methodology() override = default;
+
+		bool GetChildren(std::vector<SDBObject>& children) const override;
 
 		bool operator==(const DBObject& other) override;
 		bool operator!=(const DBObject& other) override;
 		Methodology& operator=(const DBObject& other) override;
+
+		const std::vector<SNomogramm>& GetNomogramms() const;
+
+	private:
+		// Унаследовано через DBObject
+		virtual void initFromDB() override;
 
 	private:
 		std::vector<SNomogramm> nomogramms;

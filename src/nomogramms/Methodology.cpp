@@ -6,30 +6,36 @@ namespace nomogramms
 {
 	Methodology::Methodology(const QUuid& id)
 		: base(id)
-	{}
+	{
+		initFromDB();
+	}
 
 	Methodology::Methodology(const Methodology& other)
 		: base(other)
 	{
-		for (const auto& nomogramm : other.nomogramms)
-		{
-			this->nomogramms.push_back(nomogramm);
-		}
+		this->nomogramms.insert(this->nomogramms.begin(), other.nomogramms.begin(), other.nomogramms.end());
 	}
 
-	Methodology::~Methodology() = default;
+	bool Methodology::GetChildren(std::vector<SDBObject>& children) const
+	{
+		if (nomogramms.empty())
+			return false;
+
+		children.clear();
+		children.insert(children.begin(), nomogramms.begin(), nomogramms.end());
+		
+		return true;
+	}
 
 	void Methodology::initFromDB()
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
-		QString queryString = "select [slave_id] from [template_template] where master_id = :1";
+		QString queryString = "select [sub_id] from [template_template] where master_id = :1";
 		std::vector<QVariant> params{ QVariant(GetId()) };
 		QString error;
 		auto result = db->ExecuteQuery(queryString, params, error);
 		if (!error.isEmpty())
-		{
 			return;
-		}
 
 		for (const auto& v : result)
 		{
@@ -50,6 +56,7 @@ namespace nomogramms
 		return base::operator==(other)
 			&& this->nomogramms == o.nomogramms;
 	}
+
 	bool Methodology::operator!=(const DBObject& other)
 	{
 		return !operator==(other);
@@ -65,5 +72,10 @@ namespace nomogramms
 		this->nomogramms = o.nomogramms;
 
 		return *this;
+	}
+
+	const std::vector<SNomogramm>& Methodology::GetNomogramms() const
+	{
+		return nomogramms;
 	}
 }

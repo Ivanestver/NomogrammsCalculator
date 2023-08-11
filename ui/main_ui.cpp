@@ -2,16 +2,19 @@
 #include <nomogramms_viewer.h>
 #include <QPushButton>
 
-MainUI::MainUI(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::NomogrammCalculatorClass())
+namespace ui
 {
-    ui->setupUi(this);
-    connect(ui->allNomogrammsBtn, &QPushButton::clicked, this, &MainUI::onAllNomogrammsClicked);
-}
+    MainUI::MainUI(QWidget* parent)
+        : QMainWindow(parent)
+        , ui(new Ui::NomogrammCalculatorClass())
+    {
+        ui->setupUi(this);
+        connect(ui->allNomogrammsBtn, &QPushButton::clicked, this, &MainUI::onAllNomogrammsClicked);
+    }
 
-void MainUI::onAllNomogrammsClicked()
-{
-    NomogrammsViewer viewer(this);
-    viewer.exec();
+    void MainUI::onAllNomogrammsClicked()
+    {
+        NomogrammsViewer viewer(this);
+        viewer.exec();
+    }
 }

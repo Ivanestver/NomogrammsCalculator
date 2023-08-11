@@ -5,13 +5,15 @@
 #include "nomogramms/Nomogramm.h"
 #include "nomogramms/Methodology.h"
 #include "common/MeasureUnit.h"
+#include "exceptions/db_exception.h"
+#include <QDebug>
 
 using namespace nomogramms;
 
 DBObject::DBObject(const QUuid& id)
 	: id(id)
 {
-	initialize();
+	initFromDB();
 }
 
 DBObject::DBObject(const DBObject& other)
@@ -22,12 +24,12 @@ DBObject::DBObject(const DBObject& other)
 
 DBObject::~DBObject() = default;
 
-QString DBObject::GetName() const
+const QString& DBObject::GetName() const
 {
 	return name;
 }
 
-QUuid DBObject::GetId() const
+const QUuid& DBObject::GetId() const
 {
 	return id;
 }
@@ -54,6 +56,11 @@ DBObject& DBObject::operator=(const DBObject& other)
 	return *this;
 }
 
+bool DBObject::GetChildren(std::vector<SDBObject>& children) const
+{
+	return false;
+}
+
 SDBObject DBObject::CreateDBObject(const QUuid& class_id, const QUuid& template_id)
 {
 	if (class_id == nomogramms::Graphics::GetCID())
@@ -74,12 +81,18 @@ SDBObject DBObject::CreateDBObject(const QUuid& class_id, const QUuid& template_
 	return nullptr;
 }
 
-void DBObject::initialize()
+void DBObject::initFromDB()
 {
 	auto dbInstance = db::DataBaseWrapper::GetDatabase();
 	if (!dbInstance)
 		return;
-
-	name = dbInstance->GetAttributeByIdAndTemplateID(db::properties::dbobject_name, id);
-	initFromDB();
+	try
+	{
+		name = dbInstance->GetPropertyValueByIdAndTemplateID(db::properties::dbobject_name, id);
+	}
+	catch (const exceptions::BadRequestException& e)
+	{
+		qDebug() << e.GetMessage();
+		return;
+	}
 }

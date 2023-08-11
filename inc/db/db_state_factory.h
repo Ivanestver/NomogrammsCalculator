@@ -14,12 +14,16 @@ namespace db
 			static std::shared_ptr<DBState> GetState()
 			{
 				const auto* xmlConfiguration = xml::XmlConfiguration::GetInstance();
-				StateType stateType = (StateType)xmlConfiguration->GetValueByTag("db_state_type").toInt();
+				auto value = xmlConfiguration->GetValueByTag("db_state_type");
+				if (value.isEmpty())
+					return SDBState();
+
+				StateType stateType = (StateType)value.toInt();
 				switch (stateType)
 				{
 				case db::db_state::MSAccess:
 				{
-					QString pathTofile = xmlConfiguration->GetValueByTag("ms_access_path");
+					QString pathTofile = xmlConfiguration->GetValueByTag("db_path");
 					return std::make_shared<MSAccessDBState>(pathTofile);
 				}
 				case db::db_state::MySQL:

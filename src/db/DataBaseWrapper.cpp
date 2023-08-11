@@ -6,6 +6,7 @@
 #include <QStringBuilder>
 #include "xml/xml.h"
 #include "db/db_state_factory.h"
+#include <exceptions/db_exception.h>
 
 namespace db
 {
@@ -42,9 +43,10 @@ namespace db
 		QString sID = classID.toString();
 		sID = sID.left(sID.length() - 1);
 		sID = sID.right(sID.length() - 1).toUpper();
-		QSqlQuery query;
-		query.prepare("select template_id from template where class_id = :classID");
-		query.bindValue(":classID", sID);
+
+		QSqlQuery query(db);
+		query.prepare("select [template_id] from [template] where [class_id] in (?)");
+		query.addBindValue(sID);
 		if (!query.exec())
 			return query.lastError().text();
 
@@ -59,15 +61,28 @@ namespace db
 		return "";
 	}
 
-	QString DataBaseWrapper::GetAttributeByIdAndTemplateID(const QUuid& attributeID, const QUuid& templateID) const
+	QString DataBaseWrapper::GetPropertyValueByIdAndTemplateID(const QUuid& propertyID, const QUuid& templateID) const
 	{
-		Q_UNUSED(attributeID);
-		Q_UNUSED(templateID);
-		return QString();
+		QSqlQuery query(db);
+		query.prepare("select [property_value] from [template_property] where [property_id] in (?) and [template_id] in (?)");
+		query.addBindValue(turnIDToStr(propertyID));
+		query.addBindValue(turnIDToStr(templateID));
+		if (!query.exec())
+			throw exceptions::BadRequestException(query.lastError().text());
+
+		if (!query.next())
+			return "";
+
+		auto var = query.value(0);
+		if (!var.isValid())
+			throw exceptions::BadRequestException("Значение невалидно");
+
+		return var.toString();
 	}
 
-	QString DataBaseWrapper::GetPropertiesByIDsAndObjID(std::vector<QString>& values, const std::vector<QUuid>& attributes, const QUuid& objID) const
+	std::vector<QString> DataBaseWrapper::GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& objID) const
 	{
+		std::vector<QString> values;
 		QString queryStr = QString("select property_value from template_property where template_id = :tID and property_id in (");
 		for (size_t i = 0; i < attributes.size(); i++)
 		{
@@ -84,7 +99,7 @@ namespace db
 			query.bindValue(QString(":%1").arg(i), turnIDToStr(attributes[i].toString()));
 
 		if (!query.exec())
-			return query.lastError().text();
+			throw exceptions::BadRequestException(query.lastError().text());
 
 		while (query.next())
 		{
@@ -94,7 +109,7 @@ namespace db
 			values.push_back(var.value<QString>());
 		}
 
-		return "";
+		return values;
 	}
 
 	QString DataBaseWrapper::ExecuteUpdate(const QString& query, const std::vector<QVariant>& params) const

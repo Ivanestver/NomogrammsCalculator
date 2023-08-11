@@ -66,7 +66,7 @@ namespace nomogramms
 	void Nomogramm::initFromDB()
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
-		bypassRule = db->GetAttributeByIdAndTemplateID(db::properties::nomogramm_bypassRule_name, GetId());
+		bypassRule = db->GetPropertyValueByIdAndTemplateID(db::properties::nomogramm_bypassRule_name, GetId());
 
 		QString queryString = "select slave_id, master_slave_value from template_template where master_id = :1";
 		std::vector<QVariant> params { QVariant(GetId()) };

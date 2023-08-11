@@ -5,15 +5,22 @@
 #include <QWidget>
 #include <memory>
 #include "ui/ui_nomogramms_viewer.h"
+#include "db/DataBaseWrapper.h"
 
-class NomogrammsViewer : public QDialog
+namespace ui
 {
-	Q_OBJECT;
+	class NomogrammsViewer : public QDialog
+	{
+		Q_OBJECT;
 
-public:
-	NomogrammsViewer(QWidget* parent = nullptr);
-	~NomogrammsViewer() = default;
+	public:
+		NomogrammsViewer(QWidget* parent = nullptr);
+		~NomogrammsViewer() = default;
 
-private:
-	std::shared_ptr<Ui::NomogrammViewer> ui;
-};
+	private:
+		void setTree();
+
+	private:
+		std::shared_ptr<Ui::NomogrammViewer> ui;
+	};
+}

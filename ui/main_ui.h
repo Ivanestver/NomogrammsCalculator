@@ -5,17 +5,20 @@
 #include <memory>
 #include "ui/ui_main_ui.h"
 
-class MainUI : public QMainWindow
+namespace ui
 {
-    Q_OBJECT
+    class MainUI : public QMainWindow
+    {
+        Q_OBJECT
 
-public:
-    MainUI(QWidget *parent = nullptr);
-    ~MainUI() override = default;
+    public:
+        MainUI(QWidget* parent = nullptr);
+        ~MainUI() override = default;
 
-private:
-    std::unique_ptr<Ui::NomogrammCalculatorClass> ui;
+    private:
+        std::unique_ptr<Ui::NomogrammCalculatorClass> ui;
 
-private Q_SLOTS:
-    void onAllNomogrammsClicked();
-};
+    private Q_SLOTS:
+        void onAllNomogrammsClicked();
+    };
+}

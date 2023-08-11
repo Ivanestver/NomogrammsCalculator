@@ -22,7 +22,7 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="graphicsTab">
       <attribute name="title">
        <string>Tab 1</string>
       </attribute>
@@ -32,11 +32,11 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="calcTab">
       <attribute name="title">
        <string>Tab 2</string>
       </attribute>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox">
+      <widget class="QDoubleSpinBox" name="inputSpinBox">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -59,7 +59,7 @@
         <string>Input</string>
        </property>
       </widget>
-      <widget class="QTextEdit" name="textEdit">
+      <widget class="QTextEdit" name="outputTextEdit">
        <property name="geometry">
         <rect>
          <x>140</x>

@@ -17,20 +17,19 @@ public:
 	DBObject(const DBObject& other);
 	virtual ~DBObject() = 0;
 
-	QString GetName() const;
-	QUuid GetId() const;
+	const QString& GetName() const;
+	const QUuid& GetId() const;
 
 	virtual bool operator==(const DBObject& other);
 	virtual bool operator!=(const DBObject& other);
 	virtual DBObject& operator=(const DBObject& other);
 
+	virtual bool GetChildren(std::vector<SDBObject>& children) const;
+
 	static SDBObject CreateDBObject(const QUuid& class_id, const QUuid& template_id);
 
-private:
-	void initialize();
-
 protected:
-	virtual void initFromDB() = 0;
+	virtual void initFromDB();
 	DECL_DCBASECLASS
 
 private:

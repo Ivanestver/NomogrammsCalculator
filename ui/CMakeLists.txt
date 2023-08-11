@@ -11,5 +11,5 @@ add_library(ui
 
 # Add the Qt5 Widgets for linking
 find_package(Qt5 CONFIG REQUIRED COMPONENTS Core Widgets)
-target_link_libraries(ui PRIVATE Qt5::Core PRIVATE Qt5::Widgets)
+target_link_libraries(ui PRIVATE Qt5::Core PRIVATE Qt5::Widgets PRIVATE nomogramms)
 target_include_directories(ui PUBLIC "${CMAKE_BINARY_DIR}/ui/ui_autogen/include_Debug")
