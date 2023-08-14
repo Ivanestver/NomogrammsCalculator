@@ -21,6 +21,7 @@ private:
 
 private Q_SLOTS:
 	void onAddItem();
+	void onAddMethodology();
 
 private:
 	Ui::MainWindow ui;

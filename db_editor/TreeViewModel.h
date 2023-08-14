@@ -1,6 +1,7 @@
 #pragma once
 #include <QAbstractItemModel>
 #include <TreeItem.h>
+#include <map>
 
 class TreeItemModel : public QAbstractItemModel
 {
@@ -29,8 +30,13 @@ public:
 	Qt::ItemFlags flags(const QModelIndex& index) const override;
 	virtual bool insertRows(int row, int count, const QModelIndex& parent = QModelIndex());
 
+	bool SaveIndexToDB(const QModelIndex& index, QString& error) const;
+
 private:
 	TreeItem* getItem(const QModelIndex& idx) const;
+	bool saveTemplate(const TreeItem* item, QString& error) const;
+	bool saveProperties(const TreeItem* item, const std::map<QUuid, QVariant>& properties, QString& error) const;
+	bool saveMasterIdForSubId(const TreeItem* item, QString& error) const;
 
 private:
 	TreeItem* rootItem;

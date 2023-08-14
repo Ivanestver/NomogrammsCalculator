@@ -5,6 +5,8 @@
 #include "TreeViewModel.h"
 #include "db_state/properties.h"
 #include <QInputDialog>
+#include "choose_item_type_dlg.h"
+#include <QDebug>
 
 const QUuid methodology_class("A8A4951D-8542-4CFA-B593-ECBA3DE727D1");
 const QUuid nomogramm_class("F5313633-C8FC-43DC-A92E-88B7EE8DF439");
@@ -51,11 +53,40 @@ void MainWindow::addToolBar()
 {
 	QToolBar* toolBar = new QToolBar(this);
 	toolBar->addAction(QString::fromLocal8Bit("Добавить новый объект"), this, &MainWindow::onAddItem);
+	toolBar->addAction(QString::fromLocal8Bit("Добавить новую методику"), this, &MainWindow::onAddMethodology);
 }
 
 QMessageBox::StandardButton MainWindow::showWarning(const QString& message)
 {
 	return QMessageBox::warning(this, QString::fromLocal8Bit("Ошибка при получении модели дерева"), QString::fromLocal8Bit("Ошибка"));
+}
+
+void MainWindow::onAddMethodology()
+{
+	auto* model = ui.treeView->model();
+	if (!model)
+	{
+		QMessageBox::warning(this, QString::fromLocal8Bit("Ошибка при получении модели дерева"), QString::fromLocal8Bit("Ошибка"));
+		return;
+	}
+
+	bool ok;
+	const auto text = QInputDialog::getText(this, QString::fromLocal8Bit("Введите название нового объекта"), QString::fromLocal8Bit("Добавление нового объекта"), QLineEdit::Normal, "", &ok);
+	if (!ok || text.isEmpty())
+		return;
+
+	if (!model->insertRow(model->rowCount(QModelIndex()) + 1, QModelIndex()))
+	{
+		showWarning(QString::fromLocal8Bit("Ошибка при добавлении нового элемента"));
+		return;
+	}
+
+	const auto added = model->index(model->rowCount(QModelIndex()) - 1, 1, QModelIndex());
+	if (added.isValid())
+	{
+		model->setData(added, text, TreeItemModel::ModelRole::NameRole);
+		model->setData(added, methodology_class, TreeItemModel::ModelRole::ClassIDRole);
+	}
 }
 
 void MainWindow::onAddItem()
@@ -67,17 +98,56 @@ void MainWindow::onAddItem()
 		return;
 	}
 
-	const auto selected = ui.treeView->selectionModel()->currentIndex();
+	const auto selectedIdx = ui.treeView->selectionModel()->selectedIndexes();
+	if (selectedIdx.isEmpty())
+	{
+		showWarning("Выберите родительский элемент!");
+		return;
+	}
+
+	const auto& selected = selectedIdx.first();
 	const auto* item = static_cast<const TreeItem*>(selected.internalPointer());
 	if (!item)
+	{
+		showWarning("Ошибка при получении выделенного элемента");
 		return;
+	}
 
-	bool ok;
-	const auto text = QInputDialog::getText(this, QString::fromLocal8Bit("Введите название нового объекта"), QString::fromLocal8Bit("Добавление нового объекта"), QLineEdit::Normal, "", &ok);
-	if (!ok || text.isEmpty())
-		return;
+	QUuid selectedItemClassId = item->classId;
 
-	if (!model->insertRow(selected.row() + 1, selected))
+	QString text;
+	QUuid classId;
+
+	if (selectedItemClassId == nomogramm_class)
+	{
+		DlgChooseItemType dlg(this);
+		int response = dlg.exec();
+		if (response == QDialog::Accepted)
+		{
+			text = dlg.GetName();
+			classId = dlg.IsNomogramm() ? nomogramm_class : graphics_class;
+		}
+		else
+		{
+			qDebug() << "Отмена ввода";
+			return;
+		}
+	}
+	else
+	{
+		bool ok;
+		text = QInputDialog::getText(this, QString::fromLocal8Bit("Введите название нового объекта"), QString::fromLocal8Bit("Добавление нового объекта"), QLineEdit::Normal, "", &ok);
+		if (!ok || text.isEmpty())
+		{
+			showWarning(QString::fromLocal8Bit("Возникла ошибка при вводе названия объекта"));
+			return;
+		}
+
+		else if (selectedItemClassId == methodology_class)
+			classId = nomogramm_class;
+	}
+
+	if (!model->insertRow(model->rowCount(selected) + 1, selected))
 	{
 		showWarning(QString::fromLocal8Bit("Ошибка при добавлении нового элемента"));
 		return;
@@ -85,5 +155,19 @@ void MainWindow::onAddItem()
 
 	const auto added = model->index(selected.row(), 1, selected);
 	if (added.isValid())
+	{
 		model->setData(added, text, TreeItemModel::ModelRole::NameRole);
+		model->setData(added, classId, TreeItemModel::ModelRole::ClassIDRole);
+	}
+
+	const auto* treeModel = dynamic_cast<const TreeItemModel*>(model);
+	if (!treeModel)
+	{
+		showWarning(QString::fromLocal8Bit("Модель не является моделью дерева"));
+		return;
+	}
+
+	QString error;
+	if (!treeModel->SaveIndexToDB(added, error))
+		showWarning(error);
 }

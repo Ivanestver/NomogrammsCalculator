@@ -9,14 +9,9 @@ TreeItemModel::TreeItemModel(const std::vector<TreeItem>& items_, QObject* paren
 {
     rootItem->children.insert(rootItem->children.begin(), items_.begin(), items_.end());
     for (auto& item : rootItem->children)
-        item.parent = rootItem;
-}
-
-Q_INVOKABLE QModelIndex TreeItemModel::index(int row, int column, const QModelIndex& parent) const
-{
-    auto* parentPtr = getItem(parent);
-    /*if (parentPtr->children.empty())
     {
+        item.parent = rootItem;
+
         auto executor = DBExecutor::GetInstance();
         std::vector<std::vector<QVariant>> results;
         QString queryStr = "select t1.sub_id, master_id, property_value\
@@ -27,25 +22,31 @@ Q_INVOKABLE QModelIndex TreeItemModel::index(int row, int column, const QModelIn
  on t1.sub_id = t3.template_id\
  where master_id = ?\
  and property_id = ?";
-        QString error = executor->ExecSELECT(queryStr, { DBExecutor::DBExecutorUtils::TurnUuidToStr(parentPtr->id), DBExecutor::DBExecutorUtils::TurnUuidToStr(db_state::properties::dbobject_name)}, results);
-        if (!error.isEmpty())
+        QString error = executor->ExecSELECT(queryStr, { DBExecutor::DBExecutorUtils::TurnUuidToStr(item.id), DBExecutor::DBExecutorUtils::TurnUuidToStr(db_state::properties::dbobject_name) }, results);
+        if (error.isEmpty())
+        {
+            for (const auto& result : results)
+            {
+                TreeItem newTreeItem;
+                newTreeItem.id = result[0].toUuid();
+                newTreeItem.classId = result[1].toUuid();
+                newTreeItem.name = result[2].toString();
+                newTreeItem.parent = &item;
+                item.children.push_back(newTreeItem);
+            }
+        }
+        else
         {
             qDebug() << error;
-            return Q_INVOKABLE QModelIndex();
         }
+    }
+}
 
-        for (const auto& result : results)
-        {
-            TreeItem newTreeItem;
-            newTreeItem.id = result[0].toUuid();
-            newTreeItem.classId = result[1].toUuid();
-            newTreeItem.name = result[2].toString();
-            newTreeItem.parent = parentPtr;
-            parentPtr->children.push_back(newTreeItem);
-        }
-    }*/
-
-    if (parentPtr->children.empty())
+Q_INVOKABLE QModelIndex TreeItemModel::index(int row, int column, const QModelIndex& parent) const
+{
+    auto* parentPtr = getItem(parent);
+    if (!parentPtr
+      || parentPtr->children.empty())
         return Q_INVOKABLE QModelIndex();
 
     return Q_INVOKABLE createIndex(row, column, (void*)&parentPtr->children[row]);
@@ -148,11 +149,25 @@ bool TreeItemModel::insertRows(int row, int count, const QModelIndex& parent)
     item.id = QUuid::createUuid();
     item.parent = parentItem;
 
-    //beginInsertRows(parent, row - 1, row + count - 1);
-    beginInsertRows(parent, 0, 0);
+    beginInsertRows(parent, row - 1, row + count - 1);
     parentItem->children.push_back(std::move(item));
     endInsertRows();
+
     return true;
+}
+
+bool TreeItemModel::SaveIndexToDB(const QModelIndex& index, QString& error) const
+{
+    if (!index.isValid())
+        return false;
+
+    const auto* item = getItem(index);
+    if (!item)
+        return false;
+
+    return saveTemplate(item, error)
+        && saveProperties(item, { {db_state::properties::dbobject_name, item->name} }, error)
+        && saveMasterIdForSubId(item, error);
 }
 
 TreeItem* TreeItemModel::getItem(const QModelIndex& idx) const
@@ -162,4 +177,57 @@ TreeItem* TreeItemModel::getItem(const QModelIndex& idx) const
 
     auto* item = static_cast<TreeItem*>(idx.internalPointer());
     return item ? item : rootItem;
+}
+
+bool TreeItemModel::saveTemplate(const TreeItem* item, QString& error) const
+{
+    if (!item
+     || item->id.isNull()
+     || item->classId.isNull())
+        return false;
+
+    error = "";
+
+    auto executor = DBExecutor::GetInstance();
+    int rowsInserted = executor->ExecChange("insert into [template](template_id, class_id) values (?, ?)", { item->id, item->classId }, error);
+    return rowsInserted != 0;
+}
+
+bool TreeItemModel::saveProperties(const TreeItem* item, const std::map<QUuid, QVariant>& properties, QString& error) const
+{
+    if (!item
+     || item->id.isNull()
+     || properties.empty())
+        return false;
+
+    error = "";
+
+    auto executor = DBExecutor::GetInstance();
+    QString queryStr = "insert into [template_property](template_id, property_id, property_value) values (?, ?, ?)";
+    size_t rowsAffected = 0;
+    for (const auto& pair : properties)
+    {
+        rowsAffected += executor->ExecChange(queryStr, { item->id, pair.first, pair.second }, error);
+    }
+
+    return rowsAffected == properties.size();
+}
+
+bool TreeItemModel::saveMasterIdForSubId(const TreeItem* item, QString& error) const
+{
+    if (!item
+     || item->id.isNull()
+     || !item->parent
+     || item->parent->id.isNull())
+        return false;
+
+    error = "";
+
+    if (item->parent == rootItem)
+        return true;
+
+    auto executor = DBExecutor::GetInstance();
+    int rowsAffected = executor->ExecChange("insert into [template_template](master_id, sub_id) values (?, ?)", { item->parent->id, item->id }, error);
+
+    return rowsAffected != 0;
 }

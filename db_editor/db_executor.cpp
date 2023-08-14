@@ -51,7 +51,12 @@ int DBExecutor::ExecChange(const QString& queryStr, const std::vector<QVariant>&
 	QSqlQuery query(db);
 	query.prepare(queryStr);
 	for (const auto& param : params)
-		query.addBindValue(param);
+	{
+		if (param.type() == QVariant::Type::Uuid)
+			query.addBindValue(DBExecutorUtils::TurnUuidToStr(param.toUuid()));
+		else
+			query.addBindValue(param);
+	}
 
 	query.exec();
 	error = query.lastError().text();
