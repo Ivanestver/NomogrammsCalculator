@@ -1,6 +1,6 @@
 #include "common/DBObject.h"
 #include "db/DataBaseWrapper.h"
-#include "db/properties.h"
+#include "db_state/properties.h"
 #include "nomogramms/Graphics.h"
 #include "nomogramms/Nomogramm.h"
 #include "nomogramms/Methodology.h"

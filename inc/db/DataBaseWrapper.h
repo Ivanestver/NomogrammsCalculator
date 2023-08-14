@@ -5,7 +5,7 @@
 #include <QVariant>
 #include <vector>
 #include <memory>
-#include "db_state.h"
+#include "db_state/db_state.h"
 
 namespace db
 {

@@ -1,7 +1,7 @@
 #include "common/Measure.h"
 #include "db/DataBaseWrapper.h"
 #include <QVariant>
-#include "db/properties.h"
+#include "db_state/properties.h"
 
 namespace nomogramms
 {

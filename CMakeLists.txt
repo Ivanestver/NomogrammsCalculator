@@ -40,11 +40,12 @@ add_subdirectory(src)
 
 add_subdirectory(xml)
 add_subdirectory("./ui")
+add_subdirectory(db_state)
 
 # Tell CMake to create the helloworld executable
 add_executable(NomogrammCalculator main.cpp)
 # Add the Qt5 Widgets for linking
-target_link_libraries(NomogrammCalculator Qt5::Core Qt5::Widgets Qt5::Gui ui)
+target_link_libraries(NomogrammCalculator Qt5::Core Qt5::Widgets Qt5::Gui ui db_state)
 target_include_directories(NomogrammCalculator 
 	PUBLIC ${CMAKE_BINARY_DIR} 
 	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

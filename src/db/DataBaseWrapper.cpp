@@ -5,7 +5,7 @@
 #include <QSqlRecord>
 #include <QStringBuilder>
 #include "xml/xml.h"
-#include "db/db_state_factory.h"
+#include "db_state/db_state_factory.h"
 #include <exceptions/db_exception.h>
 
 namespace db
