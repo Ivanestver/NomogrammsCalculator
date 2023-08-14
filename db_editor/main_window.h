@@ -4,6 +4,7 @@
 #include "ui_main_window.h"
 #include <memory>
 #include "xml/xml.h"
+#include <QMessageBox>
 
 class MainWindow : public QDialog
 {
@@ -16,6 +17,7 @@ public:
 private:
 	void initTree();
 	void addToolBar();
+	QMessageBox::StandardButton showWarning(const QString& message);
 
 private Q_SLOTS:
 	void onAddItem();

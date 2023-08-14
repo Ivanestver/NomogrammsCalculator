@@ -13,7 +13,10 @@ TreeItem::TreeItem(const TreeItem& Other)
 TreeItem& TreeItem::operator=(const TreeItem& Other)
 {
 	this->id = Other.id;
+	this->classId = Other.classId;
+	this->name = Other.name;
 	this->children = Other.children;
+	this->parent = Other.parent;
 
 	return *this;
 }
