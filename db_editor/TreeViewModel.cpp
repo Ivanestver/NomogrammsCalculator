@@ -46,7 +46,8 @@ Q_INVOKABLE QModelIndex TreeItemModel::index(int row, int column, const QModelIn
 {
     auto* parentPtr = getItem(parent);
     if (!parentPtr
-      || parentPtr->children.empty())
+      || parentPtr->children.empty()
+      || parentPtr->children.size() <= (size_t)row)
         return Q_INVOKABLE QModelIndex();
 
     return Q_INVOKABLE createIndex(row, column, (void*)&parentPtr->children[row]);
@@ -149,9 +150,29 @@ bool TreeItemModel::insertRows(int row, int count, const QModelIndex& parent)
     item.id = QUuid::createUuid();
     item.parent = parentItem;
 
-    beginInsertRows(parent, row - 1, row + count - 1);
+    beginInsertRows(parent, row, row + count - 1);
     parentItem->children.push_back(std::move(item));
     endInsertRows();
+
+    return true;
+}
+
+bool TreeItemModel::removeRows(int row, int count, const QModelIndex& parent)
+{
+    auto* parentItem = getItem(parent);
+
+    auto executor = DBExecutor::GetInstance();
+    if (!executor)
+        return false;
+
+    const auto& item = parentItem->children[row];
+    QString error;
+    if (!executor->RemoveTemplate(item.id, error))
+        return false;
+
+    beginRemoveRows(parent, row, row + count - 1);
+    parentItem->children.erase(parentItem->children.begin() + row);
+    endRemoveRows();
 
     return true;
 }
@@ -165,9 +186,14 @@ bool TreeItemModel::SaveIndexToDB(const QModelIndex& index, QString& error) cons
     if (!item)
         return false;
 
-    return saveTemplate(item, error)
-        && saveProperties(item, { {db_state::properties::dbobject_name, item->name} }, error)
-        && saveMasterIdForSubId(item, error);
+    if (!saveTemplate(item, error))
+        return false;
+    if (!saveProperties(item, { {db_state::properties::dbobject_name, item->name} }, error))
+        return false;
+
+    saveMasterIdForSubId(item, error);
+    
+    return true;
 }
 
 TreeItem* TreeItemModel::getItem(const QModelIndex& idx) const

@@ -17,6 +17,8 @@ public:
 public:
 	TreeItemModel(const std::vector<TreeItem>& items_, QObject* parent = nullptr);
 	~TreeItemModel() override = default;
+	TreeItemModel(const TreeItemModel&) = delete;
+	TreeItemModel& operator=(const TreeItemModel&) = delete;
 
 	// Унаследовано через QAbstractItemModel
 	virtual Q_INVOKABLE QModelIndex index(int row, int column, const QModelIndex& parent) const override;
@@ -28,7 +30,8 @@ public:
 	virtual Q_INVOKABLE QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 	Qt::ItemFlags flags(const QModelIndex& index) const override;
-	virtual bool insertRows(int row, int count, const QModelIndex& parent = QModelIndex());
+	bool insertRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
+	bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
 
 	bool SaveIndexToDB(const QModelIndex& index, QString& error) const;
 

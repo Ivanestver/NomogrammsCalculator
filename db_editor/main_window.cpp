@@ -54,19 +54,20 @@ void MainWindow::addToolBar()
 	QToolBar* toolBar = new QToolBar(this);
 	toolBar->addAction(QString::fromLocal8Bit("Добавить новый объект"), this, &MainWindow::onAddItem);
 	toolBar->addAction(QString::fromLocal8Bit("Добавить новую методику"), this, &MainWindow::onAddMethodology);
+	toolBar->addAction(QString::fromLocal8Bit("Удалить выбранный объект"), this, &MainWindow::onRemoveItem);
 }
 
 QMessageBox::StandardButton MainWindow::showWarning(const QString& message)
 {
-	return QMessageBox::warning(this, QString::fromLocal8Bit("Ошибка при получении модели дерева"), QString::fromLocal8Bit("Ошибка"));
+	return QMessageBox::warning(this, QString::fromLocal8Bit("Ошибка"), message);
 }
 
 void MainWindow::onAddMethodology()
 {
-	auto* model = ui.treeView->model();
+	auto* model = dynamic_cast<TreeItemModel*>(ui.treeView->model());
 	if (!model)
 	{
-		QMessageBox::warning(this, QString::fromLocal8Bit("Ошибка при получении модели дерева"), QString::fromLocal8Bit("Ошибка"));
+		showWarning(QString::fromLocal8Bit("Ошибка при получении модели дерева"));
 		return;
 	}
 
@@ -87,6 +88,30 @@ void MainWindow::onAddMethodology()
 		model->setData(added, text, TreeItemModel::ModelRole::NameRole);
 		model->setData(added, methodology_class, TreeItemModel::ModelRole::ClassIDRole);
 	}
+
+	QString error;
+	if (!model->SaveIndexToDB(added, error))
+		showWarning(error);
+}
+
+void MainWindow::onRemoveItem()
+{
+	const auto selectedIdxs = ui.treeView->selectionModel()->selectedIndexes();
+	if (selectedIdxs.isEmpty())
+	{
+		showWarning(QString::fromLocal8Bit("Выберите объект для удаления"));
+		return;
+	}
+
+	const auto& selected = selectedIdxs.first();
+	auto* model = dynamic_cast<TreeItemModel*>(ui.treeView->model());
+	if (!model)
+	{
+		QMessageBox::warning(this, QString::fromLocal8Bit("Ошибка при получении модели дерева"), QString::fromLocal8Bit("Ошибка"));
+		return;
+	}
+
+	model->removeRow(selected.row(), selected.parent());
 }
 
 void MainWindow::onAddItem()
@@ -94,14 +119,14 @@ void MainWindow::onAddItem()
 	auto* model = ui.treeView->model();
 	if (!model)
 	{
-		QMessageBox::warning(this, QString::fromLocal8Bit("Ошибка при получении модели дерева"), QString::fromLocal8Bit("Ошибка"));
+		showWarning(QString::fromLocal8Bit("Ошибка при получении модели дерева"));
 		return;
 	}
 
 	const auto selectedIdx = ui.treeView->selectionModel()->selectedIndexes();
 	if (selectedIdx.isEmpty())
 	{
-		showWarning("Выберите родительский элемент!");
+		showWarning(QString::fromLocal8Bit("Выберите родительский элемент!"));
 		return;
 	}
 
@@ -143,17 +168,17 @@ void MainWindow::onAddItem()
 			return;
 		}
 
-		else if (selectedItemClassId == methodology_class)
+		if (selectedItemClassId == methodology_class)
 			classId = nomogramm_class;
 	}
 
-	if (!model->insertRow(model->rowCount(selected) + 1, selected))
+	if (!model->insertRow(model->rowCount(selected), selected))
 	{
 		showWarning(QString::fromLocal8Bit("Ошибка при добавлении нового элемента"));
 		return;
 	}
 
-	const auto added = model->index(selected.row(), 1, selected);
+	const auto added = model->index(model->rowCount(selected) - 1, 1, selected);
 	if (added.isValid())
 	{
 		model->setData(added, text, TreeItemModel::ModelRole::NameRole);

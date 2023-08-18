@@ -64,6 +64,32 @@ int DBExecutor::ExecChange(const QString& queryStr, const std::vector<QVariant>&
 	return query.numRowsAffected();
 }
 
+bool DBExecutor::RemoveTemplate(const QUuid& templateId, QString& error) const
+{
+	int numRowsAffected = removeTemplateFromTable(templateId, QString("template_property"), QString("template_id"), error);
+	numRowsAffected += removeTemplateFromTable(templateId, QString("template"), QString("template_id"), error);
+	numRowsAffected += removeTemplateFromTable(templateId, QString("template_template"), QString("sub_id"), error);
+	numRowsAffected += removeTemplateFromTable(templateId, QString("template_template"), QString("master_id"), error);
+
+	return numRowsAffected > 0;
+}
+
+int DBExecutor::removeTemplateFromTable(const QUuid& templateId, const QString& table, const QString& fieldOfTemplate, QString& error) const
+{
+	QString queryStr = QString("delete from [%1] where [%2] = ?").arg(table).arg(fieldOfTemplate);
+	QSqlQuery query(db);
+	query.prepare(queryStr);
+	query.addBindValue(DBExecutorUtils::TurnUuidToStr(templateId));
+
+	if (!query.exec())
+	{
+		error = query.lastError().text();
+		return 0;
+	}
+
+	return query.numRowsAffected();
+}
+
 DBExecutor::DBExecutor(const db_state::SDBState& state)
 {
 	db = QSqlDatabase::addDatabase(state->GetDBName());

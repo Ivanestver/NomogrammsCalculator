@@ -21,6 +21,10 @@ public:
 
 	QString ExecSELECT(const QString& queryStr, const std::vector<QVariant>& params, std::vector<std::vector<QVariant>>& results) const;
 	int ExecChange(const QString& queryStr, const std::vector<QVariant>& params, QString& error) const;
+	bool RemoveTemplate(const QUuid& templateId, QString& error) const;
+
+private:
+	int removeTemplateFromTable(const QUuid& templateId, const QString& table, const QString& fieldOfTemplate, QString& error) const;
 
 private:
 	QSqlDatabase db;
