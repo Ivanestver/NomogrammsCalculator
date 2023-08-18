@@ -8,38 +8,7 @@ TreeItemModel::TreeItemModel(const std::vector<TreeItem>& items_, QObject* paren
     , rootItem(new TreeItem())
 {
     rootItem->children.insert(rootItem->children.begin(), items_.begin(), items_.end());
-    for (auto& item : rootItem->children)
-    {
-        item.parent = rootItem;
-
-        auto executor = DBExecutor::GetInstance();
-        std::vector<std::vector<QVariant>> results;
-        QString queryStr = "select t1.sub_id, master_id, property_value\
- from(template_template as t1\
- inner join template_property as t2\
- on t1.sub_id = t2.template_id)\
- inner join template as t3\
- on t1.sub_id = t3.template_id\
- where master_id = ?\
- and property_id = ?";
-        QString error = executor->ExecSELECT(queryStr, { DBExecutor::DBExecutorUtils::TurnUuidToStr(item.id), DBExecutor::DBExecutorUtils::TurnUuidToStr(db_state::properties::dbobject_name) }, results);
-        if (error.isEmpty())
-        {
-            for (const auto& result : results)
-            {
-                TreeItem newTreeItem;
-                newTreeItem.id = result[0].toUuid();
-                newTreeItem.classId = result[1].toUuid();
-                newTreeItem.name = result[2].toString();
-                newTreeItem.parent = &item;
-                item.children.push_back(newTreeItem);
-            }
-        }
-        else
-        {
-            qDebug() << error;
-        }
-    }
+    initItem(*rootItem);
 }
 
 Q_INVOKABLE QModelIndex TreeItemModel::index(int row, int column, const QModelIndex& parent) const
@@ -194,6 +163,45 @@ bool TreeItemModel::SaveIndexToDB(const QModelIndex& index, QString& error) cons
     saveMasterIdForSubId(item, error);
     
     return true;
+}
+
+void TreeItemModel::initItem(TreeItem& itemToInit)
+{
+    for (auto& item : itemToInit.children)
+    {
+        item.parent = &itemToInit;
+
+        auto executor = DBExecutor::GetInstance();
+        std::vector<std::vector<QVariant>> results;
+        QString queryStr = "select t1.sub_id, class_id, property_value\
+ from(template_template as t1\
+ inner join template_property as t2\
+ on t1.sub_id = t2.template_id)\
+ inner join template as t3\
+ on t1.sub_id = t3.template_id\
+ where master_id = ?\
+ and property_id = ?";
+        QString error = executor->ExecSELECT(queryStr, { DBExecutor::DBExecutorUtils::TurnUuidToStr(item.id), DBExecutor::DBExecutorUtils::TurnUuidToStr(db_state::properties::dbobject_name) }, results);
+        if (error.isEmpty())
+        {
+            for (const auto& result : results)
+            {
+                TreeItem newTreeItem;
+                newTreeItem.id = result[0].toUuid();
+                newTreeItem.classId = result[1].toUuid();
+                newTreeItem.name = result[2].toString();
+                newTreeItem.parent = &item;
+
+                item.children.push_back(newTreeItem);
+            }
+        }
+        else
+        {
+            qDebug() << error;
+        }
+
+        initItem(item);
+    }
 }
 
 TreeItem* TreeItemModel::getItem(const QModelIndex& idx) const

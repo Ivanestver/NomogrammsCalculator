@@ -36,6 +36,7 @@ public:
 	bool SaveIndexToDB(const QModelIndex& index, QString& error) const;
 
 private:
+	void initItem(TreeItem& itemToInit);
 	TreeItem* getItem(const QModelIndex& idx) const;
 	bool saveTemplate(const TreeItem* item, QString& error) const;
 	bool saveProperties(const TreeItem* item, const std::map<QUuid, QVariant>& properties, QString& error) const;
