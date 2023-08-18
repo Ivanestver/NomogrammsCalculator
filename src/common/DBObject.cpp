@@ -88,7 +88,7 @@ void DBObject::initFromDB()
 		return;
 	try
 	{
-		name = dbInstance->GetPropertyValueByIdAndTemplateID(db::properties::dbobject_name, id);
+		name = dbInstance->GetPropertyValueByIdAndTemplateID(db_state::properties::dbobject_name, id);
 	}
 	catch (const exceptions::BadRequestException& e)
 	{

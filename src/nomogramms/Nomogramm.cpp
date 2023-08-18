@@ -8,7 +8,9 @@ namespace nomogramms
 {
 	Nomogramm::Nomogramm(const QUuid& id)
 		: base(id)
-	{}
+	{
+		initFromDB();
+	}
 
 	Nomogramm::Nomogramm(const Nomogramm& other)
 		: base(other)
@@ -16,9 +18,6 @@ namespace nomogramms
 
 	bool Nomogramm::operator==(const DBObject& other)
 	{
-		if (*this == other)
-			return true;
-
 		const auto& o = static_cast<const Nomogramm&>(other);
 
 		return base::operator==(other);
@@ -66,7 +65,7 @@ namespace nomogramms
 	void Nomogramm::initFromDB()
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
-		bypassRule = db->GetPropertyValueByIdAndTemplateID(db::properties::nomogramm_bypassRule_name, GetId());
+		bypassRule = db->GetPropertyValueByIdAndTemplateID(db_state::properties::nomogramm_bypassRule_name, GetId());
 
 		QString queryString = "select slave_id, master_slave_value from template_template where master_id = :1";
 		std::vector<QVariant> params { QVariant(GetId()) };

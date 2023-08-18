@@ -1,6 +1,7 @@
 #include "nomogramms/Methodology.h"
 #include "db/DataBaseWrapper.h"
 #include <QVariant>
+#include <QDebug>
 
 namespace nomogramms
 {
@@ -30,7 +31,7 @@ namespace nomogramms
 	void Methodology::initFromDB()
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
-		QString queryString = "select [sub_id] from [template_template] where master_id = :1";
+		QString queryString = "select [sub_id] from [template_template] where [master_id] = ?";
 		std::vector<QVariant> params{ QVariant(GetId()) };
 		QString error;
 		auto result = db->ExecuteQuery(queryString, params, error);
@@ -41,11 +42,8 @@ namespace nomogramms
 		{
 			for (const auto& itemID : v)
 			{
-				if (itemID.type() == QVariant::Uuid)
-				{
-					auto nomogramm = std::make_shared<Nomogramm>(itemID.value<QUuid>());
-					nomogramms.push_back(nomogramm);
-				}
+				auto nomogramm = std::make_shared<Nomogramm>(itemID.value<QUuid>());
+				nomogramms.push_back(nomogramm);
 			}
 		}
 	}

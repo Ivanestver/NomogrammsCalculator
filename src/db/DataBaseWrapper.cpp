@@ -136,8 +136,13 @@ namespace db
 			return result;
 		}
 
-		for (size_t i = 0; i < params.size(); i++)
-			q.bindValue((int)i, params[i]);
+		for (const auto& param : params)
+		{
+			if (param.type() == QVariant::Type::Uuid)
+				q.addBindValue(turnIDToStr(param.toUuid()));
+			else
+				q.addBindValue(param);
+		}
 
 		if (!q.exec())
 		{
