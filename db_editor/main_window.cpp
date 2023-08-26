@@ -19,10 +19,15 @@ MainWindow::MainWindow(QWidget* parent)
 	ui.setupUi(this);
 	initTree();
 	addToolBar();
+	addContextMenuToTree();
 
 	factoryMap.insert({ methodology_class, std::make_shared<StateCreator<MethodologyState>>()});
 	factoryMap.insert({ nomogramm_class, std::make_shared<NomogrammGraphicStateCreator>()});
 	factoryMap.insert({ graphics_class, std::make_shared<NomogrammGraphicStateCreator>()});
+
+	factoryMapIndependent.insert({ methodology_class, std::make_shared<StateCreator<MethodologyState>>()});
+	factoryMapIndependent.insert({ nomogramm_class, std::make_shared<StateCreator<NomogrammState>>()});
+	factoryMapIndependent.insert({ graphics_class, std::make_shared<StateCreator<GraphicState>>()});
 
 	mappingRules.insert({QUuid(), methodology_class});
 	mappingRules.insert({methodology_class, nomogramm_class});
@@ -66,6 +71,15 @@ void MainWindow::addToolBar()
 	toolBar->addAction(QString::fromLocal8Bit("Удалить выбранный объект"), this, &MainWindow::onRemoveItem);
 }
 
+void MainWindow::addContextMenuToTree()
+{
+	ui.treeView->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+	connect(ui.treeView, &QTreeView::customContextMenuRequested, this, &MainWindow::onCustomMenuRequested);
+
+	treeContextMenu = new QMenu(ui.treeView);
+	treeContextMenu->addAction(QString::fromLocal8Bit("Удалить выбранный объект"), this, &MainWindow::onRemoveItem);
+}
+
 QMessageBox::StandardButton MainWindow::showWarning(const QString& message)
 {
 	return QMessageBox::warning(this, QString::fromLocal8Bit("Ошибка"), message);
@@ -98,8 +112,8 @@ void MainWindow::onRemoveItem()
 
 	const auto& selected = selectedIdxs.first();
 	const auto* itemToRemove = static_cast<const TreeItem*>(selected.internalPointer());
-	auto itStateFactory = factoryMap.find(itemToRemove->classId);
-	if (itStateFactory == factoryMap.end())
+	auto itStateFactory = factoryMapIndependent.find(itemToRemove->classId);
+	if (itStateFactory == factoryMapIndependent.end())
 	{
 		showWarning(QString::fromLocal8Bit("Незарегистрированный тип объекта"));
 		return;
@@ -115,6 +129,14 @@ void MainWindow::onRemoveItem()
 	QString error;
 	if (!state->RemoveItem(selected, ui.treeView->model(), error))
 		showWarning(error);
+}
+
+void MainWindow::onCustomMenuRequested(const QPoint& point)
+{
+	QModelIndex index = ui.treeView->indexAt(point);
+	if (index.isValid()) {
+		treeContextMenu->exec(ui.treeView->viewport()->mapToGlobal(point));
+	}
 }
 
 void MainWindow::onAddItem()

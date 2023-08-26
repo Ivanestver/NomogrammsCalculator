@@ -10,8 +10,3 @@ bool DlgChooseItemType::IsNomogramm() const
 {
 	return ui.nomogrammRadioBtn->isChecked();
 }
-
-QString DlgChooseItemType::GetName() const
-{
-	return ui.lineEdit->text();
-}

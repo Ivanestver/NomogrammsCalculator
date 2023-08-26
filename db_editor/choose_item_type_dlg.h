@@ -11,7 +11,6 @@ public:
 	~DlgChooseItemType() override = default;
 
 	bool IsNomogramm() const;
-	QString GetName() const;
 
 private:
 	Ui::ChooseItemTypeDlg ui;
