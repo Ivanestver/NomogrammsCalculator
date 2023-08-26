@@ -23,6 +23,13 @@ public:
 	int ExecChange(const QString& queryStr, const std::vector<QVariant>& params, QString& error) const;
 	bool RemoveTemplate(const QUuid& templateId, QString& error) const;
 
+	bool InsertNewTemplate(const QUuid& templateId, const QUuid& classId, QString& error) const;
+
+	bool InsertProperty(const QUuid& templateId, const QUuid& propertyId, const QVariant& value, QString& error) const;
+	bool UpdateProperty(const QUuid& templateId, const QUuid& propertyId, const QVariant& value, QString& error) const;
+
+	bool LinkTemplates(const QUuid& masterObjId, const QUuid& subObjId, QString& error) const;
+
 private:
 	int removeTemplateFromTable(const QUuid& templateId, const QString& table, const QString& fieldOfTemplate, QString& error) const;
 

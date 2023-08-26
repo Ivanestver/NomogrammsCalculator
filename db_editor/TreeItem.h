@@ -1,12 +1,16 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include <QUuid>
 #include <QVariant>
 #include <QString>
 #include <QObject>
 #include "qmetatype.h"
 #include "qmetaobject.h"
+
+class TreeItem;
+using STreeItem = std::shared_ptr<TreeItem>;
 
 class TreeItem : public QObject
 {
@@ -22,7 +26,7 @@ public:
 	QUuid id{};
 	QUuid classId{};
 	QString name{};
-	std::vector<TreeItem> children{};
+	std::vector<STreeItem> children{};
 	TreeItem* parent = nullptr;
 
 	operator QVariant() const;
@@ -31,3 +35,4 @@ public:
 bool operator==(const TreeItem& left, const TreeItem& right);
 
 Q_DECLARE_METATYPE(TreeItem)
+Q_DECLARE_METATYPE(STreeItem)

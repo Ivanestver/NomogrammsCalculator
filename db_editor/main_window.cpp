@@ -19,6 +19,14 @@ MainWindow::MainWindow(QWidget* parent)
 	ui.setupUi(this);
 	initTree();
 	addToolBar();
+
+	factoryMap.insert({ methodology_class, std::make_shared<StateCreator<MethodologyState>>()});
+	factoryMap.insert({ nomogramm_class, std::make_shared<NomogrammGraphicStateCreator>()});
+	factoryMap.insert({ graphics_class, std::make_shared<NomogrammGraphicStateCreator>()});
+
+	mappingRules.insert({QUuid(), methodology_class});
+	mappingRules.insert({methodology_class, nomogramm_class});
+	mappingRules.insert({ nomogramm_class, nomogramm_class });
 }
 
 void MainWindow::initTree()
@@ -36,17 +44,18 @@ void MainWindow::initTree()
 	std::vector<std::vector<QVariant>> results;
 	dbExecutor->ExecSELECT(queryStr, { DBExecutor::DBExecutorUtils::TurnUuidToStr(methodology_class), DBExecutor::DBExecutorUtils::TurnUuidToStr(db_state::properties::dbobject_name)}, results);
 
-	std::vector<TreeItem> ids;
+	std::vector<STreeItem> ids;
 	for (const auto& result : results)
 	{
-		TreeItem item;
-		item.id = result[0].toUuid();
-		item.name = result[1].toString();
-		item.classId = methodology_class;
+		auto item = std::make_shared<TreeItem>();
+		item->id = result[0].toUuid();
+		item->name = result[1].toString();
+		item->classId = methodology_class;
 		ids.push_back(item);
 	}
 
 	ui.treeView->setModel(new TreeItemModel(ids));
+	ui.treeView->selectAll();
 }
 
 void MainWindow::addToolBar()
@@ -71,26 +80,10 @@ void MainWindow::onAddMethodology()
 		return;
 	}
 
-	bool ok;
-	const auto text = QInputDialog::getText(this, QString::fromLocal8Bit("Введите название нового объекта"), QString::fromLocal8Bit("Добавление нового объекта"), QLineEdit::Normal, "", &ok);
-	if (!ok || text.isEmpty())
-		return;
-
-	if (!model->insertRow(model->rowCount(QModelIndex()) + 1, QModelIndex()))
-	{
-		showWarning(QString::fromLocal8Bit("Ошибка при добавлении нового элемента"));
-		return;
-	}
-
-	const auto added = model->index(model->rowCount(QModelIndex()) - 1, 1, QModelIndex());
-	if (added.isValid())
-	{
-		model->setData(added, text, TreeItemModel::ModelRole::NameRole);
-		model->setData(added, methodology_class, TreeItemModel::ModelRole::ClassIDRole);
-	}
-
+	const auto& creator = factoryMap.find(methodology_class)->second;
+	auto dbObjState = creator->CreateObj();
 	QString error;
-	if (!model->SaveIndexToDB(added, error))
+	if (!dbObjState->AddNewObjToModelAndThenToDB(model, QModelIndexList(), error))
 		showWarning(error);
 }
 
@@ -104,14 +97,24 @@ void MainWindow::onRemoveItem()
 	}
 
 	const auto& selected = selectedIdxs.first();
-	auto* model = dynamic_cast<TreeItemModel*>(ui.treeView->model());
-	if (!model)
+	const auto* itemToRemove = static_cast<const TreeItem*>(selected.internalPointer());
+	auto itStateFactory = factoryMap.find(itemToRemove->classId);
+	if (itStateFactory == factoryMap.end())
 	{
-		QMessageBox::warning(this, QString::fromLocal8Bit("Ошибка при получении модели дерева"), QString::fromLocal8Bit("Ошибка"));
+		showWarning(QString::fromLocal8Bit("Незарегистрированный тип объекта"));
 		return;
 	}
 
-	model->removeRow(selected.row(), selected.parent());
+	auto state = itStateFactory->second->CreateObj();
+	if (!state)
+	{
+		showWarning(QString::fromLocal8Bit("Не было создано состояние"));
+		return;
+	}
+
+	QString error;
+	if (!state->RemoveItem(selected, ui.treeView->model(), error))
+		showWarning(error);
 }
 
 void MainWindow::onAddItem()
@@ -123,76 +126,25 @@ void MainWindow::onAddItem()
 		return;
 	}
 
-	const auto selectedIdx = ui.treeView->selectionModel()->selectedIndexes();
-	if (selectedIdx.isEmpty())
+	const auto selectedIdxs = ui.treeView->selectionModel()->selectedIndexes();
+	if (selectedIdxs.isEmpty())
 	{
 		showWarning(QString::fromLocal8Bit("Выберите родительский элемент!"));
 		return;
 	}
 
-	const auto& selected = selectedIdx.first();
-	const auto* item = static_cast<const TreeItem*>(selected.internalPointer());
-	if (!item)
+	const auto& selected = selectedIdxs.first();
+	const auto* selectedItem = static_cast<const TreeItem*>(selected.internalPointer());
+	auto it = mappingRules.find(selectedItem->classId);
+	if (it == mappingRules.end())
 	{
-		showWarning("Ошибка при получении выделенного элемента");
+		showWarning(QString("Нет правила отражения для класса с ID = %1").arg(selectedItem->classId.toString()));
 		return;
 	}
 
-	QUuid selectedItemClassId = item->classId;
-
-	QString text;
-	QUuid classId;
-
-	if (selectedItemClassId == nomogramm_class)
-	{
-		DlgChooseItemType dlg(this);
-		int response = dlg.exec();
-		if (response == QDialog::Accepted)
-		{
-			text = dlg.GetName();
-			classId = dlg.IsNomogramm() ? nomogramm_class : graphics_class;
-		}
-		else
-		{
-			qDebug() << "Отмена ввода";
-			return;
-		}
-	}
-	else
-	{
-		bool ok;
-		text = QInputDialog::getText(this, QString::fromLocal8Bit("Введите название нового объекта"), QString::fromLocal8Bit("Добавление нового объекта"), QLineEdit::Normal, "", &ok);
-		if (!ok || text.isEmpty())
-		{
-			showWarning(QString::fromLocal8Bit("Возникла ошибка при вводе названия объекта"));
-			return;
-		}
-
-		if (selectedItemClassId == methodology_class)
-			classId = nomogramm_class;
-	}
-
-	if (!model->insertRow(model->rowCount(selected), selected))
-	{
-		showWarning(QString::fromLocal8Bit("Ошибка при добавлении нового элемента"));
-		return;
-	}
-
-	const auto added = model->index(model->rowCount(selected) - 1, 1, selected);
-	if (added.isValid())
-	{
-		model->setData(added, text, TreeItemModel::ModelRole::NameRole);
-		model->setData(added, classId, TreeItemModel::ModelRole::ClassIDRole);
-	}
-
-	const auto* treeModel = dynamic_cast<const TreeItemModel*>(model);
-	if (!treeModel)
-	{
-		showWarning(QString::fromLocal8Bit("Модель не является моделью дерева"));
-		return;
-	}
-
+	const auto& creator = factoryMap.find(it->second)->second;
+	auto dbObjState = creator->CreateObj();
 	QString error;
-	if (!treeModel->SaveIndexToDB(added, error))
+	if (!dbObjState->AddNewObjToModelAndThenToDB(model, selectedIdxs, error))
 		showWarning(error);
 }

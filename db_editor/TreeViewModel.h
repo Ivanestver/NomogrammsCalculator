@@ -15,7 +15,7 @@ public:
 	};
 
 public:
-	TreeItemModel(const std::vector<TreeItem>& items_, QObject* parent = nullptr);
+	TreeItemModel(const std::vector<STreeItem>& items_, QObject* parent = nullptr);
 	~TreeItemModel() override = default;
 	TreeItemModel(const TreeItemModel&) = delete;
 	TreeItemModel& operator=(const TreeItemModel&) = delete;
@@ -36,12 +36,12 @@ public:
 	bool SaveIndexToDB(const QModelIndex& index, QString& error) const;
 
 private:
-	void initItem(TreeItem& itemToInit);
+	void initItem(STreeItem& itemToInit);
 	TreeItem* getItem(const QModelIndex& idx) const;
 	bool saveTemplate(const TreeItem* item, QString& error) const;
 	bool saveProperties(const TreeItem* item, const std::map<QUuid, QVariant>& properties, QString& error) const;
 	bool saveMasterIdForSubId(const TreeItem* item, QString& error) const;
 
 private:
-	TreeItem* rootItem;
+	STreeItem rootItem;
 };

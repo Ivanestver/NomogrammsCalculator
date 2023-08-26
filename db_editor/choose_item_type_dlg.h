@@ -7,6 +7,7 @@ class DlgChooseItemType : public QDialog
 {
 public:
 	DlgChooseItemType(QWidget* parent = nullptr);
+	DlgChooseItemType(const DlgChooseItemType&) = delete;
 	~DlgChooseItemType() override = default;
 
 	bool IsNomogramm() const;

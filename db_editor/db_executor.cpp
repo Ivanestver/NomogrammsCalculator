@@ -58,8 +58,8 @@ int DBExecutor::ExecChange(const QString& queryStr, const std::vector<QVariant>&
 			query.addBindValue(param);
 	}
 
-	query.exec();
-	error = query.lastError().text();
+	if (!query.exec())
+		error = query.lastError().text();
 
 	return query.numRowsAffected();
 }
@@ -72,6 +72,30 @@ bool DBExecutor::RemoveTemplate(const QUuid& templateId, QString& error) const
 	numRowsAffected += removeTemplateFromTable(templateId, QString("template_template"), QString("master_id"), error);
 
 	return numRowsAffected > 0;
+}
+
+bool DBExecutor::InsertNewTemplate(const QUuid& templateId, const QUuid& classId, QString& error) const
+{
+	int rowsInserted = ExecChange("insert into [template](template_id, class_id) values (?, ?)", { templateId, classId }, error);
+	return rowsInserted > 0;
+}
+
+bool DBExecutor::InsertProperty(const QUuid& templateId, const QUuid& propertyId, const QVariant& value, QString& error) const
+{
+	int rowsInserted = ExecChange("insert into [template_property](template_id, property_id, property_value) values (?, ?, ?)", { templateId, propertyId, value }, error);
+	return rowsInserted > 0;
+}
+
+bool DBExecutor::UpdateProperty(const QUuid& templateId, const QUuid& propertyId, const QVariant& value, QString& error) const
+{
+	int rowsInserted = ExecChange("update [template_property] set [value] = ? where [template_id] = ? and [property_id] = ?", { value, templateId, propertyId }, error);
+	return rowsInserted > 0;
+}
+
+bool DBExecutor::LinkTemplates(const QUuid& masterObjId, const QUuid& subObjId, QString& error) const
+{
+	int rowsInserted = ExecChange("insert into [template_template](master_id, sub_id) values (?, ?)", { masterObjId, subObjId }, error);
+	return rowsInserted > 0;
 }
 
 int DBExecutor::removeTemplateFromTable(const QUuid& templateId, const QString& table, const QString& fieldOfTemplate, QString& error) const

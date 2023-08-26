@@ -3,12 +3,12 @@
 #include <QDebug>
 #include "db_state/properties.h"
 
-TreeItemModel::TreeItemModel(const std::vector<TreeItem>& items_, QObject* parent/* = nullptr*/)
+TreeItemModel::TreeItemModel(const std::vector<STreeItem>& items_, QObject* parent/* = nullptr*/)
     : QAbstractItemModel(parent)
-    , rootItem(new TreeItem())
 {
+    rootItem = std::make_shared<TreeItem>(nullptr);
     rootItem->children.insert(rootItem->children.begin(), items_.begin(), items_.end());
-    initItem(*rootItem);
+    initItem(rootItem);
 }
 
 Q_INVOKABLE QModelIndex TreeItemModel::index(int row, int column, const QModelIndex& parent) const
@@ -19,7 +19,7 @@ Q_INVOKABLE QModelIndex TreeItemModel::index(int row, int column, const QModelIn
       || parentPtr->children.size() <= (size_t)row)
         return Q_INVOKABLE QModelIndex();
 
-    return Q_INVOKABLE createIndex(row, column, (void*)&parentPtr->children[row]);
+    return Q_INVOKABLE createIndex(row, column, (void*)parentPtr->children[row].get());
 }
 
 Q_INVOKABLE QModelIndex TreeItemModel::parent(const QModelIndex& child) const
@@ -27,20 +27,27 @@ Q_INVOKABLE QModelIndex TreeItemModel::parent(const QModelIndex& child) const
     if (!child.isValid())
         return Q_INVOKABLE QModelIndex();
 
-    const auto* childPtr = getItem(child);
-    const auto* parentPtr = childPtr->parent;
-    if (!parentPtr || parentPtr == rootItem)
+    try
+    {
+        const auto* childPtr = getItem(child);
+        const auto* parentPtr = childPtr->parent;
+        if (!parentPtr || *parentPtr == *rootItem)
+            return Q_INVOKABLE QModelIndex();
+
+        const auto it = std::find_if(parentPtr->children.begin(), parentPtr->children.end(), [childPtr](const STreeItem& item)
+            {
+                return *childPtr == *item;
+            });
+        if (it == parentPtr->children.end())
+            return Q_INVOKABLE QModelIndex();
+
+        return Q_INVOKABLE createIndex(it - parentPtr->children.begin(), 0, (void*)parentPtr);
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << e.what();
         return Q_INVOKABLE QModelIndex();
-
-    const auto it = std::find_if(parentPtr->children.begin(), parentPtr->children.end(), [childPtr](const TreeItem& item)
-        {
-            return *childPtr == item;
-        });
-
-    if (it == parentPtr->children.end())
-        return Q_INVOKABLE QModelIndex();
-
-    return Q_INVOKABLE createIndex(it - parentPtr->children.begin(), 0, (void*)parentPtr);
+    }
 }
 
 Q_INVOKABLE int TreeItemModel::rowCount(const QModelIndex& parent) const
@@ -115,9 +122,9 @@ bool TreeItemModel::insertRows(int row, int count, const QModelIndex& parent)
 {
     auto* parentItem = getItem(parent);
 
-    TreeItem item;
-    item.id = QUuid::createUuid();
-    item.parent = parentItem;
+    auto item = std::make_shared<TreeItem>(nullptr);
+    item->id = QUuid::createUuid();
+    item->parent = parentItem;
 
     beginInsertRows(parent, row, row + count - 1);
     parentItem->children.push_back(std::move(item));
@@ -129,15 +136,6 @@ bool TreeItemModel::insertRows(int row, int count, const QModelIndex& parent)
 bool TreeItemModel::removeRows(int row, int count, const QModelIndex& parent)
 {
     auto* parentItem = getItem(parent);
-
-    auto executor = DBExecutor::GetInstance();
-    if (!executor)
-        return false;
-
-    const auto& item = parentItem->children[row];
-    QString error;
-    if (!executor->RemoveTemplate(item.id, error))
-        return false;
 
     beginRemoveRows(parent, row, row + count - 1);
     parentItem->children.erase(parentItem->children.begin() + row);
@@ -165,11 +163,11 @@ bool TreeItemModel::SaveIndexToDB(const QModelIndex& index, QString& error) cons
     return true;
 }
 
-void TreeItemModel::initItem(TreeItem& itemToInit)
+void TreeItemModel::initItem(STreeItem& itemToInit)
 {
-    for (auto& item : itemToInit.children)
+    for (auto& item : itemToInit->children)
     {
-        item.parent = &itemToInit;
+        item->parent = itemToInit.get();
 
         auto executor = DBExecutor::GetInstance();
         std::vector<std::vector<QVariant>> results;
@@ -181,18 +179,18 @@ void TreeItemModel::initItem(TreeItem& itemToInit)
  on t1.sub_id = t3.template_id\
  where master_id = ?\
  and property_id = ?";
-        QString error = executor->ExecSELECT(queryStr, { DBExecutor::DBExecutorUtils::TurnUuidToStr(item.id), DBExecutor::DBExecutorUtils::TurnUuidToStr(db_state::properties::dbobject_name) }, results);
+        QString error = executor->ExecSELECT(queryStr, { DBExecutor::DBExecutorUtils::TurnUuidToStr(item->id), DBExecutor::DBExecutorUtils::TurnUuidToStr(db_state::properties::dbobject_name) }, results);
         if (error.isEmpty())
         {
             for (const auto& result : results)
             {
-                TreeItem newTreeItem;
-                newTreeItem.id = result[0].toUuid();
-                newTreeItem.classId = result[1].toUuid();
-                newTreeItem.name = result[2].toString();
-                newTreeItem.parent = &item;
+                auto newTreeItem = std::make_shared<TreeItem>(nullptr);
+                newTreeItem->id = result[0].toUuid();
+                newTreeItem->classId = result[1].toUuid();
+                newTreeItem->name = result[2].toString();
+                newTreeItem->parent = item.get();
 
-                item.children.push_back(newTreeItem);
+                item->children.push_back(newTreeItem);
             }
         }
         else
@@ -207,17 +205,17 @@ void TreeItemModel::initItem(TreeItem& itemToInit)
 TreeItem* TreeItemModel::getItem(const QModelIndex& idx) const
 {
     if (!idx.isValid())
-        return rootItem;
+        return rootItem.get();
 
     auto* item = static_cast<TreeItem*>(idx.internalPointer());
-    return item ? item : rootItem;
+    return item ? item : rootItem.get();
 }
 
 bool TreeItemModel::saveTemplate(const TreeItem* item, QString& error) const
 {
     if (!item
-     || item->id.isNull()
-     || item->classId.isNull())
+      || item->id.isNull()
+      || item->classId.isNull())
         return false;
 
     error = "";
@@ -257,7 +255,7 @@ bool TreeItemModel::saveMasterIdForSubId(const TreeItem* item, QString& error) c
 
     error = "";
 
-    if (item->parent == rootItem)
+    if (*item->parent == *rootItem)
         return true;
 
     auto executor = DBExecutor::GetInstance();

@@ -5,6 +5,7 @@
 #include <memory>
 #include "xml/xml.h"
 #include <QMessageBox>
+#include "db_objs_state.h"
 
 class MainWindow : public QDialog
 {
@@ -26,4 +27,6 @@ private Q_SLOTS:
 
 private:
 	Ui::MainWindow ui;
+	std::map<QUuid, std::shared_ptr<IStateCreator>> factoryMap;
+	std::map<QUuid, QUuid> mappingRules;
 };
