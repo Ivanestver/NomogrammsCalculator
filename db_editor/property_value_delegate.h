@@ -2,6 +2,7 @@
 
 #include <QStyledItemDelegate>
 #include <QObject>
+#include <QUuid>
 
 class PropertyValueDelegate : public QStyledItemDelegate
 {
@@ -18,4 +19,7 @@ public:
 
 private Q_SLOTS:
     void onOpenBypassRuleListClicked();
+
+private:
+    mutable QUuid id;
 };

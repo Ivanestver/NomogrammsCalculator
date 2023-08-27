@@ -102,7 +102,7 @@ bool DBExecutor::UpdateProperty(const QUuid& templateId, const QUuid& propertyId
 
 bool DBExecutor::LinkTemplates(const QUuid& masterObjId, const QUuid& subObjId, QString& error) const
 {
-	int rowsInserted = ExecChange("insert into [template_template](master_id, sub_id) values (?, ?)", { masterObjId, subObjId }, error);
+	int rowsInserted = ExecChange("insert into [template_template](master_id, sub_id, extra) values (?, ?, ?)", { masterObjId, subObjId, QString("") }, error);
 	return rowsInserted > 0;
 }
 

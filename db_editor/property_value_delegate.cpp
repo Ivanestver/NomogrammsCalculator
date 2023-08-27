@@ -3,6 +3,7 @@
 #include <QPushButton>
 #include "db_objs_state.h"
 #include "properties_table_model.h"
+#include "set_bypass_rule_args_dlg.h"
 
 PropertyValueDelegate::PropertyValueDelegate(QObject* parent/* = nullptr*/)
 	: QStyledItemDelegate(parent)
@@ -17,6 +18,8 @@ QWidget* PropertyValueDelegate::createEditor(QWidget* parent, const QStyleOption
 	const auto& item = model->GetTableItemByIdx(index);
 	if (item.id == db_state::properties::nomogramm_bypassRule_List)
 	{
+		const auto& idItem = model->GetTableItemByIdx(model->index(0, 1, QModelIndex()));
+		id = idItem.value.toUuid();
 		auto* btn = new QPushButton(parent);
 		btn->setText(QString::fromLocal8Bit("Открыть редактор правила обхода"));
 		connect(btn, &QPushButton::clicked, this, &PropertyValueDelegate::onOpenBypassRuleListClicked);
@@ -36,5 +39,6 @@ void PropertyValueDelegate::setModelData(QWidget* editor, QAbstractItemModel* mo
 
 void PropertyValueDelegate::onOpenBypassRuleListClicked()
 {
-
+	DlgSetBypassRuleArgs dlg(id, nullptr);
+	dlg.exec();
 }
