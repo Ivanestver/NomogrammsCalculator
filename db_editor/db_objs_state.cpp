@@ -165,6 +165,11 @@ QModelIndex MethodologyState::getParentIndex(const QModelIndexList& selectedInde
 	return QModelIndex();
 }
 
+QUuid NomogrammState::GetClassID()
+{
+	return NomogrammState().getClassId();
+}
+
 QUuid NomogrammState::getClassId() const
 {
 	return nomogramm_class;
@@ -179,6 +184,12 @@ bool NomogrammState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, Q
 {
 	const auto* item = getItemToAdd();
 	if (!executor->InsertProperty(item->id, db_state::properties::dbobject_name, item->name, error))
+		return false;
+
+	if (!executor->InsertProperty(item->id, db_state::properties::nomogramm_bypassRule, QString(""), error))
+		return false;
+
+	if (!executor->InsertProperty(item->id, db_state::properties::nomogramm_bypassRule_List, QString(""), error))
 		return false;
 
 	return executor->LinkTemplates(item->parent->id, item->id, error);

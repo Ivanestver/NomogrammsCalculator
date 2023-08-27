@@ -60,6 +60,8 @@ public:
 	NomogrammState() = default;
 	~NomogrammState() override = default;
 
+	static QUuid GetClassID();
+
 private:
 	// Унаследовано через AbstractDBObjState
 	virtual QUuid getClassId() const override;

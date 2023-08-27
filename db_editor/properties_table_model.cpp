@@ -107,7 +107,19 @@ bool PropertiesTableModel::NameIsChanged() const
 
 QString PropertiesTableModel::GetChangedName() const
 {
-    return propertiesContainer.properties[2].value.toString();
+    auto dbobjectNamePropertyId = db_state::properties::dbobject_name;
+    const auto it = std::find_if(propertiesContainer.properties.begin(), propertiesContainer.properties.end(), [&dbobjectNamePropertyId](const PropertiesTableItem& item)
+        {
+            return item.id == dbobjectNamePropertyId;
+        });
+
+    assert(it != propertiesContainer.properties.end());
+    return it->value.toString();
+}
+
+const PropertiesTableItem& PropertiesTableModel::GetTableItemByIdx(const QModelIndex& index) const
+{
+    return propertiesContainer.properties[index.row()];
 }
 
 bool PropertiesTableModel::setIdOfItem(const QUuid& itemId)

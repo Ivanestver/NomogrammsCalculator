@@ -23,6 +23,7 @@ public:
 
 	bool NameIsChanged() const;
 	QString GetChangedName() const;
+	const PropertiesTableItem& GetTableItemByIdx(const QModelIndex& index) const;
 
 private:
 	bool setIdOfItem(const QUuid& itemId);

@@ -25,6 +25,7 @@ namespace nomogramms
 
 		bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const override;
 		void GetParameters(std::map<ParameterType, std::vector<SMeasure>>& parameters) const override;
+		bool GetChildren(std::vector<SDBObject>& children) const override;
 
 	protected:
 		virtual void initFromDB() override;

@@ -62,11 +62,20 @@ namespace nomogramms
 			pair.second->GetParameters(parameters);
 	}
 
+	bool Nomogramm::GetChildren(std::vector<SDBObject>& children) const
+	{
+		for (const auto& pair : graphics)
+		{
+			children.push_back(std::dynamic_pointer_cast<DBObject>(pair.second));
+		}
+		return true;
+	}
+
 	void Nomogramm::initFromDB()
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
 
-		QString queryString = "select [sub_id] from [template_template] where [master_id] = '?'";
+		QString queryString = "select [sub_id] from [template_template] where [master_id] = ?";
 		std::vector<QVariant> params { QVariant(GetId()) };
 		QString error;
 
