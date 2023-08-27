@@ -6,6 +6,7 @@
 #include "db_state/properties.h"
 #include <QInputDialog>
 #include "choose_item_type_dlg.h"
+#include "obj_properties_dlg.h"
 #include <QDebug>
 
 const QUuid methodology_class("A8A4951D-8542-4CFA-B593-ECBA3DE727D1");
@@ -47,7 +48,12 @@ void MainWindow::initTree()
  and property_id = ?";
 
 	std::vector<std::vector<QVariant>> results;
-	dbExecutor->ExecSELECT(queryStr, { DBExecutor::DBExecutorUtils::TurnUuidToStr(methodology_class), DBExecutor::DBExecutorUtils::TurnUuidToStr(db_state::properties::dbobject_name)}, results);
+	QString error;
+	if (!dbExecutor->ExecSELECT(queryStr, { DBExecutor::DBExecutorUtils::TurnUuidToStr(methodology_class), DBExecutor::DBExecutorUtils::TurnUuidToStr(db_state::properties::dbobject_name) }, results, error))
+	{
+		showWarning(error);
+		return;
+	}
 
 	std::vector<STreeItem> ids;
 	for (const auto& result : results)
@@ -78,6 +84,7 @@ void MainWindow::addContextMenuToTree()
 
 	treeContextMenu = new QMenu(ui.treeView);
 	treeContextMenu->addAction(QString::fromLocal8Bit("Удалить выбранный объект"), this, &MainWindow::onRemoveItem);
+	treeContextMenu->addAction(QString::fromLocal8Bit("Свойства"), this, &MainWindow::onPropertiesMenuActionClicked);
 }
 
 QMessageBox::StandardButton MainWindow::showWarning(const QString& message)
@@ -137,6 +144,20 @@ void MainWindow::onCustomMenuRequested(const QPoint& point)
 	if (index.isValid()) {
 		treeContextMenu->exec(ui.treeView->viewport()->mapToGlobal(point));
 	}
+}
+
+void MainWindow::onPropertiesMenuActionClicked()
+{
+	const auto selectedIdxs = ui.treeView->selectionModel()->selectedIndexes();
+	assert(!selectedIdxs.isEmpty());
+
+	const auto& selectedItemIdx = selectedIdxs.first();
+	auto* item = static_cast<TreeItem*>(selectedItemIdx.internalPointer());
+
+	DlgObjProperties dlg(item->id, this);
+	dlg.exec();
+	if (dlg.NameIsChanged())
+		item->name = dlg.GetChangedName();
 }
 
 void MainWindow::onAddItem()

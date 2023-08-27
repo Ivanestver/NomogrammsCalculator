@@ -170,7 +170,7 @@ void TreeItemModel::initItem(STreeItem& itemToInit)
         item->parent = itemToInit.get();
 
         auto executor = DBExecutor::GetInstance();
-        std::vector<std::vector<QVariant>> results;
+        DBExecutor::Response results;
         QString queryStr = "select t1.sub_id, class_id, property_value\
  from(template_template as t1\
  inner join template_property as t2\
@@ -179,8 +179,8 @@ void TreeItemModel::initItem(STreeItem& itemToInit)
  on t1.sub_id = t3.template_id\
  where master_id = ?\
  and property_id = ?";
-        QString error = executor->ExecSELECT(queryStr, { DBExecutor::DBExecutorUtils::TurnUuidToStr(item->id), DBExecutor::DBExecutorUtils::TurnUuidToStr(db_state::properties::dbobject_name) }, results);
-        if (error.isEmpty())
+        QString error;
+        if (executor->ExecSELECT(queryStr, { item->id, db_state::properties::dbobject_name }, results, error))
         {
             for (const auto& result : results)
             {

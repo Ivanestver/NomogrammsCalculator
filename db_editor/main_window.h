@@ -30,6 +30,7 @@ private Q_SLOTS:
 	void onAddMethodology();
 	void onRemoveItem();
 	void onCustomMenuRequested(const QPoint& point);
+	void onPropertiesMenuActionClicked();
 
 private:
 	Ui::MainWindow ui;

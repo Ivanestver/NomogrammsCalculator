@@ -17,17 +17,25 @@ DBExecutor::~DBExecutor()
 		db.close();
 }
 
-QString DBExecutor::ExecSELECT(const QString& queryStr, const std::vector<QVariant>& params, std::vector<std::vector<QVariant>>& results) const
+bool DBExecutor::ExecSELECT(const QString& queryStr, const std::vector<QVariant>& params, Response& results, QString& error) const
 {
 	results.clear();
 
 	QSqlQuery query(db);
 	query.prepare(queryStr);
 	for (const auto& param : params)
-		query.addBindValue(param);
+	{
+		if (param.type() == QVariant::Type::Uuid)
+			query.addBindValue(DBExecutorUtils::TurnUuidToStr(param.toUuid()));
+		else
+			query.addBindValue(param);
+	}
 
 	if (!query.exec())
-		return query.lastError().text();
+	{
+		error = query.lastError().text();
+		return false;
+	}
 
 	while (query.next())
 	{
@@ -43,7 +51,7 @@ QString DBExecutor::ExecSELECT(const QString& queryStr, const std::vector<QVaria
 		results.push_back(std::move(ress));
 	}
 
-	return "";
+	return true;
 }
 
 int DBExecutor::ExecChange(const QString& queryStr, const std::vector<QVariant>& params, QString& error) const
@@ -88,7 +96,7 @@ bool DBExecutor::InsertProperty(const QUuid& templateId, const QUuid& propertyId
 
 bool DBExecutor::UpdateProperty(const QUuid& templateId, const QUuid& propertyId, const QVariant& value, QString& error) const
 {
-	int rowsInserted = ExecChange("update [template_property] set [value] = ? where [template_id] = ? and [property_id] = ?", { value, templateId, propertyId }, error);
+	int rowsInserted = ExecChange("update [template_property] set [property_value] = ? where [template_id] = ? and [property_id] = ?", { value, templateId, propertyId }, error);
 	return rowsInserted > 0;
 }
 
@@ -96,6 +104,18 @@ bool DBExecutor::LinkTemplates(const QUuid& masterObjId, const QUuid& subObjId, 
 {
 	int rowsInserted = ExecChange("insert into [template_template](master_id, sub_id) values (?, ?)", { masterObjId, subObjId }, error);
 	return rowsInserted > 0;
+}
+
+bool DBExecutor::ReceivePropertiesOfObj(const QUuid& objId, std::set<PropertyInfo>& properties, QString& error) const
+{
+	Response results;
+	if (!ExecSELECT("select t1.property_id, t1.property_name, t2.property_value from [property] as t1 inner join [template_property] as t2 on t1.property_id=t2.property_id where [template_id] = ?", { objId }, results, error))
+		return false;
+
+	for (const auto& record : results)
+		properties.insert({record[0].toUuid(), record[1].toString(), record[2]});
+
+	return true;
 }
 
 int DBExecutor::removeTemplateFromTable(const QUuid& templateId, const QString& table, const QString& fieldOfTemplate, QString& error) const
