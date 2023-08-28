@@ -19,6 +19,7 @@ protected:
 	virtual QUuid getClassId() const = 0;
 	virtual QModelIndex getParentIndex(const QModelIndexList& selectedIndexList) const = 0;
 	virtual bool addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const = 0;
+	virtual std::pair<QString, QString> getMessageAndTitleWhenAdding() const = 0;
 
 protected:
 	const QString& getObjectName() const;
@@ -52,6 +53,7 @@ private:
 	virtual bool addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const override;
 	virtual QUuid getClassId() const override;
 	virtual QModelIndex getParentIndex(const QModelIndexList& selectedIndexList) const override;
+	virtual std::pair<QString, QString> getMessageAndTitleWhenAdding() const override;
 };
 
 class NomogrammState : public AbstractDBObjState
@@ -67,6 +69,7 @@ private:
 	virtual QUuid getClassId() const override;
 	virtual QModelIndex getParentIndex(const QModelIndexList& selectedIndexList) const override;
 	virtual bool addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const override;
+	virtual std::pair<QString, QString> getMessageAndTitleWhenAdding() const override;
 };
 
 class GraphicState : public AbstractDBObjState
@@ -81,6 +84,7 @@ private:
 	virtual QUuid getClassId() const override;
 	virtual QModelIndex getParentIndex(const QModelIndexList& selectedIndexList) const override;
 	virtual bool addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const override;
+	virtual std::pair<QString, QString> getMessageAndTitleWhenAdding() const override;
 };
 
 class IStateCreator

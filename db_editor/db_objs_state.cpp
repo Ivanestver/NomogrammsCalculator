@@ -81,7 +81,8 @@ void AbstractDBObjState::setItemToAdd(TreeItem* itemToAdd_)
 
 QString AbstractDBObjState::openInputNameDlgAndGetDlg() const
 {
-	return QInputDialog::getText(nullptr, QString::fromLocal8Bit("Введите название новой методики"), QString::fromLocal8Bit("Новая методика"));
+	const auto messageAndTitle = getMessageAndTitleWhenAdding();
+	return QInputDialog::getText(nullptr, messageAndTitle.first, messageAndTitle.second);
 }
 
 TreeItem* AbstractDBObjState::insertRowToModelAndGetItem(QAbstractItemModel* model, const QModelIndexList& selectedIndexList, QString& error)
@@ -165,6 +166,11 @@ QModelIndex MethodologyState::getParentIndex(const QModelIndexList& selectedInde
 	return QModelIndex();
 }
 
+std::pair<QString, QString> MethodologyState::getMessageAndTitleWhenAdding() const
+{
+	return { QString::fromLocal8Bit("Введите название методики") , QString::fromLocal8Bit("Название методики") };
+}
+
 QUuid NomogrammState::GetClassID()
 {
 	return NomogrammState().getClassId();
@@ -195,6 +201,11 @@ bool NomogrammState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, Q
 	return executor->LinkTemplates(item->parent->id, item->id, error);
 }
 
+std::pair<QString, QString> NomogrammState::getMessageAndTitleWhenAdding() const
+{
+	return { QString::fromLocal8Bit("Введите название номограммы") , QString::fromLocal8Bit("Название номограммы") };
+}
+
 QUuid GraphicState::getClassId() const
 {
 	return graphics_class;
@@ -212,6 +223,11 @@ bool GraphicState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QSt
 		return false;
 
 	return executor->LinkTemplates(item->parent->id, item->id, error);
+}
+
+std::pair<QString, QString> GraphicState::getMessageAndTitleWhenAdding() const
+{
+	return { QString::fromLocal8Bit("Введите название графика") , QString::fromLocal8Bit("Название графика") };
 }
 
 std::shared_ptr<AbstractDBObjState> NomogrammGraphicStateCreator::CreateObj() const
