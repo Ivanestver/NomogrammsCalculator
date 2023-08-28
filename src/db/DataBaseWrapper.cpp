@@ -166,7 +166,7 @@ namespace db
 			std::vector<QVariant> row;
 			for (int i = 0; i < columnsCount; i++)
 			{
-				auto var = q.value(0);
+				auto var = q.value(i);
 				row.emplace_back(var);
 			}
 			result.emplace_back(row);
