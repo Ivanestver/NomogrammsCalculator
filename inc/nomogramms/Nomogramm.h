@@ -31,6 +31,9 @@ namespace nomogramms
 		virtual void initFromDB() override;
 
 	private:
+		std::shared_ptr<ICalculeable> getICalculeableByCID(const QUuid& classId, const QUuid& itemId) const;
+
+	private:
 		std::map<QString, SICalculeable> graphics;
 		QString bypassRule;
 	};

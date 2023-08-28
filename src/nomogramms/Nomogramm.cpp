@@ -75,8 +75,8 @@ namespace nomogramms
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
 
-		QString queryString = "select [sub_id] from [template_template] where [master_id] = ?";
-		std::vector<QVariant> params { QVariant(GetId()) };
+		QString queryString = "select t1.class_id, t2.sub_id, t2.extra from [template] as t1 inner join [template_template] as t2 on t1.template_id=t2.master_id where [master_id] = ?";
+		std::vector<QVariant> params { GetId() };
 		QString error;
 
 		auto result = db->ExecuteQuery(queryString, params, error);
@@ -85,9 +85,18 @@ namespace nomogramms
 
 		for (const auto& v : result)
 		{
-			QString label = v[1].value<QString>();
-			auto g = std::make_shared<Graphics>(v[0].value<QUuid>());
+			QString label = v[2].value<QString>();
+			QUuid classId = v[0].value<QUuid>();
+			QUuid itemId = v[1].value<QUuid>();
+			auto g = getICalculeableByCID(classId, itemId);
 			graphics.insert({ label, g });
 		}
+	}
+	std::shared_ptr<ICalculeable> Nomogramm::getICalculeableByCID(const QUuid& classId, const QUuid& itemId) const
+	{
+		if (classId == Nomogramm::GetCID())
+			return std::make_shared<Nomogramm>(itemId);
+		else
+			return std::make_shared<Graphics>(itemId);
 	}
 }
