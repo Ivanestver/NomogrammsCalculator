@@ -8,6 +8,7 @@
 #include "choose_item_type_dlg.h"
 #include "obj_properties_dlg.h"
 #include <QDebug>
+#include "measures_list_dlg.h"
 
 const QUuid methodology_class("A8A4951D-8542-4CFA-B593-ECBA3DE727D1");
 const QUuid nomogramm_class("F5313633-C8FC-43DC-A92E-88B7EE8DF439");
@@ -75,6 +76,7 @@ void MainWindow::addToolBar()
 	toolBar->addAction(QString::fromLocal8Bit("Добавить новый объект"), this, &MainWindow::onAddItem);
 	toolBar->addAction(QString::fromLocal8Bit("Добавить новую методику"), this, &MainWindow::onAddMethodology);
 	toolBar->addAction(QString::fromLocal8Bit("Удалить выбранный объект"), this, &MainWindow::onRemoveItem);
+	toolBar->addAction(QString::fromLocal8Bit("Открыть типы данных"), this, &MainWindow::onOpenTypesWindowBtnClicked);
 }
 
 void MainWindow::addContextMenuToTree()
@@ -158,6 +160,12 @@ void MainWindow::onPropertiesMenuActionClicked()
 	dlg.exec();
 	if (dlg.NameIsChanged())
 		item->name = dlg.GetChangedName();
+}
+
+void MainWindow::onOpenTypesWindowBtnClicked()
+{
+	DlgMeasuresUnitsList dlg(this);
+	dlg.exec();
 }
 
 void MainWindow::onAddItem()

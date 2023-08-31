@@ -31,6 +31,7 @@ private Q_SLOTS:
 	void onRemoveItem();
 	void onCustomMenuRequested(const QPoint& point);
 	void onPropertiesMenuActionClicked();
+	void onOpenTypesWindowBtnClicked();
 
 private:
 	Ui::MainWindow ui;
