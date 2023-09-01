@@ -12,6 +12,8 @@ BypassRuleArgsModel::BypassRuleArgsModel(const QUuid& nomogrammId_, QObject* par
 
 Q_INVOKABLE QModelIndex BypassRuleArgsModel::index(int row, int column, const QModelIndex& parent) const
 {
+    if (items.size() <= row)
+        return Q_INVOKABLE QModelIndex();
     return Q_INVOKABLE createIndex(row, column, (void*)&(column == 0 ? std::get<1>(items[row]) : std::get<2>(items[row])));
 }
 
