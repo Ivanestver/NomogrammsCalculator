@@ -19,6 +19,7 @@ public:
 
 private Q_SLOTS:
     void onOpenBypassRuleListClicked();
+    void onOpenMeasureUnitsClicked();
 
 private:
     mutable QUuid id;

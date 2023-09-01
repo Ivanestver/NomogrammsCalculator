@@ -196,6 +196,9 @@ bool NomogrammState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, Q
 		return false;
 
 	if (!executor->InsertProperty(item->id, db_state::properties::nomogramm_bypassRule_List, QString(""), error))
+		return false; 
+
+	if (!executor->InsertProperty(item->id, db_state::properties::data_type_with_unit, QString(""), error))
 		return false;
 
 	return executor->LinkTemplates(item->parent->id, item->id, error);
