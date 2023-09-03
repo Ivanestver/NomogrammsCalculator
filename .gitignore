@@ -401,5 +401,6 @@ FodyWeavers.xsd
 
 # MSAccess files
 *.accdb
+*.laccdb
 *.mdb
 *.mdw
