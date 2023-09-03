@@ -25,7 +25,7 @@ namespace nomogramms
 		BypassRule& operator=(const DBObject& other) override;
 
 		virtual bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const override;
-		virtual void GetParameters(std::map<ParameterType, std::vector<SMeasure> >& parameters) const override;
+		virtual void GetParameters(std::map<ParameterType, std::vector<SMeasureUnit> >& parameters) const override;
 
 	protected:
 		virtual void initFromDB() override;

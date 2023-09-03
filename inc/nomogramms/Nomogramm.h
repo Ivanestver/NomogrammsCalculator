@@ -24,7 +24,7 @@ namespace nomogramms
 		Nomogramm& operator=(const DBObject& other) override;
 
 		bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const override;
-		void GetParameters(std::map<ParameterType, std::vector<SMeasure>>& parameters) const override;
+		void GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const override;
 		bool GetChildren(std::vector<SDBObject>& children) const override;
 
 	protected:

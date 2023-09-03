@@ -7,7 +7,9 @@ namespace nomogramms
     Graphics::Graphics(const QUuid& id)
         : base(id)
         , neuralNetwork(nullptr)
-    {}
+    {
+        initFromDB();
+    }
 
     Graphics::Graphics(const Graphics& other)
         : base(other)
@@ -15,7 +17,7 @@ namespace nomogramms
         this->parametersList = other.parametersList;
     }
 
-    const std::vector<SMeasure> Graphics::GetParametersByType(ParameterType type) const
+    const std::vector<SMeasureUnit>& Graphics::GetParametersByType(ParameterType type) const
     {
         return parametersList.find(type)->second;
     }
@@ -46,18 +48,24 @@ namespace nomogramms
     void Graphics::initFromDB()
     {
         auto db = db::DataBaseWrapper::GetDatabase();
-        QString queryString = "select slave_id, master_slave_value from template_template where master_id = :1";
-        std::vector<QVariant> params{QVariant(GetId())};
-        QString error = "";
-        auto result = db->ExecuteQuery(queryString, params, error);
-        if (!error.isEmpty())
+        if (!db)
             return;
 
-        for (const auto& v : result)
+        QString queryString = "select [measure_unit_id] from [template_measure_unit_input] where [template_id] = ?";
+        QString error;
+        auto response = db->ExecuteQuery(queryString, { GetId() }, error);
+        for (const auto& record : response)
         {
-            ParameterType type = (ParameterType)v[1].value<int>();
-            auto measure = std::make_shared<Measure>(v[0].value<QUuid>());
-            parametersList[type].push_back(measure);
+            auto measureUnit = std::make_shared<MeasureUnit>(record[0].toUuid());
+            parametersList[ParameterType::Input].push_back(measureUnit);
+        }
+
+        queryString = "select [measure_unit_id] from [template_measure_unit_output] where [template_id] = ?";
+        response = db->ExecuteQuery(queryString, { GetId() }, error);
+        for (const auto& record : response)
+        {
+            auto measureUnit = std::make_shared<MeasureUnit>(record[0].toUuid());
+            parametersList[ParameterType::Output].push_back(measureUnit);
         }
     }
 
@@ -67,7 +75,7 @@ namespace nomogramms
         return false;
     }
 
-    void Graphics::GetParameters(std::map<ParameterType, std::vector<SMeasure>>& parameters) const
+    void Graphics::GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const
     {
         for (const auto& pair : parameters)
             parameters.insert(pair);

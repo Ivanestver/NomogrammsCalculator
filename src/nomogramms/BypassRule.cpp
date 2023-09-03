@@ -50,7 +50,7 @@ namespace nomogramms
 		return false;
 	}
 
-	void BypassRule::GetParameters(std::map<ParameterType, std::vector<SMeasure>>& parameters) const
+	void BypassRule::GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const
 	{
 		for (const auto& g : graphics)
 			g->GetParameters(parameters);

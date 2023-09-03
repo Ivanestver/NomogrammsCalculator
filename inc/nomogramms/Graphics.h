@@ -7,8 +7,8 @@
 #include "common/Measure.h"
 #include "common/macros.h"
 #include "common/DBObject.h"
-#include "nomogramms/ICalculeable.h"
 #include "common/IOData.h"
+#include "nomogramms/ICalculeable.h"
 
 namespace nomogramms
 {
@@ -22,20 +22,20 @@ namespace nomogramms
 		Graphics(const QUuid& id);
 		Graphics(const Graphics& other);
 
-		const std::vector<SMeasure> GetParametersByType(ParameterType type) const;
+		const std::vector<SMeasureUnit>& GetParametersByType(ParameterType type) const;
 
 		bool operator==(const DBObject& other) override;
 		bool operator!=(const DBObject& other) override;
 		Graphics& operator=(const DBObject& other) override;
 
 		bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const override;
-		void GetParameters(std::map<ParameterType, std::vector<SMeasure>>& parameters) const override;
+		void GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const override;
 
 	protected:
 		virtual void initFromDB() override;
 
 	private:
-		std::map<ParameterType, std::vector<SMeasure>> parametersList;
+		std::map<ParameterType, std::vector<SMeasureUnit>> parametersList;
 		void* neuralNetwork;
 	};
 }

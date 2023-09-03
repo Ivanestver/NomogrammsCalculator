@@ -1,6 +1,5 @@
 #pragma once
 #include "DBObject.h"
-#include "MeasureUnit.h"
 #include "macros.h"
 
 namespace nomogramms
@@ -13,23 +12,9 @@ namespace nomogramms
 		DECL_DBCLASS(Measure)
 	public:
 		Measure(const QUuid& id);
-		Measure(const Measure& other);
-		~Measure() override;
-
-		const SMeasureUnit GetMeasureUnit() const;
-
-		void SetValue(double value_);
-		double GetValue() const;
-
-		bool operator==(const DBObject& other) override;
-		bool operator!=(const DBObject& other) override;
-		Measure& operator=(const DBObject& other) override;
-
-	protected:
-		virtual void initFromDB() override;
+		~Measure() override = default;
 
 	private:
-		SMeasureUnit measureUnit;
-		double value;
+		void initFromDB() override;
 	};
 }

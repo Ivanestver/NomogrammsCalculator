@@ -32,6 +32,9 @@ protected:
 	virtual void initFromDB();
 	DECL_DCBASECLASS
 
+protected:
+	void setName(const QString& name);
+
 private:
 	QString name;
 	QUuid id;

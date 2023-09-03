@@ -96,3 +96,8 @@ void DBObject::initFromDB()
 		return;
 	}
 }
+
+void DBObject::setName(const QString& name)
+{
+	this->name = name;
+}

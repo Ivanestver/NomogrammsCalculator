@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include "db_state/db_state.h"
+#include <db_state/db_state.h>
 
 namespace db
 {
@@ -16,20 +17,24 @@ namespace db
 	{
 	public:
 		static SDataBaseWrapper GetDatabase();
-		~DataBaseWrapper();
+		~DataBaseWrapper() = default;
 
-		QString GetTemplateIDsByClassID(const QUuid& classID, std::vector<QUuid>& ids) const;
-		QString GetPropertyValueByIdAndTemplateID(const QUuid& attributeID, const QUuid& templateID) const;
-		std::vector<QString> GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& templateID) const;
+		QString GetTemplateIDsByClassID(const QUuid& classID, std::vector<QUuid>& ids);
+		QString GetPropertyValueByIdAndTemplateID(const QUuid& attributeID, const QUuid& templateID);
+		std::vector<QString> GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& templateID);
 
-		QString ExecuteUpdate(const QString& query, const std::vector<QVariant>& params) const;
-		std::vector<std::vector<QVariant> > ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error) const;
+		bool ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error);
+		std::vector<std::vector<QVariant>> ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error);
 
 	private: 
 		QString turnIDToStr(const QUuid& id) const;
 
+		bool openConnection();
+		void closeConnection();
+
 	private:
 		QSqlDatabase db;
+		db_state::SDBState dbState = nullptr;
 		DataBaseWrapper(const db_state::SDBState& state);
 	};
 

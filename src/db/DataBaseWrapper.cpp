@@ -11,11 +11,8 @@
 namespace db
 {
 	DataBaseWrapper::DataBaseWrapper(const db_state::SDBState& state)
-	{
-		db = QSqlDatabase::addDatabase(state->GetDBName());
-		db.setDatabaseName(state->GetConnectionString());
-		qDebug() << db.open();
-	}
+		: dbState(state)
+	{}
 
 	QString DataBaseWrapper::turnIDToStr(const QUuid& id) const
 	{
@@ -25,6 +22,19 @@ namespace db
 		return s;
 	}
 
+	bool DataBaseWrapper::openConnection()
+	{
+		db = QSqlDatabase::addDatabase(dbState->GetDBName());
+		db.setDatabaseName(dbState->GetConnectionString());
+		return db.open();
+	}
+
+	void DataBaseWrapper::closeConnection()
+	{
+		if (db.isOpen())
+			db.close();
+	}
+
 	SDataBaseWrapper DataBaseWrapper::GetDatabase()
 	{
 		auto state = db_state::DBStateFactory::GetState();
@@ -32,14 +42,11 @@ namespace db
 		return SDataBaseWrapper(new DataBaseWrapper(state));
 	}
 
-	DataBaseWrapper::~DataBaseWrapper()
+	QString DataBaseWrapper::GetTemplateIDsByClassID(const QUuid& classID, std::vector<QUuid>& ids)
 	{
-		if (db.isOpen())
-			db.close();
-	}
+		if (!openConnection())
+			return QString::fromLocal8Bit("Не удалость открыть подключение");
 
-	QString DataBaseWrapper::GetTemplateIDsByClassID(const QUuid& classID, std::vector<QUuid>& ids) const
-	{
 		QString sID = classID.toString();
 		sID = sID.left(sID.length() - 1);
 		sID = sID.right(sID.length() - 1).toUpper();
@@ -58,11 +65,16 @@ namespace db
 			ids.push_back(QUuid(var.toString()));
 		}
 
+		closeConnection();
+
 		return "";
 	}
 
-	QString DataBaseWrapper::GetPropertyValueByIdAndTemplateID(const QUuid& propertyID, const QUuid& templateID) const
+	QString DataBaseWrapper::GetPropertyValueByIdAndTemplateID(const QUuid& propertyID, const QUuid& templateID)
 	{
+		if (!openConnection())
+			return QString::fromLocal8Bit("Не удалость открыть подключение");
+
 		QSqlQuery query(db);
 		query.prepare("select [property_value] from [template_property] where [property_id] in (?) and [template_id] in (?)");
 		query.addBindValue(turnIDToStr(propertyID));
@@ -77,11 +89,16 @@ namespace db
 		if (!var.isValid())
 			throw exceptions::BadRequestException("Значение невалидно");
 
+		closeConnection();
+
 		return var.toString();
 	}
 
-	std::vector<QString> DataBaseWrapper::GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& objID) const
+	std::vector<QString> DataBaseWrapper::GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& objID)
 	{
+		if (!openConnection())
+			return {};
+
 		std::vector<QString> values;
 		QString queryStr = QString("select property_value from template_property where template_id = :tID and property_id in (");
 		for (size_t i = 0; i < attributes.size(); i++)
@@ -109,25 +126,42 @@ namespace db
 			values.push_back(var.value<QString>());
 		}
 
+		closeConnection();
+
 		return values;
 	}
 
-	QString DataBaseWrapper::ExecuteUpdate(const QString& query, const std::vector<QVariant>& params) const
+	bool DataBaseWrapper::ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error)
 	{
+		if (!openConnection())
+		{
+			error = QString::fromLocal8Bit("Не удалость открыть подключение");
+			return false;
+		}
+
 		QSqlQuery q(db);
 		q.prepare(query);
 		for (size_t i = 0; i < params.size(); i++)
 			q.bindValue((int)i, params[i]);
 
 		if (!q.exec())
-			return q.lastError().text();
+		{
+			error = q.lastError().text();
+			return false;
+		}
 
-		return QString();
+		closeConnection();
+
+		return true;
 	}
 
-	std::vector<std::vector<QVariant> > DataBaseWrapper::ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error) const
+	std::vector<std::vector<QVariant>> DataBaseWrapper::ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error)
 	{
-		error = "";
+		if (!openConnection())
+		{
+			error = QString::fromLocal8Bit("Не удалость открыть подключение");
+			return {};
+		}
 		std::vector<std::vector<QVariant> > result;
 		QSqlQuery q(db);
 		if (!q.prepare(query))
@@ -171,6 +205,8 @@ namespace db
 			}
 			result.emplace_back(row);
 		}
+
+		closeConnection();
 
 		return result;
 	}

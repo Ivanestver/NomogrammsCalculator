@@ -2,6 +2,8 @@
 #include "DBObject.h"
 #include "macros.h"
 #include "QUuid"
+#include "Unit.h"
+#include "Measure.h"
 
 namespace nomogramms
 {
@@ -16,7 +18,6 @@ namespace nomogramms
 		MeasureUnit(const MeasureUnit& other);
 		~MeasureUnit() override;
 
-
 		bool operator==(const DBObject& other) override;
 		bool operator!=(const DBObject& other) override;
 		DBObject& operator=(const DBObject& other) override;
@@ -24,5 +25,9 @@ namespace nomogramms
 
 	protected:
 		virtual void initFromDB() override;
+
+	private:
+		SMeasure measure = nullptr;
+		SUnit unit = nullptr;
 	};
 }

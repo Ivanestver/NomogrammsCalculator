@@ -1,23 +1,21 @@
-#include "common/Measure.h"
+#include "common/Unit.h"
 #include "db/DataBaseWrapper.h"
-#include <QVariant>
-#include "db_state/properties.h"
 
 namespace nomogramms
 {
-	Measure::Measure(const QUuid& id)
+	Unit::Unit(const QUuid& id)
 		: base(id)
 	{
 		initFromDB();
 	}
 
-	void Measure::initFromDB()
+	void Unit::initFromDB()
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
 		if (!db)
 			return;
 
-		QString queryStr = "select [measure_name] from [measure] where [measure_id] = ?";
+		QString queryStr = "select [unit_name] from [unit] where [unit_id] = ?";
 		QString error;
 		auto response = db->ExecuteQuery(queryStr, { GetId() }, error);
 		if (response.empty() || response[0].empty())

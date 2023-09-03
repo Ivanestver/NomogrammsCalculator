@@ -56,7 +56,7 @@ namespace nomogramms
 		return true;
 	}
 
-	void Nomogramm::GetParameters(std::map<ParameterType, std::vector<SMeasure>>& parameters) const
+	void Nomogramm::GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const
 	{
 		for (const auto& pair : graphics)
 			pair.second->GetParameters(parameters);
@@ -75,7 +75,7 @@ namespace nomogramms
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
 
-		QString queryString = "select t1.class_id, t2.sub_id, t2.extra from [template] as t1 inner join [template_template] as t2 on t1.template_id=t2.master_id where [master_id] = ?";
+		QString queryString = "select class_id, sub_id, extra from ([template] as t1 inner join [template_template] as t2 on t1.template_id=t2.sub_id) where [master_id] = ?";
 		std::vector<QVariant> params { GetId() };
 		QString error;
 
@@ -85,13 +85,15 @@ namespace nomogramms
 
 		for (const auto& v : result)
 		{
-			QString label = v[2].value<QString>();
 			QUuid classId = v[0].value<QUuid>();
 			QUuid itemId = v[1].value<QUuid>();
 			auto g = getICalculeableByCID(classId, itemId);
+
+			QString label = v[2].value<QString>();
 			graphics.insert({ label, g });
 		}
 	}
+
 	std::shared_ptr<ICalculeable> Nomogramm::getICalculeableByCID(const QUuid& classId, const QUuid& itemId) const
 	{
 		if (classId == Nomogramm::GetCID())
