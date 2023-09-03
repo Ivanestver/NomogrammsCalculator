@@ -36,5 +36,6 @@ namespace nomogramms
 	private:
 		std::map<QString, SICalculeable> graphics;
 		QString bypassRule;
+		std::vector<SMeasureUnit> parameters;
 	};
 }
