@@ -5,17 +5,53 @@
 #include <QList>
 #include "db_executor.h"
 #include "TreeItem.h"
+#include <set>
+
+const QUuid methodology_class("A8A4951D-8542-4CFA-B593-ECBA3DE727D1");
+const QUuid nomogramm_class("F5313633-C8FC-43DC-A92E-88B7EE8DF439");
+const QUuid rule_class("BB75693A-4506-47DE-9DE6-6F40C8BC3C74");
+const QUuid graphics_class("6DCE13AE-8897-48EC-9B4E-664845D40D73");
+
+class MethodologyState;
+class NomogrammState;
+class GraphicState;
 
 class AbstractDBObjState
 {
 public:
-	AbstractDBObjState() = default;
+	template<class T>
+	static std::shared_ptr<AbstractDBObjState> CreateState()
+	{
+		auto ptr = std::make_shared<T>();
+		ptr->fillProperties();
+		return ptr;
+	}
+
+	static std::shared_ptr<AbstractDBObjState> CreateStateById(const QUuid& classId)
+	{
+		std::shared_ptr<AbstractDBObjState> ptr;
+		if (classId == methodology_class)
+			ptr = AbstractDBObjState::CreateState<MethodologyState>();
+		else if (classId == nomogramm_class)
+			ptr = AbstractDBObjState::CreateState<NomogrammState>();
+		else if (classId == graphics_class)
+			ptr = AbstractDBObjState::CreateState<GraphicState>();
+		else
+			return ptr;
+
+		ptr->fillProperties();
+		return ptr;
+	}
+
 	virtual ~AbstractDBObjState() = default;
 
 	bool AddNewObjToModelAndThenToDB(QAbstractItemModel* abstractModel, const QModelIndexList& selectedIndexList, QString& error);
 	bool RemoveItem(const QModelIndex& selectedItemIdx, QAbstractItemModel* abstractModel, QString& error) const;
+	const std::set<QUuid>& GetPropertiesIds() const;
+	virtual void fillProperties() = 0;
 
 protected:
+	AbstractDBObjState();
 	virtual QUuid getClassId() const = 0;
 	virtual QModelIndex getParentIndex(const QModelIndexList& selectedIndexList) const = 0;
 	virtual bool addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const = 0;
@@ -24,6 +60,7 @@ protected:
 protected:
 	const QString& getObjectName() const;
 	const TreeItem* getItemToAdd() const;
+	void addProperty(const QUuid& propertyId);
 
 private:
 	void setObjectName(const QString& objectName_);
@@ -40,14 +77,18 @@ private:
 private:
 	QString objectName;
 	const TreeItem* itemToAdd = nullptr;
+	std::set<QUuid> propertiesIds;
 };
 
 class MethodologyState : public AbstractDBObjState
 {
 public:
+	static QUuid GetClassID();
+
 	MethodologyState() = default;
 	~MethodologyState() override = default;
 
+	virtual void fillProperties() override;
 private:
 	// Унаследовано через AbstractDBObjState
 	virtual bool addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const override;
@@ -63,6 +104,7 @@ public:
 	~NomogrammState() override = default;
 
 	static QUuid GetClassID();
+	virtual void fillProperties() override;
 
 private:
 	// Унаследовано через AbstractDBObjState
@@ -77,9 +119,10 @@ class GraphicState : public AbstractDBObjState
 public:
 	GraphicState() = default;
 	~GraphicState() override = default;
-
+	
+	static QUuid GetClassID();
+	virtual void fillProperties() override;
 private:
-
 	// Унаследовано через AbstractDBObjState
 	virtual QUuid getClassId() const override;
 	virtual QModelIndex getParentIndex(const QModelIndexList& selectedIndexList) const override;
@@ -102,7 +145,7 @@ public:
 
 	std::shared_ptr<AbstractDBObjState> CreateObj() const override
 	{
-		return std::make_shared<T>();
+		return AbstractDBObjState::CreateState<T>();
 	}
 };
 

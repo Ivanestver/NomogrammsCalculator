@@ -2,6 +2,7 @@
 #include "db_executor.h"
 #include <QDebug>
 #include "properties.h"
+#include "db_objs_state.h"
 
 PropertiesTableModel::PropertiesTableModel(const QUuid& itemId, QObject* parent/* = nullptr*/)
     : QAbstractItemModel(parent)
@@ -161,20 +162,49 @@ bool PropertiesTableModel::fillPropertiesContainer(const QUuid& id)
     if (!db)
         return false;
 
-    std::set<DBExecutor::PropertyInfo> propertiesInfo;
+    DBExecutor::Response response;
     QString error;
+    if (!db->ExecSELECT("select [class_id] from [template] where [template_id] = ?", { id }, response, error))
+    {
+        qDebug() << error;
+        return false;
+    }
+
+    if (response.empty())
+    {
+        qDebug() << QString("Не удалось установить класс объекта %1").arg(id.toString());
+        return false;
+    }
+
+    QUuid classId = response.front().front().toUuid();
+
+    auto state = AbstractDBObjState::CreateStateById(classId);
+    if (!state)
+        return false;
+
+    const auto& propertiesIds = state->GetPropertiesIds();
+
+    std::set<DBExecutor::PropertyInfo> propertiesInfo;
     if (!db->ReceivePropertiesOfObj(id, propertiesInfo, error))
     {
         qDebug() << error;
         return false;
     }
 
-    for (const auto& info : propertiesInfo)
+    for (const auto& id : propertiesIds)
     {
         PropertiesTableItem item;
-        item.id = std::get<0>(info);
-        item.name = std::get<1>(info);
-        item.value = std::get<2>(info);
+        item.id = id;
+        const auto it = std::find_if(propertiesInfo.begin(), propertiesInfo.end(), [&id](const auto& info)
+            {
+                return std::get<0>(info) == id;
+            });
+
+        if (it != propertiesInfo.end())
+        {
+            item.name = std::get<1>(*it);
+            item.value = std::get<2>(*it);
+        }
 
         propertiesContainer.properties.push_back(item);
     }

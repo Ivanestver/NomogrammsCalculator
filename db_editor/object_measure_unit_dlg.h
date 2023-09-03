@@ -3,6 +3,7 @@
 #include <QDialog>
 #include <QObject>
 #include <QUuid>
+#include <QString>
 
 class DlgObjectMeasureUnit : public QDialog
 {
@@ -10,7 +11,7 @@ class DlgObjectMeasureUnit : public QDialog
 	using MeasureUnitInfo = std::pair<QUuid, QString>;
 
 public:
-	DlgObjectMeasureUnit(const QUuid& objId_, QWidget* parent = nullptr);
+	DlgObjectMeasureUnit(const QUuid& objId_, bool isInput, QWidget* parent = nullptr);
 	~DlgObjectMeasureUnit() override = default;
 
 private:
@@ -22,27 +23,6 @@ private:
 	void sortMeasureUnitInfoVectors();
 
 private:
-	template<class InputIt1, class InputIt2, class OutputIt>
-	OutputIt set_difference(InputIt1 first1, InputIt1 last1,
-		InputIt2 first2, InputIt2 last2, OutputIt d_first)
-	{
-		while (first1 != last1)
-		{
-			if (first2 == last2)
-				return std::copy(first1, last1, d_first);
-
-			if (*first1 < *first2)
-				*d_first++ = *first1++;
-			else
-			{
-				if (!(*first2 < *first1))
-					++first1;
-				++first2;
-			}
-		}
-		return d_first;
-	}
-
 	void setDifference(const std::vector<MeasureUnitInfo>& v1, const std::vector<MeasureUnitInfo>& v2, std::vector<MeasureUnitInfo>& diff)
 	{
 		for (size_t i = 0, j = 0; i < v1.size();)
@@ -80,4 +60,5 @@ private:
 	std::vector<MeasureUnitInfo> measureInfoVectorOrigin;
 	std::vector<MeasureUnitInfo> measureInfoOfObjVector;
 	std::vector<MeasureUnitInfo> measureInfoOfObjVectorOrigin;
+	QString tableName = "";
 };

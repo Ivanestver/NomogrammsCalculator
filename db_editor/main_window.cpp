@@ -10,11 +10,6 @@
 #include <QDebug>
 #include "measures_list_dlg.h"
 
-const QUuid methodology_class("A8A4951D-8542-4CFA-B593-ECBA3DE727D1");
-const QUuid nomogramm_class("F5313633-C8FC-43DC-A92E-88B7EE8DF439");
-const QUuid rule_class("BB75693A-4506-47DE-9DE6-6F40C8BC3C74");
-const QUuid graphics_class("6DCE13AE-8897-48EC-9B4E-664845D40D73");
-
 MainWindow::MainWindow(QWidget* parent)
 	: QDialog(parent)
 {

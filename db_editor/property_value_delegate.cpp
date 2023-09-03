@@ -30,8 +30,19 @@ QWidget* PropertyValueDelegate::createEditor(QWidget* parent, const QStyleOption
 	{
 		const auto& idItem = model->GetTableItemByIdx(model->index(0, 1, QModelIndex()));
 		id = idItem.value.toUuid();
+		isInput = true;
 		auto* btn = new QPushButton(parent);
 		btn->setText(QString::fromLocal8Bit("Открыть редактор типов данных"));
+		connect(btn, &QPushButton::clicked, this, &PropertyValueDelegate::onOpenMeasureUnitsClicked);
+		return btn;
+	}
+	else if (item.id == db_state::properties::data_output_type_with_unit)
+	{
+		const auto& idItem = model->GetTableItemByIdx(model->index(0, 1, QModelIndex()));
+		id = idItem.value.toUuid();
+		isInput = false;
+		auto* btn = new QPushButton(parent);
+		btn->setText(QString::fromLocal8Bit("Открыть редактор выходных типов данных"));
 		connect(btn, &QPushButton::clicked, this, &PropertyValueDelegate::onOpenMeasureUnitsClicked);
 		return btn;
 	}
@@ -49,7 +60,7 @@ void PropertyValueDelegate::setModelData(QWidget* editor, QAbstractItemModel* mo
 
 void PropertyValueDelegate::onOpenMeasureUnitsClicked()
 {
-	DlgObjectMeasureUnit dlg(id, nullptr);
+	DlgObjectMeasureUnit dlg(id, isInput, nullptr);
 	dlg.exec();
 }
 

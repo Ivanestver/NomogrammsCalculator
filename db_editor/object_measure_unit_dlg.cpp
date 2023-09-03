@@ -3,11 +3,13 @@
 #include <QMessageBox>
 #include <algorithm>
 
-DlgObjectMeasureUnit::DlgObjectMeasureUnit(const QUuid& objId_, QWidget* parent)
+DlgObjectMeasureUnit::DlgObjectMeasureUnit(const QUuid& objId_, bool isInput, QWidget* parent)
 	: QDialog(parent)
 	, objId(objId_)
 {
 	ui.setupUi(this);
+
+	tableName = isInput ? "template_measure_unit_input" : "template_measure_unit_output";
 	
 	connect(ui.addMeasureUnit, &QPushButton::clicked, this, &DlgObjectMeasureUnit::onAddMeasureUnitBtnClicked);
 	connect(ui.removeMeasureUnit, &QPushButton::clicked, this, &DlgObjectMeasureUnit::onRemoveMeasureUnitBtnClicked);
@@ -33,7 +35,7 @@ DlgObjectMeasureUnit::DlgObjectMeasureUnit(const QUuid& objId_, QWidget* parent)
 		}
 		sortVector(measureInfoVector);
 
-		queryString = "select t2.id, t2.measure_unit_name from [template_measure_unit] as t1 inner join [measure_unit] as t2 on t1.measure_unit_id=t2.id where [template_id] = ?";
+		queryString = QString("select t2.id, t2.measure_unit_name from [%1] as t1 inner join [measure_unit] as t2 on t1.measure_unit_id=t2.id where [template_id] = ?").arg(tableName);
 		response.clear();
 		db->ExecSELECT(queryString, { objId }, response, error);
 
@@ -180,7 +182,7 @@ void DlgObjectMeasureUnit::onAccept()
 
 	if (!vectorToDelete.empty())
 	{
-		QString queryString = "delete from [template_measure_unit] where [template_id] = ? and [measure_unit_id] in (";
+		QString queryString = QString("delete from [%1] where [template_id] = ? and [measure_unit_id] in (").arg(tableName);
 		for (size_t i = 0; i < vectorToDelete.size(); i++)
 		{
 			queryString += "?,";
@@ -202,7 +204,7 @@ void DlgObjectMeasureUnit::onAccept()
 		for (const auto& item : vectorToAdd)
 		{
 
-			QString queryString = "insert into [template_measure_unit](template_id, measure_unit_id) values (?,?)";
+			QString queryString = QString("insert into [%1](template_id, measure_unit_id) values (?,?)").arg(tableName);
 			std::vector<QVariant> params { objId, item.first };
 			QString error;
 			if (!db->ExecChange(queryString, params, error))

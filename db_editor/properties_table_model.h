@@ -32,4 +32,5 @@ private:
 private:
 	PropertiesTableItemInfo propertiesContainer;
 	bool nameIsChanged = false;
+	QString measureUnitTableName;
 };

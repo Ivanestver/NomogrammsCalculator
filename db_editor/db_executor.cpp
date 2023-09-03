@@ -118,6 +118,19 @@ bool DBExecutor::ReceivePropertiesOfObj(const QUuid& objId, std::set<PropertyInf
 	return true;
 }
 
+bool DBExecutor::ReceiveProperties(const std::vector<QUuid>& propertiesId, std::set<PropertyInfo>& properoties, QString& error) const
+{
+	std::vector<QVariant> params;
+	for (const auto& propertyId : propertiesId)
+		params.push_back(propertyId);
+
+	Response results;
+	if (!ExecSELECT("select", params, results, error))
+		return false;
+
+	return true;
+}
+
 int DBExecutor::removeTemplateFromTable(const QUuid& templateId, const QString& table, const QString& fieldOfTemplate, QString& error) const
 {
 	QString queryStr = QString("delete from [%1] where [%2] = ?").arg(table).arg(fieldOfTemplate);

@@ -4,10 +4,10 @@
 #include "db_state/properties.h"
 #include "choose_item_type_dlg.h"
 
-const QUuid methodology_class("A8A4951D-8542-4CFA-B593-ECBA3DE727D1");
-const QUuid nomogramm_class("F5313633-C8FC-43DC-A92E-88B7EE8DF439");
-const QUuid rule_class("BB75693A-4506-47DE-9DE6-6F40C8BC3C74");
-const QUuid graphics_class("6DCE13AE-8897-48EC-9B4E-664845D40D73");
+AbstractDBObjState::AbstractDBObjState()
+{
+	propertiesIds.insert(db_state::properties::dbobject_name);
+}
 
 bool AbstractDBObjState::AddNewObjToModelAndThenToDB(QAbstractItemModel* abstractModel, const QModelIndexList& selectedIndexList, QString& error)
 {
@@ -59,6 +59,11 @@ bool AbstractDBObjState::RemoveItem(const QModelIndex& selectedItemIdx, QAbstrac
 	return removeItemFromDatabase(itemId, error);
 }
 
+const std::set<QUuid>& AbstractDBObjState::GetPropertiesIds() const
+{
+	return propertiesIds;
+}
+
 const QString& AbstractDBObjState::getObjectName() const
 {
 	return objectName;
@@ -72,6 +77,11 @@ void AbstractDBObjState::setObjectName(const QString& objectName_)
 const TreeItem* AbstractDBObjState::getItemToAdd() const
 {
 	return itemToAdd;
+}
+
+void AbstractDBObjState::addProperty(const QUuid& propertyId)
+{
+	propertiesIds.insert(propertyId);
 }
 
 void AbstractDBObjState::setItemToAdd(TreeItem* itemToAdd_)
@@ -157,7 +167,7 @@ bool MethodologyState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor,
 
 QUuid MethodologyState::getClassId() const
 {
-	return methodology_class;
+	return MethodologyState::GetClassID();
 }
 
 QModelIndex MethodologyState::getParentIndex(const QModelIndexList& selectedIndexList) const
@@ -171,14 +181,23 @@ std::pair<QString, QString> MethodologyState::getMessageAndTitleWhenAdding() con
 	return { QString::fromLocal8Bit("Введите название методики") , QString::fromLocal8Bit("Название методики") };
 }
 
+QUuid MethodologyState::GetClassID()
+{
+	return methodology_class;
+}
+
+void MethodologyState::fillProperties()
+{
+}
+
 QUuid NomogrammState::GetClassID()
 {
-	return NomogrammState().getClassId();
+	return nomogramm_class;
 }
 
 QUuid NomogrammState::getClassId() const
 {
-	return nomogramm_class;
+	return NomogrammState::GetClassID();
 }
 
 QModelIndex NomogrammState::getParentIndex(const QModelIndexList& selectedIndexList) const
@@ -196,7 +215,7 @@ bool NomogrammState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, Q
 		return false;
 
 	if (!executor->InsertProperty(item->id, db_state::properties::nomogramm_bypassRule_List, QString(""), error))
-		return false; 
+		return false;
 
 	if (!executor->InsertProperty(item->id, db_state::properties::data_type_with_unit, QString(""), error))
 		return false;
@@ -209,9 +228,16 @@ std::pair<QString, QString> NomogrammState::getMessageAndTitleWhenAdding() const
 	return { QString::fromLocal8Bit("Введите название номограммы") , QString::fromLocal8Bit("Название номограммы") };
 }
 
+void NomogrammState::fillProperties()
+{
+	addProperty(db_state::properties::nomogramm_bypassRule);
+	addProperty(db_state::properties::nomogramm_bypassRule_List);
+	addProperty(db_state::properties::data_type_with_unit);
+}
+
 QUuid GraphicState::getClassId() const
 {
-	return graphics_class;
+	return GraphicState::GetClassID();
 }
 
 QModelIndex GraphicState::getParentIndex(const QModelIndexList& selectedIndexList) const
@@ -225,6 +251,12 @@ bool GraphicState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QSt
 	if (!executor->InsertProperty(item->id, db_state::properties::dbobject_name, item->name, error))
 		return false;
 
+	if (!executor->InsertProperty(item->id, db_state::properties::data_type_with_unit, item->name, error))
+		return false;
+
+	if (!executor->InsertProperty(item->id, db_state::properties::data_output_type_with_unit, item->name, error))
+		return false;
+
 	return executor->LinkTemplates(item->parent->id, item->id, error);
 }
 
@@ -233,11 +265,23 @@ std::pair<QString, QString> GraphicState::getMessageAndTitleWhenAdding() const
 	return { QString::fromLocal8Bit("Введите название графика") , QString::fromLocal8Bit("Название графика") };
 }
 
+QUuid GraphicState::GetClassID()
+{
+	return graphics_class;
+}
+
+void GraphicState::fillProperties()
+{
+	addProperty(db_state::properties::dbobject_name);
+	addProperty(db_state::properties::data_type_with_unit);
+	addProperty(db_state::properties::data_output_type_with_unit);
+}
+
 std::shared_ptr<AbstractDBObjState> NomogrammGraphicStateCreator::CreateObj() const
 {
 	DlgChooseItemType dlg;
 	if (dlg.exec() == QDialog::Accepted)
 		return dlg.IsNomogramm() ? StateCreator<NomogrammState>().CreateObj() : StateCreator<GraphicState>().CreateObj();
 
-	return std::shared_ptr<AbstractDBObjState>();
+	return nullptr;
 }

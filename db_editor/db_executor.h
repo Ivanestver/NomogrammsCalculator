@@ -38,6 +38,7 @@ public:
 	bool LinkTemplates(const QUuid& masterObjId, const QUuid& subObjId, QString& error) const;
 
 	bool ReceivePropertiesOfObj(const QUuid& objId, std::set<PropertyInfo>& properties, QString& error) const;
+	bool ReceiveProperties(const std::vector<QUuid>& propertiesId, std::set<PropertyInfo>& properoties, QString& error) const;
 
 private:
 	int removeTemplateFromTable(const QUuid& templateId, const QString& table, const QString& fieldOfTemplate, QString& error) const;

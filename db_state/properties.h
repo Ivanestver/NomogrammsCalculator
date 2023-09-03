@@ -10,6 +10,7 @@ namespace db_state
 		const QUuid nomogramm_bypassRule_List("ED6368E7-897B-4951-9705-6E7B74FD359D");
 		const QUuid measure_value("8F8F8660-6AE1-4C79-8B96-0832903C5772");
 		const QUuid data_type_with_unit("C3AA13ED-4620-4016-A106-7AAE653CBFD1");
+		const QUuid data_output_type_with_unit("E67ABF23-9E60-49A4-BB5E-DC44F50B649E");
 	}
 
 	namespace db_ids
