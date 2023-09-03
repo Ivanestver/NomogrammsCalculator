@@ -23,5 +23,5 @@ private Q_SLOTS:
 
 private:
     mutable QUuid id;
-    mutable bool isInput;
+    mutable bool isInput = true;
 };
