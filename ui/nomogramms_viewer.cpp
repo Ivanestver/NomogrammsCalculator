@@ -87,7 +87,13 @@ namespace ui
 			if (indexObj == rootItem)
 				return Q_INVOKABLE QVariant();
 
-			return Q_INVOKABLE indexObj->item->GetName();;
+			return Q_INVOKABLE indexObj->item->GetName();
+		}
+
+		const SICalculeable GetICalculableFromIndex(const QModelIndex& index) const
+		{
+			const TreeItem* item = static_cast<const TreeItem*>(index.internalPointer());
+			return std::dynamic_pointer_cast<ICalculeable>(item->item);
 		}
 
 	private:
@@ -129,6 +135,7 @@ namespace ui
 		, ui(new Ui::NomogrammViewer())
 	{
 		ui->setupUi(this);
+		connect(ui->inputSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &NomogrammsViewer::onSpinBoxValueChanged);
 
 		setTree();
 	}
@@ -151,5 +158,137 @@ namespace ui
 			methodologies.push_back(std::make_shared<Methodology>(id));
 
 		ui->nomogrammsTree->setModel(new NomogrammTreeModel(methodologies));
+
+		connect(ui->nomogrammsTree->selectionModel(), &QItemSelectionModel::currentChanged, this, &NomogrammsViewer::onCurrentItemTreeChanged);
+	}
+
+	void NomogrammsViewer::setInputTable(const ValuesMap& params)
+	{
+		ui->inputTable->setColumnCount(2);
+		ui->outputTable->setColumnCount(2);
+
+		addParameterTypeToInputTable(ParameterType::Input, params);
+		addParameterTypeToInputTable(ParameterType::Output, params);
+
+		connect(ui->inputTable, &QTableWidget::itemChanged, this, &NomogrammsViewer::onItemChanged);
+	}
+
+	void NomogrammsViewer::addParameterTypeToInputTable(ParameterType type, const ValuesMap& parameters)
+	{
+		const auto inputIt = parameters.find(type);
+		if (inputIt == parameters.end())
+			return;
+
+		auto* tableWidget = type == ParameterType::Input ? ui->inputTable : ui->outputTable;
+
+		for (const auto& measureUnit : inputIt->second)
+		{
+			addMeasureUnitToInputTable(measureUnit, tableWidget);
+		}
+	}
+
+	void NomogrammsViewer::addMeasureUnitToInputTable(const Value& measureUnit, QTableWidget* tableWidget)
+	{
+		if (!measureUnit.first)
+			return;
+
+		auto* item = new QTableWidgetItem(measureUnit.first->GetName());
+		item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+		int insertedRowNumber = tableWidget->rowCount();
+		tableWidget->insertRow(insertedRowNumber);
+		tableWidget->setItem(insertedRowNumber, 0, item);
+
+		item = new QTableWidgetItem(QString::number(measureUnit.second));
+		tableWidget->setItem(insertedRowNumber, 1, item);
+	}
+
+	void NomogrammsViewer::setValue(const QTableWidgetItem* item)
+	{
+		const auto it = values.find(ParameterType::Input);
+		assert(it != values.end());
+
+		int rowNumber = ui->inputTable->row(item);
+		if (rowNumber >= (size_t)it->second.size())
+			return;
+
+		double value = item->text().toDouble();
+		it->second[rowNumber].second = value;
+	}
+
+	nomogramms::IOData NomogrammsViewer::createInputData() const
+	{
+		IOData inputData;
+		const auto it = values.find(ParameterType::Input);
+		assert(it != values.end());
+		
+		for (const auto& pair : it->second)
+		{
+			inputData.AddValue(pair.first, pair.second);
+		}
+
+		return inputData;
+	}
+
+	void NomogrammsViewer::setOutputData(const IOData& outputData)
+	{
+		auto it = values.find(ParameterType::Output);
+		assert(it != values.end());
+
+		for (auto& pair : it->second)
+		{
+			double value = outputData.GetValue(pair.first);
+			pair.second = value;
+		}
+	}
+
+	void NomogrammsViewer::onCurrentItemTreeChanged(const QModelIndex& current, const QModelIndex& previous)
+	{
+		ui->inputTable->setRowCount(0);
+		ui->outputTable->setRowCount(0);
+
+		const auto* model = dynamic_cast<const NomogrammTreeModel*>(ui->nomogrammsTree->model());
+		if (!model)
+			return;
+
+		currentCalculeable = model->GetICalculableFromIndex(current);
+		if (!currentCalculeable)
+			return;
+
+		ICalculeable::ParametersDict parameters;
+		currentCalculeable->GetParameters(parameters);
+
+		for (const auto& pair : parameters)
+		{
+			std::vector<Value> valuesVector;
+			for (const auto& measureUnit : pair.second)
+				valuesVector.push_back({measureUnit, 0.0});
+			values.insert({ pair.first, valuesVector });
+		}
+
+		setInputTable(values);
+	}
+
+	void NomogrammsViewer::onItemChanged(QTableWidgetItem* item)
+	{
+		if (!currentCalculeable)
+			return;
+
+		setValue(item);
+		const auto inputData = createInputData();
+		IOData outputData;
+
+		QString error;
+		if (!currentCalculeable->Calculate(inputData, outputData, error))
+		{
+			QMessageBox::warning(this, QString::fromLocal8Bit("Внимание!"), error);
+			return;
+		}
+
+		setOutputData(outputData);
+		setInputTable(values);
+	}
+
+	void NomogrammsViewer::onSpinBoxValueChanged(int value)
+	{
 	}
 }

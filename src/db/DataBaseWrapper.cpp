@@ -70,10 +70,13 @@ namespace db
 		return "";
 	}
 
-	QString DataBaseWrapper::GetPropertyValueByIdAndTemplateID(const QUuid& propertyID, const QUuid& templateID)
+	QString DataBaseWrapper::GetPropertyValueByIdAndTemplateID(const QUuid& propertyID, const QUuid& templateID, QString& error)
 	{
 		if (!openConnection())
-			return QString::fromLocal8Bit("Не удалость открыть подключение");
+		{
+			error = QString::fromLocal8Bit("Не удалость открыть подключение");
+			return QString();
+		}
 
 		QSqlQuery query(db);
 		query.prepare("select [property_value] from [template_property] where [property_id] in (?) and [template_id] in (?)");
@@ -87,7 +90,10 @@ namespace db
 
 		auto var = query.value(0);
 		if (!var.isValid())
+		{
 			throw exceptions::BadRequestException("Значение невалидно");
+			return QString();
+		}
 
 		closeConnection();
 

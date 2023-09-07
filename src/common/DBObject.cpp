@@ -88,7 +88,8 @@ void DBObject::initFromDB()
 		return;
 	try
 	{
-		name = dbInstance->GetPropertyValueByIdAndTemplateID(db_state::properties::dbobject_name, id);
+		QString error;
+		name = dbInstance->GetPropertyValueByIdAndTemplateID(db_state::properties::dbobject_name, id, error);
 	}
 	catch (const exceptions::BadRequestException& e)
 	{

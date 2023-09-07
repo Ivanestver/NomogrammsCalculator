@@ -13,9 +13,11 @@ namespace nomogramms
 	class ICalculeable
 	{
 	public:
+		using ParametersDict = std::map<ParameterType, std::vector<SMeasureUnit>>;
+	public:
 		virtual ~ICalculeable() = 0 {};
 		virtual bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const = 0;
-		virtual void GetParameters(std::map<ParameterType, std::vector<SMeasureUnit> >& parameters) const = 0;
+		virtual void GetParameters(ParametersDict& parameters) const = 0;
 
 	protected:
 		ICalculeable() = default;

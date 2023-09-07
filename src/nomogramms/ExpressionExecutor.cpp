@@ -1,4 +1,5 @@
 #include "nomogramms/ExpressionExecutor.h"
+#include <QDebug>
 
 namespace nomogramms
 {
@@ -9,6 +10,7 @@ namespace nomogramms
 		L = luaL_newstate();
 		luaL_openlibs(L);
 		initLuaFunctions();
+		initLuaClasses();
 	}
 
 	ExpressionExecutor::~ExpressionExecutor()
@@ -17,9 +19,19 @@ namespace nomogramms
 			lua_close(L);
 	}
 
-	void ExpressionExecutor::SetVariable(const QString& variableName, const SICalculeable& variable)
+	bool ExpressionExecutor::SetVariable(const QString& variableName, const SICalculeable& variable, QString& error)
 	{
-		luabridge::setGlobal(L, variable, variableName.toLocal8Bit().constData());
+		try
+		{
+			luabridge::setGlobal(L, variable, variableName.toLocal8Bit().constData());
+		}
+		catch (std::logic_error& err)
+		{
+			error = QString::fromLocal8Bit("В классе 'ExpressionExecutor::SetVariable' возникла следующая ошибка: %1 \n").arg(err.what());
+			return false;
+		}
+
+		return true;
 	}
 
 	bool ExpressionExecutor::WriteResultsTo(IOData& outputData_)
@@ -62,7 +74,7 @@ namespace nomogramms
 			output.Clear();
 			if (lua_isuserdata(L, i))
 			{
-				const auto calculeable = luabridge::get<const SICalculeable>(L, i);
+				const auto calculeable = luabridge::get<SICalculeable>(L, i);
 				if (!calculeable)
 					continue;
 
@@ -96,12 +108,16 @@ namespace nomogramms
 			.endClass()
 			.beginClass<ICalculeable>("ICalculeable")
 			.endClass();
+
+		luabridge::setGlobal(L, this, "c");
 	}
 
 	void ExpressionExecutor::initLuaClasses()
 	{
 		luabridge::getGlobalNamespace(L)
 			.beginClass<SICalculeable>("SICalculeable")
+			.endClass()
+			.beginClass<ICalculeable>("ICalculeable")
 			.endClass();
 	}
 }

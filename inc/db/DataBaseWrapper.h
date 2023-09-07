@@ -20,7 +20,7 @@ namespace db
 		~DataBaseWrapper() = default;
 
 		QString GetTemplateIDsByClassID(const QUuid& classID, std::vector<QUuid>& ids);
-		QString GetPropertyValueByIdAndTemplateID(const QUuid& attributeID, const QUuid& templateID);
+		QString GetPropertyValueByIdAndTemplateID(const QUuid& attributeID, const QUuid& templateID, QString& error);
 		std::vector<QString> GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& templateID);
 
 		bool ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error);

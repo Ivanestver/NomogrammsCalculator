@@ -26,9 +26,36 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <widget class="QWidget" name="inputTab">
+      <attribute name="title">
+       <string>Расчет</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Входные данные</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="inputTable"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Выходные данные</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="outputTable"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="graphicsTab">
       <attribute name="title">
-       <string>Tab 1</string>
+       <string>Визуальное представление</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>

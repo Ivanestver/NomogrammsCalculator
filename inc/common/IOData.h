@@ -1,6 +1,6 @@
 #pragma once
 #include <map>
-#include "Measure.h"
+#include "MeasureUnit.h"
 
 namespace nomogramms
 {
@@ -9,11 +9,14 @@ namespace nomogramms
 	public:
 		IOData() = default;
 		IOData(const IOData& other);
+		IOData(IOData&& other) noexcept;
 
-		void AddValue(const nomogramms::SMeasure& measure, double value);
-		double GetValue(const nomogramms::SMeasure& measure);
+		void AddValue(const SMeasureUnit& measure, double value);
+		double GetValue(const SMeasureUnit& measure) const;
 
 		IOData& operator=(const IOData& other);
+		IOData& operator=(IOData&& other) noexcept;
+
 		IOData& operator+=(const IOData& other);
 
 		bool operator==(const IOData& other);
@@ -22,6 +25,6 @@ namespace nomogramms
 		void Clear();
 
 	private:
-		std::map<nomogramms::SMeasure, double> data;
+		std::map<SMeasureUnit, double> data;
 	};
 }

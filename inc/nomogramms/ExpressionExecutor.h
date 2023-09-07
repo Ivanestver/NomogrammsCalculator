@@ -3,6 +3,7 @@
 #include "ICalculeable.h"
 #include "lua/lua.hpp"
 #include <LuaBridge/LuaBridge.h>
+#include <QString>
 
 namespace nomogramms
 {
@@ -13,7 +14,7 @@ namespace nomogramms
 		ExpressionExecutor(const QString& expression, const IOData* inputData);
 		~ExpressionExecutor();
 
-		void SetVariable(const QString& variableName, const SICalculeable& variable);
+		bool SetVariable(const QString& variableName, const SICalculeable& variable, QString& error);
 		bool WriteResultsTo(IOData& outputData_);
 
 		bool Exec();

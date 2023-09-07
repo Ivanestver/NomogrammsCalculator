@@ -77,7 +77,7 @@ namespace nomogramms
 
     void Graphics::GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const
     {
-        for (const auto& pair : parameters)
+        for (const auto& pair : parametersList)
             parameters.insert(pair);
     }
 }
