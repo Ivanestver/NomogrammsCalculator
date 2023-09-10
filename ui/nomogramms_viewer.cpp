@@ -40,7 +40,7 @@ namespace ui
 				|| parentPtr->children.size() <= (size_t)row)
 				return Q_INVOKABLE QModelIndex();
 
-			return Q_INVOKABLE createIndex(row, column, (void*)&parentPtr->children[row]);
+			return Q_INVOKABLE createIndex(row, column, (void*)&parentPtr->children[(size_t)row]);
 		}
 
 		virtual Q_INVOKABLE QModelIndex parent(const QModelIndex& child) const override
@@ -75,6 +75,7 @@ namespace ui
 
 		virtual Q_INVOKABLE int columnCount(const QModelIndex& parent) const override
 		{
+			Q_UNUSED(parent);
 			return Q_INVOKABLE 1;
 		}
 
@@ -125,6 +126,12 @@ namespace ui
 			auto* item = static_cast<TreeItem*>(idx.internalPointer());
 			return item ? item : rootItem;
 		}
+
+	private:
+		NomogrammTreeModel(const NomogrammTreeModel&) = delete;
+		NomogrammTreeModel(NomogrammTreeModel&&) = delete;
+		NomogrammTreeModel& operator=(const NomogrammTreeModel&) = delete;
+		NomogrammTreeModel& operator=(NomogrammTreeModel&&) = delete;
 
 	private:
 		TreeItem* rootItem = nullptr;
@@ -208,11 +215,11 @@ namespace ui
 		assert(it != values.end());
 
 		int rowNumber = ui->inputTable->row(item);
-		if (rowNumber >= (size_t)it->second.size())
+		if (rowNumber >= (int)it->second.size())
 			return;
 
 		double value = item->text().toDouble();
-		it->second[rowNumber].second = value;
+		it->second[(size_t)rowNumber].second = value;
 	}
 
 	nomogramms::IOData NomogrammsViewer::createInputData() const
@@ -243,6 +250,7 @@ namespace ui
 
 	void NomogrammsViewer::onCurrentItemTreeChanged(const QModelIndex& current, const QModelIndex& previous)
 	{
+		Q_UNUSED(previous);
 		ui->inputTable->setRowCount(0);
 		ui->outputTable->setRowCount(0);
 
@@ -290,5 +298,6 @@ namespace ui
 
 	void NomogrammsViewer::onSpinBoxValueChanged(int value)
 	{
+		Q_UNUSED(value);
 	}
 }

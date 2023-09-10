@@ -1,10 +1,10 @@
 #pragma once
-#include "common/IOData.h"
+#include "nomogramms/IOData.h"
 #include <QString>
 #include <vector>
 #include "common/macros.h"
-#include "common/NomogrammsEnums.h"
-#include "common/MeasureUnit.h"
+#include "nomogramms/NomogrammsEnums.h"
+#include "nomogramms/MeasureUnit.h"
 
 namespace nomogramms
 {

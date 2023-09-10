@@ -1,5 +1,5 @@
 #pragma once
-#include "common/DBObject.h"
+#include "nomogramms/DBObject.h"
 #include "BypassRule.h"
 #include <vector>
 #include "common/macros.h"

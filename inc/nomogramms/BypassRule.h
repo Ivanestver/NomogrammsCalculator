@@ -1,11 +1,11 @@
 #pragma once
-#include "common/DBObject.h"
+#include "nomogramms/DBObject.h"
 #include "Graphics.h"
 #include <vector>
 #include "common/macros.h"
 #include "ICalculeable.h"
-#include <common/IOData.h>
-#include <common/NomogrammsEnums.h>
+#include <nomogramms/IOData.h>
+#include <nomogramms/NomogrammsEnums.h>
 
 namespace nomogramms
 {

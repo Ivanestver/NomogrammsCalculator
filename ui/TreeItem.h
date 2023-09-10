@@ -7,7 +7,7 @@
 #include <QObject>
 #include "qmetatype.h"
 #include "qmetaobject.h"
-#include "common/DBObject.h"
+#include "nomogramms/DBObject.h"
 
 namespace ui
 {

@@ -4,13 +4,13 @@
 #include <map>
 #include <vector>
 #include <map>
-#include "common/NomogrammsEnums.h"
-#include "common/Measure.h"
+#include "nomogramms/NomogrammsEnums.h"
+#include "nomogramms/Measure.h"
 #include "common/macros.h"
-#include "common/DBObject.h"
-#include "common/IOData.h"
+#include "nomogramms/DBObject.h"
+#include "nomogramms/IOData.h"
 #include "nomogramms/ICalculeable.h"
-#include "ml/AbstractNN.h"
+//#include "ml/AbstractNN.h"
 
 namespace nomogramms
 {
