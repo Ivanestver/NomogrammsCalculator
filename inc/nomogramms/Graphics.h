@@ -10,7 +10,7 @@
 #include "nomogramms/DBObject.h"
 #include "nomogramms/IOData.h"
 #include "nomogramms/ICalculeable.h"
-//#include "ml/AbstractNN.h"
+#include "ml/AbstractNN.h"
 
 namespace nomogramms
 {
