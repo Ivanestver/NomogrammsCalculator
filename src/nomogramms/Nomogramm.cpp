@@ -20,7 +20,8 @@ namespace nomogramms
 	{
 		const auto& o = static_cast<const Nomogramm&>(other);
 
-		return base::operator==(other);
+		return base::operator==(other)
+			&& this->bypassRule == o.bypassRule;
 	}
 
 	bool Nomogramm::operator!=(const DBObject& other)
@@ -35,6 +36,10 @@ namespace nomogramms
 
 		base::operator=(other);
 		const auto& o = static_cast<const Nomogramm&>(other);
+
+		graphics = o.graphics;
+		bypassRule = o.bypassRule;
+		parameters = o.parameters;
 
 		return *this;
 	}
@@ -105,9 +110,9 @@ namespace nomogramms
 		if (result.empty() || result[0].empty())
 			return;
 
-		for (const auto& id : result[0])
+		for (const auto& id_ : result[0])
 		{
-			auto measureUnit = std::make_shared<MeasureUnit>(id.toUuid());
+			auto measureUnit = std::make_shared<MeasureUnit>(id_.toUuid());
 			parameters.push_back(measureUnit);
 		}
 

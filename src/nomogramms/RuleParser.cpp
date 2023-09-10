@@ -51,7 +51,7 @@ void RuleParser::processValues(const QString& Part, const QString& openingParent
 
 	for (int i = 1; i < str.length() - 2; i++)
 	{
-		if (str[i] == ',')
+		if (str[i] == QChar(','))
 			continue;
 
 		values.push_back(QString(str[i]));

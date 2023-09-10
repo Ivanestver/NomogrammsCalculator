@@ -70,6 +70,9 @@ namespace nomogramms
 
     bool Graphics::Calculate(const IOData& inputData, IOData& outputData, QString& error) const
     {
+        Q_UNUSED(inputData);
+        Q_UNUSED(outputData);
+        Q_UNUSED(error);
         error = "Method 'Calculate' is not implemented in Graphics class";
         return false;
     }

@@ -32,6 +32,10 @@ namespace ui
 		nomogramms::IOData createInputData() const;
 		void setOutputData(const nomogramms::IOData& outputData);
 
+	private:
+		NomogrammsViewer(const NomogrammsViewer&) = delete;
+		NomogrammsViewer& operator=(const NomogrammsViewer&) = delete;
+
 	private Q_SLOTS:
 		void onSpinBoxValueChanged(int value);
 		void onCurrentItemTreeChanged(const QModelIndex& current, const QModelIndex& previous);

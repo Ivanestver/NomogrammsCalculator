@@ -5,6 +5,8 @@
 ** See Copyright Notice at the end of this file
 */
 
+#pragma warning(disable:4820)
+
 
 #ifndef lua_h
 #define lua_h

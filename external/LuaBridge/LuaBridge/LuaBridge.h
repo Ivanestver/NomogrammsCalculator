@@ -6,6 +6,10 @@
 
 #pragma once
 
+#pragma warning(disable:4458)
+#pragma warning(disable:5039)
+#pragma warning(disable:4820)
+
 // All #include dependencies are listed here
 // instead of in the individual header files.
 //

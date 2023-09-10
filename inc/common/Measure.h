@@ -14,6 +14,8 @@ namespace nomogramms
 		Measure(const QUuid& id);
 		~Measure() override = default;
 
+		DBObject& operator=(const DBObject& other) override;
+
 	private:
 		void initFromDB() override;
 	};

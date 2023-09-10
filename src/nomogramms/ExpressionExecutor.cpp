@@ -4,8 +4,8 @@
 namespace nomogramms
 {
 	ExpressionExecutor::ExpressionExecutor(const QString& expression, const IOData* inputData)
-		: expression(expression)
-		, inputData(inputData)
+		: inputData(inputData)
+		, expression(expression)
 	{
 		L = luaL_newstate();
 		luaL_openlibs(L);
@@ -19,7 +19,7 @@ namespace nomogramms
 			lua_close(L);
 	}
 
-	bool ExpressionExecutor::SetVariable(const QString& variableName, const SICalculeable& variable, QString& error)
+	bool ExpressionExecutor::SetVariable(const QString& variableName, const SICalculeable& variable, QString& error_)
 	{
 		try
 		{
@@ -27,7 +27,7 @@ namespace nomogramms
 		}
 		catch (std::logic_error& err)
 		{
-			error = QString::fromLocal8Bit("В классе 'ExpressionExecutor::SetVariable' возникла следующая ошибка: %1 \n").arg(err.what());
+			error_ = QString::fromLocal8Bit("В классе 'ExpressionExecutor::SetVariable' возникла следующая ошибка: %1 \n").arg(err.what());
 			return false;
 		}
 
@@ -59,6 +59,7 @@ namespace nomogramms
 
 	int ExpressionExecutor::exec(lua_State* state)
 	{
+		Q_UNUSED(state);
 		int args = lua_gettop(L);
 		if (args < 2)
 		{

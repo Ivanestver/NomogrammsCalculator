@@ -20,5 +20,9 @@ namespace ui
 
     private Q_SLOTS:
         void onAllNomogrammsClicked();
+
+    private:
+        MainUI(const MainUI&) = delete;
+        MainUI& operator=(const MainUI&) = delete;
     };
 }
