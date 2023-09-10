@@ -3,12 +3,14 @@
 #include <QUuid>
 #include <map>
 #include <vector>
+#include <map>
 #include "common/NomogrammsEnums.h"
 #include "common/Measure.h"
 #include "common/macros.h"
 #include "common/DBObject.h"
 #include "common/IOData.h"
 #include "nomogramms/ICalculeable.h"
+#include "ml/AbstractNN.h"
 
 namespace nomogramms
 {
@@ -36,6 +38,6 @@ namespace nomogramms
 
 	private:
 		std::map<ParameterType, std::vector<SMeasureUnit>> parametersList;
-		void* neuralNetwork;
+		//std::shared_ptr<ml::FullyConnectedNN> network{ nullptr };
 	};
 }

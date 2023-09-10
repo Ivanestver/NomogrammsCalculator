@@ -2,8 +2,11 @@
 #include <QtWidgets/QApplication>
 #include <QString>
 
+#include "ml/AbstractNN.h"
+
 int main(int argc, char *argv[])
 {
+    ml::FullyConnectedNN* nn = nullptr;
     QApplication a(argc, argv);
     ui::MainUI w;
     w.show();

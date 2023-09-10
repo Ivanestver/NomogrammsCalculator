@@ -6,7 +6,6 @@ namespace nomogramms
 {
     Graphics::Graphics(const QUuid& id)
         : base(id)
-        , neuralNetwork(nullptr)
     {
         initFromDB();
     }

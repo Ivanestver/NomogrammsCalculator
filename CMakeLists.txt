@@ -33,6 +33,10 @@ if(WIN32)
   set(CMAKE_WIN32_EXECUTABLE ON)
 endif()
 
+# Add libtorch
+find_package(Torch REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
 add_subdirectory(external)
 
 include_directories(${INCLUDE_DIRS})
@@ -41,17 +45,29 @@ add_subdirectory(src)
 add_subdirectory(xml)
 add_subdirectory("./ui")
 add_subdirectory(db_state)
+add_subdirectory(ml)
 
 # Tell CMake to create the helloworld executable
 add_executable(NomogrammCalculator main.cpp)
 # Add the Qt5 Widgets for linking
-target_link_libraries(NomogrammCalculator Qt5::Core Qt5::Widgets Qt5::Gui ui db_state)
+target_link_libraries(NomogrammCalculator Qt5::Core Qt5::Widgets Qt5::Gui ui db_state "${TORCH_LIBRARIES}" ml)
+# The following code block is suggested to be used on Windows.
+# According to https://github.com/pytorch/pytorch/issues/25457,
+# the DLLs need to be copied to avoid memory errors.
+if (MSVC)
+  file(GLOB TORCH_DLLS "${TORCH_INSTALL_PREFIX}/lib/*.dll")
+  add_custom_command(TARGET NomogrammCalculator
+                     POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                     ${TORCH_DLLS}
+                     $<TARGET_FILE_DIR:NomogrammCalculator>)
+endif (MSVC)
 target_include_directories(NomogrammCalculator 
 	PUBLIC ${CMAKE_BINARY_DIR} 
-	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    PUBLIC "${TORCH_INSTALL_PREFIX}/include/torch/csrc/api/include/")
 
-message("${Qt5_BASE_DIR}")
-include_directories(${Qt5Widgets_INCLUDES} ${Qt5_DIR})
+include_directories(${Qt5Widgets_INCLUDES} ${Qt5_DIR} PUBLIC "${TORCH_INSTALL_PREFIX}/include/torch/csrc/api/include/")
 add_definitions(${Qt5Widgets_DEFINITIONS})
 
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Debug")
