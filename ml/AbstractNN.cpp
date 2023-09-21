@@ -34,4 +34,20 @@ namespace ml
 
 		return lastLinearLayer(Y);
 	}
+
+	void FullyConnectedNN::Print(QStringList& modules) const
+	{
+		QList<QString> list;
+		for (const auto& layer : linearLayers)
+		{
+			list.append(layer->name().c_str());
+			list.append("ReLU");
+		}
+
+		list.pop_back();
+
+		list.append(lastLinearLayer->name().c_str());
+
+		modules.append(list);
+	}
 }

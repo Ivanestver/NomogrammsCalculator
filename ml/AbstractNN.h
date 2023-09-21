@@ -1,10 +1,8 @@
 #pragma once
 
-#undef slots
-#include <torch/torch.h>
-#define slots Q_SLOTS
-
+#include "ml/includes.h"
 #include <QString>
+#include <QStringList>
 #include <vector>
 
 namespace ml
@@ -16,6 +14,8 @@ namespace ml
 		~FullyConnectedNN() override = default;
 
 		virtual at::Tensor Predict(const at::Tensor& X);
+
+		void Print(QStringList& modules) const;
 
 	private:
 		std::vector<torch::nn::Linear> linearLayers;

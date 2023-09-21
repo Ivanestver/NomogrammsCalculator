@@ -20,6 +20,7 @@ namespace ui
 
     private Q_SLOTS:
         void onAllNomogrammsClicked();
+        void onCreateNNBtnClicked();
 
     private:
         MainUI(const MainUI&) = delete;
