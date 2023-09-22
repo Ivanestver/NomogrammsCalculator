@@ -2,6 +2,9 @@
 #include <QAbstractItemModel>
 #include <vector>
 #include <deque>
+#include <QFile>
+#include <QFileDialog>
+#include <QTableWidget>
 
 namespace ui
 {
@@ -245,6 +248,11 @@ namespace ui
 		connect(ui.inputParamsSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &DlgNNCreator::onInputParamsNumberChanged);
 		connect(ui.hiddenLayersSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &DlgNNCreator::onLayersCountChanged);
 		connect(model, &HiddenLayersTableModel::dataChanged, this, &DlgNNCreator::onDataChanged);
+		connect(ui.viewDataBtn, &QPushButton::clicked, this, &DlgNNCreator::onViewDataBtnClicked);
+
+		connect(ui.chooseFileBtn, &QPushButton::clicked, this, &DlgNNCreator::onChooseFileBtnClicked);
+
+		updateMap();
 	}
 
 	void DlgNNCreator::onInputParamsNumberChanged(int value)
@@ -268,6 +276,36 @@ namespace ui
 		updateMap();
 	}
 
+	void DlgNNCreator::onChooseFileBtnClicked()
+	{
+		QString defaultFilter("CSV Files (*.csv);");
+		QString fileName = QFileDialog::getOpenFileName(this, QString::fromLocal8Bit("Âûבונטעו פאיכ"), "./", "CSV files (*.csv)", &defaultFilter, QFileDialog::Option::DontUseNativeDialog);
+
+		QFile file(fileName);
+		if (!file.open(QIODevice::ReadOnly))
+			return;
+
+		while (!file.atEnd())
+		{
+			auto line = file.readLine();
+			auto items = line.split(',');
+			std::vector<QString> row;
+			for (const auto& item : items)
+			{
+				row.push_back(QString(item));
+			}
+			inputData.push_back(row);
+		}
+	}
+
+	void DlgNNCreator::onViewDataBtnClicked()
+	{
+		QDialog dlg(this);
+		
+		setupUIForViewDataDlg(&dlg);
+		dlg.exec();
+	}
+
 	void DlgNNCreator::updateMap()
 	{
 		auto* scene = dynamic_cast<NNGraphicsScene*>(ui.nnGraphicsView->scene());
@@ -275,5 +313,26 @@ namespace ui
 			return;
 
 		scene->ShowMap(info.inputParamsNumber, info.hiddenLayers);
+	}
+
+	void DlgNNCreator::setupUIForViewDataDlg(QDialog* viewDataDlg)
+	{
+		auto* dlgLayout = new QVBoxLayout(viewDataDlg);
+
+		auto* tableWidget = new QTableWidget();
+		dlgLayout->addWidget(tableWidget);
+
+		if (inputData.empty())
+			return;
+
+		tableWidget->setColumnCount(inputData[0].size());
+		for (size_t i = 0; i < inputData.size(); ++i)
+		{
+			tableWidget->insertRow(i);
+			for (size_t j = 0; j < inputData[i].size(); ++j)
+			{
+				tableWidget->setItem(i, j, new QTableWidgetItem(inputData[i][j]));
+			}
+		}		
 	}
 }
