@@ -5,6 +5,8 @@
 #include <memory>
 #include <functional>
 #include <QString>
+#include <QObject>
+#include "ml/optimizer.h"
 
 namespace ml
 {
@@ -15,7 +17,7 @@ namespace ml
 		NNCouchSettings(const NNCouchSettings& other)
 		{
 			nn = other.nn;
-			optimizer = other.optimizer;
+			optimizerType = other.optimizerType;
 			criterion = other.criterion;
 			epochsCount = other.epochsCount;
 			batchSize = other.batchSize;
@@ -25,28 +27,40 @@ namespace ml
 		NNCouchSettings& operator=(const NNCouchSettings& other) = default;
 
 		std::shared_ptr<FullyConnectedNN> nn{ nullptr };
-		std::shared_ptr<torch::optim::Optimizer> optimizer{ nullptr };
+		OptimizerType optimizerType{ OptimizerType::Adam };
 		std::shared_ptr<Criterion> criterion{ nullptr };
 		int epochsCount = 1;
 		int batchSize = 1;
-		int learningRate = 0.1;
+		double learningRate = 0.1;
 	};
 
-	class NNCouch
+	struct LearningReply
 	{
-	public:
-		using OnMessageRepliedListener = std::function<void(const QString&)>;
+		int epochNumber = -1;
+		QString message = "";
+		double avgLoss = 0.0;
+	};
+
+	class NNCouch : public QObject
+	{
+		Q_OBJECT;
 
 	public:
 		NNCouch(const NNCouchSettings& settings_);
 		~NNCouch() = default;
 
-		void Train(const at::Tensor& XTrain, const at::Tensor& YTrue, const OnMessageRepliedListener& listener);
+		void Train(const at::Tensor& XTrain, const at::Tensor& YTrue);
+
+	Q_SIGNALS:
+		void EpochFinished(const LearningReply& reply) const;
+		void DecadeFinished(const LearningReply& reply) const;
+		void ErrorRaised(const QString& error) const;
 
 	private:
-		bool isReady(const OnMessageRepliedListener& listener) const;
+		bool isReady() const;
 
 	private:
 		NNCouchSettings settings;
+		std::shared_ptr<torch::optim::Optimizer> optimizer{ nullptr };
 	};
 }

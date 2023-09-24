@@ -247,10 +247,11 @@ namespace ui
 
 		connect(ui.inputParamsSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &DlgNNCreator::onInputParamsNumberChanged);
 		connect(ui.hiddenLayersSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &DlgNNCreator::onLayersCountChanged);
-		connect(model, &HiddenLayersTableModel::dataChanged, this, &DlgNNCreator::onDataChanged);
+		connect(model, &HiddenLayersTableModel::dataChanged, this, &DlgNNCreator::onHiddenNeuronsCountChanged);
 		connect(ui.viewDataBtn, &QPushButton::clicked, this, &DlgNNCreator::onViewDataBtnClicked);
 
 		connect(ui.chooseFileBtn, &QPushButton::clicked, this, &DlgNNCreator::onChooseFileBtnClicked);
+		connect(ui.startLearningBtn, &QPushButton::clicked, this, &DlgNNCreator::onStartLearningBtnClicked);
 
 		updateMap();
 	}
@@ -271,13 +272,14 @@ namespace ui
 		updateMap();
 	}
 
-	void DlgNNCreator::onDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles)
+	void DlgNNCreator::onHiddenNeuronsCountChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles)
 	{
 		updateMap();
 	}
 
 	void DlgNNCreator::onChooseFileBtnClicked()
 	{
+		inputData.clear();
 		QString defaultFilter("CSV Files (*.csv);");
 		QString fileName = QFileDialog::getOpenFileName(this, QString::fromLocal8Bit("Выберите файл"), "./", "CSV files (*.csv)", &defaultFilter, QFileDialog::Option::DontUseNativeDialog);
 
@@ -303,7 +305,48 @@ namespace ui
 		QDialog dlg(this);
 		
 		setupUIForViewDataDlg(&dlg);
+		const auto& rect = geometry();
+		dlg.setGeometry(rect.width() / 2, rect.height() / 2, rect.width() / 2, rect.height() / 2);
 		dlg.exec();
+	}
+
+	void DlgNNCreator::onStartLearningBtnClicked()
+	{
+		ui.logListWidget->clear();
+		ml::NNCouchSettings settings;
+		settings.epochsCount = ui.epochsCountSpinBox->value();
+		settings.batchSize = 4;
+		settings.learningRate = ui.lrSpinBox->value();
+		settings.nn = createNN();
+		settings.criterion = createCriterion();
+		settings.optimizerType = createOptimizer();
+
+		ml::NNCouch couch(settings);
+		connect(&couch, &ml::NNCouch::EpochFinished, this, &DlgNNCreator::onEpochFinished);
+		connect(&couch, &ml::NNCouch::DecadeFinished, this, &DlgNNCreator::onDecadeFinished);
+		connect(&couch, &ml::NNCouch::ErrorRaised, this, &DlgNNCreator::onErrorRaised);
+
+		auto [xTrain, yTrue] = splitData();
+		couch.Train(xTrain, yTrue);
+		disconnect(&couch, &ml::NNCouch::EpochFinished, this, &DlgNNCreator::onEpochFinished);
+		disconnect(&couch, &ml::NNCouch::DecadeFinished, this, &DlgNNCreator::onDecadeFinished);
+		disconnect(&couch, &ml::NNCouch::ErrorRaised, this, &DlgNNCreator::onErrorRaised);
+	}
+
+	void DlgNNCreator::onEpochFinished(const ml::LearningReply& reply)
+	{
+		ui.logListWidget->addItems({ QString::fromLocal8Bit("Эпоха №%1").arg(reply.epochNumber),
+			QString::fromLocal8Bit("Лосс по эпохе: %1").arg(reply.avgLoss) });
+	}
+
+	void DlgNNCreator::onDecadeFinished(const ml::LearningReply& reply)
+	{
+		ui.logListWidget->addItem(reply.message);
+	}
+
+	void DlgNNCreator::onErrorRaised(const QString& error)
+	{
+		ui.logListWidget->addItem(error);
 	}
 
 	void DlgNNCreator::updateMap()
@@ -334,5 +377,42 @@ namespace ui
 				tableWidget->setItem(i, j, new QTableWidgetItem(inputData[i][j]));
 			}
 		}		
+	}
+
+	std::shared_ptr<ml::FullyConnectedNN> DlgNNCreator::createNN() const
+	{
+		return std::make_shared<ml::FullyConnectedNN>(info.inputParamsNumber, info.hiddenLayers, ui.OutputParamsSpinBox->value());
+	}
+
+	std::shared_ptr<ml::Criterion> DlgNNCreator::createCriterion() const
+	{
+		return std::make_shared<ml::MSECriterion>(torch::nn::MSELoss());
+	}
+
+	ml::OptimizerType DlgNNCreator::createOptimizer() const
+	{
+		return ml::OptimizerType::Adam;
+	}
+
+	std::pair<at::Tensor, at::Tensor> DlgNNCreator::splitData() const
+	{
+		if (inputData.empty())
+			return std::pair<at::Tensor, at::Tensor>();
+
+		at::Tensor xTrain = torch::zeros({(long long)inputData.size(), (long long)inputData[0].size() - 1});
+		auto yTrue = torch::zeros({ (long long)inputData.size(), 1 });
+
+		for (size_t row = 0; row < inputData.size(); ++row)
+		{
+			size_t rowSize = inputData[row].size() - 1;
+			for (size_t col = 0; col < rowSize; ++col)
+			{
+				xTrain[row][col] = inputData[row][col].toDouble();
+			}
+
+			yTrue[row][0] = inputData[row][rowSize].toDouble();
+		}
+
+		return std::pair<at::Tensor, at::Tensor>(xTrain, yTrue);
 	}
 }

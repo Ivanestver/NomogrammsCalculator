@@ -3,6 +3,7 @@
 namespace ml
 {
 	MSECriterion::MSECriterion(const torch::nn::MSELoss& loss_)
+		: loss(loss_)
 	{
 	}
 
