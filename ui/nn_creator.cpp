@@ -253,6 +253,9 @@ namespace ui
 		connect(ui.chooseFileBtn, &QPushButton::clicked, this, &DlgNNCreator::onChooseFileBtnClicked);
 		connect(ui.startLearningBtn, &QPushButton::clicked, this, &DlgNNCreator::onStartLearningBtnClicked);
 
+		auto* lossScene = new QGraphicsScene();
+		ui.lossGraphicsView->setScene(lossScene);
+
 		updateMap();
 	}
 
@@ -320,23 +323,44 @@ namespace ui
 		settings.nn = createNN();
 		settings.criterion = createCriterion();
 		settings.optimizerType = createOptimizer();
+		
+		auto* thisPtr = this;
+		std::thread t([thisPtr, settings]()
+			{
+			std::shared_ptr<ml::NNCouch> couch = std::make_shared<ml::NNCouch>(settings);
+			auto onEpochFinishedLambda = [thisPtr](const ml::LearningReply& reply)
+			{
+				thisPtr->onEpochFinished(reply);
+			};
 
-		ml::NNCouch couch(settings);
-		connect(&couch, &ml::NNCouch::EpochFinished, this, &DlgNNCreator::onEpochFinished);
-		connect(&couch, &ml::NNCouch::DecadeFinished, this, &DlgNNCreator::onDecadeFinished);
-		connect(&couch, &ml::NNCouch::ErrorRaised, this, &DlgNNCreator::onErrorRaised);
+			auto onDecadeFinishedLambda = [thisPtr](const ml::LearningReply& reply)
+			{
+				thisPtr->onDecadeFinished(reply);
+			};
 
-		auto [xTrain, yTrue] = splitData();
-		couch.Train(xTrain, yTrue);
-		disconnect(&couch, &ml::NNCouch::EpochFinished, this, &DlgNNCreator::onEpochFinished);
-		disconnect(&couch, &ml::NNCouch::DecadeFinished, this, &DlgNNCreator::onDecadeFinished);
-		disconnect(&couch, &ml::NNCouch::ErrorRaised, this, &DlgNNCreator::onErrorRaised);
+			auto onErrorRaisedLambda = [thisPtr](const QString& error)
+			{
+				thisPtr->onErrorRaised(error);
+			};
+			connect(couch.get(), &ml::NNCouch::EpochFinished, onEpochFinishedLambda);
+			connect(couch.get(), &ml::NNCouch::DecadeFinished, onDecadeFinishedLambda);
+			connect(couch.get(), &ml::NNCouch::ErrorRaised, onErrorRaisedLambda);
+
+			auto [xTrain, yTrue] = thisPtr->splitData();
+			couch->Train(xTrain, yTrue);
+
+			thisPtr->drawLosses();
+			});
+
+		t.detach();
 	}
 
 	void DlgNNCreator::onEpochFinished(const ml::LearningReply& reply)
 	{
 		ui.logListWidget->addItems({ QString::fromLocal8Bit("Эпоха №%1").arg(reply.epochNumber),
 			QString::fromLocal8Bit("Лосс по эпохе: %1").arg(reply.avgLoss) });
+
+		losses.push_back(reply.avgLoss);
 	}
 
 	void DlgNNCreator::onDecadeFinished(const ml::LearningReply& reply)
@@ -379,9 +403,11 @@ namespace ui
 		}		
 	}
 
-	std::shared_ptr<ml::FullyConnectedNN> DlgNNCreator::createNN() const
+	std::shared_ptr<ml::FullyConnectedNN> DlgNNCreator::createNN()
 	{
-		return std::make_shared<ml::FullyConnectedNN>(info.inputParamsNumber, info.hiddenLayers, ui.OutputParamsSpinBox->value());
+		nn.reset();
+		nn = std::make_shared<ml::FullyConnectedNN>(info.inputParamsNumber, info.hiddenLayers, ui.OutputParamsSpinBox->value());
+		return nn;
 	}
 
 	std::shared_ptr<ml::Criterion> DlgNNCreator::createCriterion() const
@@ -414,5 +440,14 @@ namespace ui
 		}
 
 		return std::pair<at::Tensor, at::Tensor>(xTrain, yTrue);
+	}
+
+	void DlgNNCreator::drawLosses()
+	{
+		auto* scene = ui.lossGraphicsView->scene();
+		for (size_t i = 1; i < losses.size(); ++i)
+		{
+			scene->addLine(i - 1, losses[i - 1] * -100, i, losses[i] * -100);
+		}
 	}
 }

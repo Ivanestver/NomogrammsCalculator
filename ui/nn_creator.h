@@ -2,8 +2,10 @@
 
 #include <QDialog>
 #include <QWidget>
+#include <memory>
 #include "ui/ui_nn_creator.h"
 #include "ml/NNCouch.h"
+#include <ml/AbstractNN.h>
 
 namespace ui
 {
@@ -40,14 +42,17 @@ namespace ui
 	private:
 		void updateMap();
 		void setupUIForViewDataDlg(QDialog* viewDataDlg);
-		std::shared_ptr<ml::FullyConnectedNN> createNN() const;
+		std::shared_ptr<ml::FullyConnectedNN> createNN();
 		std::shared_ptr<ml::Criterion> createCriterion() const;
 		ml::OptimizerType createOptimizer() const;
 		std::pair<at::Tensor, at::Tensor> splitData() const;
+		void drawLosses();
 
 	private:
 		Ui::DlgNNCreator ui;
 		DlgNNCreatorInfo info;
 		Data inputData;
+		std::vector<double> losses;
+		std::shared_ptr<ml::FullyConnectedNN> nn{ nullptr };
 	};
 }

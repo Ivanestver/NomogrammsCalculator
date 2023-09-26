@@ -40,7 +40,7 @@ namespace ml
 		QString message = "";
 		double avgLoss = 0.0;
 	};
-
+	
 	class NNCouch : public QObject
 	{
 		Q_OBJECT;
