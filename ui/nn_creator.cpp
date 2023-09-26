@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QTableWidget>
+#include "ui/learning_stats.h"
 
 namespace ui
 {
@@ -252,6 +253,7 @@ namespace ui
 
 		connect(ui.chooseFileBtn, &QPushButton::clicked, this, &DlgNNCreator::onChooseFileBtnClicked);
 		connect(ui.startLearningBtn, &QPushButton::clicked, this, &DlgNNCreator::onStartLearningBtnClicked);
+		connect(ui.showStatBtn, &QPushButton::clicked, this, &DlgNNCreator::onShowLearningStatsBtnClicked);
 
 		auto* lossScene = new QGraphicsScene();
 		ui.lossGraphicsView->setScene(lossScene);
@@ -326,7 +328,7 @@ namespace ui
 		
 		auto* thisPtr = this;
 		std::thread t([thisPtr, settings]()
-			{
+		{
 			std::shared_ptr<ml::NNCouch> couch = std::make_shared<ml::NNCouch>(settings);
 			auto onEpochFinishedLambda = [thisPtr](const ml::LearningReply& reply)
 			{
@@ -349,10 +351,18 @@ namespace ui
 			auto [xTrain, yTrue] = thisPtr->splitData();
 			couch->Train(xTrain, yTrue);
 
+			thisPtr->learningStatistics = couch->GetStatistics();
+
 			thisPtr->drawLosses();
-			});
+		});
 
 		t.detach();
+	}
+
+	void DlgNNCreator::onShowLearningStatsBtnClicked()
+	{
+		LearningStatsDlg dlg(learningStatistics, this);
+		dlg.exec();
 	}
 
 	void DlgNNCreator::onEpochFinished(const ml::LearningReply& reply)

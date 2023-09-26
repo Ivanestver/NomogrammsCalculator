@@ -35,6 +35,7 @@ namespace ui
 		void onChooseFileBtnClicked();
 		void onViewDataBtnClicked();
 		void onStartLearningBtnClicked();
+		void onShowLearningStatsBtnClicked();
 		void onEpochFinished(const ml::LearningReply& reply);
 		void onDecadeFinished(const ml::LearningReply& reply);
 		void onErrorRaised(const QString& error);
@@ -54,5 +55,6 @@ namespace ui
 		Data inputData;
 		std::vector<double> losses;
 		std::shared_ptr<ml::FullyConnectedNN> nn{ nullptr };
+		ml::LearningStatistics learningStatistics;
 	};
 }

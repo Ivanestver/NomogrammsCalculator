@@ -7,6 +7,7 @@
 #include <QString>
 #include <QObject>
 #include "ml/optimizer.h"
+#include <chrono>
 
 namespace ml
 {
@@ -40,6 +41,16 @@ namespace ml
 		QString message = "";
 		double avgLoss = 0.0;
 	};
+
+	struct LearningStatistics
+	{
+		LearningStatistics() = default;
+		LearningStatistics(const LearningStatistics& other) = default;
+
+		std::vector<double> epochLosses;
+		std::vector<double> decadeLosses;
+		std::chrono::milliseconds executionTime{ 0 };
+	};
 	
 	class NNCouch : public QObject
 	{
@@ -50,6 +61,7 @@ namespace ml
 		~NNCouch() = default;
 
 		void Train(const at::Tensor& XTrain, const at::Tensor& YTrue);
+		LearningStatistics GetStatistics() const noexcept;
 
 	Q_SIGNALS:
 		void EpochFinished(const LearningReply& reply) const;
@@ -62,5 +74,6 @@ namespace ml
 	private:
 		NNCouchSettings settings;
 		std::shared_ptr<torch::optim::Optimizer> optimizer{ nullptr };
+		LearningStatistics stats;
 	};
 }

@@ -70,6 +70,7 @@ namespace ml
 					}) / lossesOfEpoch.size();
 
 					EpochFinished(reply);
+					stats.epochLosses.push_back(reply.avgLoss);
 					reply.avgLoss = 0.0;
 					reply.message.clear();
 			}
@@ -79,6 +80,11 @@ namespace ml
 			ErrorRaised(e.what());
 			return;
 		}
+	}
+
+	LearningStatistics NNCouch::GetStatistics() const noexcept
+	{
+		return stats;
 	}
 
 	bool NNCouch::isReady() const
