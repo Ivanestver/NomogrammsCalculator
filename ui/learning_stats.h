@@ -15,6 +15,10 @@ namespace ui
 		~LearningStatsDlg() override = default;
 
 	private:
+		QTableWidgetItem* createItem(const QString& text) const noexcept;
+		void showStat(const std::vector<double>& values, const QString& title, const QString& rowName) noexcept;
+
+	private:
 		Ui::LearningStatsDlg ui;
 	};
 }
