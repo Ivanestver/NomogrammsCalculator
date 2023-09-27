@@ -353,7 +353,6 @@ namespace ui
 
 			thisPtr->learningStatistics = couch->GetStatistics();
 
-			thisPtr->drawLosses();
 		});
 
 		t.detach();
@@ -371,6 +370,12 @@ namespace ui
 			QString::fromLocal8Bit("Лосс по эпохе: %1").arg(reply.avgLoss) });
 
 		losses.push_back(reply.avgLoss);
+		auto* scene = ui.lossGraphicsView->scene();
+		if (!scene || losses.size() == 1uLL)
+			return;
+		
+		size_t s = losses.size() - 1;
+		scene->addLine(s - 1, losses[s - 1] * -100, s, losses[s] * -100);
 	}
 
 	void DlgNNCreator::onDecadeFinished(const ml::LearningReply& reply)
@@ -455,6 +460,7 @@ namespace ui
 	void DlgNNCreator::drawLosses()
 	{
 		auto* scene = ui.lossGraphicsView->scene();
+		scene->clear();
 		for (size_t i = 1; i < losses.size(); ++i)
 		{
 			scene->addLine(i - 1, losses[i - 1] * -100, i, losses[i] * -100);
