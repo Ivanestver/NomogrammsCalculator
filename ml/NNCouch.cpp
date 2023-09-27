@@ -34,7 +34,7 @@ namespace ml
 			{
 				std::vector<at::Tensor> lossesOfEpoch;
 				reply.epochNumber = epoch;
-				if (epoch % (settings.epochsCount / 10) == 0)
+				if (epoch % settings.epochsCount == 0)
 				{
 					reply.message = QString("Epoch #%1").arg(epoch);
 					if (!lossesOfDecade.empty())
