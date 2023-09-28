@@ -36,6 +36,7 @@ namespace ui
 		void onViewDataBtnClicked();
 		void onStartLearningBtnClicked();
 		void onShowLearningStatsBtnClicked();
+		void onTestNNBtnClicked();
 		void onEpochFinished(const ml::LearningReply& reply);
 		void onDecadeFinished(const ml::LearningReply& reply);
 		void onErrorRaised(const QString& error);

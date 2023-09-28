@@ -43,8 +43,9 @@ namespace ml
 			list.append(layer->name().c_str());
 			list.append("ReLU");
 		}
-
-		list.pop_back();
+		
+		if (!list.isEmpty())
+			list.pop_back();
 
 		list.append(lastLinearLayer->name().c_str());
 

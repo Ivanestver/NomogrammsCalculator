@@ -39,7 +39,7 @@ namespace ui
 		for (size_t i = 0; i < values.size(); ++i)
 		{
 			ui.statsWidget->insertRow(++rowNumber);
-			ui.statsWidget->setItem(rowNumber, 0, createItem(rowName.arg(i)));
+			ui.statsWidget->setItem(rowNumber, 0, createItem(rowName.arg(i + 1)));
 			ui.statsWidget->setItem(rowNumber, 1, createItem(QString::number(values[i])));
 		}
 	}

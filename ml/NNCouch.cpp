@@ -1,5 +1,8 @@
 #include "NNCouch.h"
 #include "ml/optimizer.h"
+#include <chrono>
+
+using namespace std::chrono;
 
 namespace ml
 {
@@ -28,8 +31,10 @@ namespace ml
 
 		std::vector<at::Tensor> lossesOfDecade;
 
+		auto start = high_resolution_clock::now();
 		try
 		{
+			
 			for (int epoch = 0; epoch < settings.epochsCount; epoch++)
 			{
 				std::vector<at::Tensor> lossesOfEpoch;
@@ -78,8 +83,11 @@ namespace ml
 		catch (std::exception& e)
 		{
 			ErrorRaised(e.what());
-			return;
 		}
+
+		auto end = high_resolution_clock::now();
+		auto time = duration_cast<milliseconds>(end - start);
+		stats.executionTime = time;
 	}
 
 	LearningStatistics NNCouch::GetStatistics() const noexcept

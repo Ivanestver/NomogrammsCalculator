@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QTableWidget>
 #include "ui/learning_stats.h"
+#include "ui/test_nn.h"
 
 namespace ui
 {
@@ -255,6 +256,8 @@ namespace ui
 		connect(ui.startLearningBtn, &QPushButton::clicked, this, &DlgNNCreator::onStartLearningBtnClicked);
 		connect(ui.showStatBtn, &QPushButton::clicked, this, &DlgNNCreator::onShowLearningStatsBtnClicked);
 
+		connect(ui.testBtn, &QPushButton::clicked, this, &DlgNNCreator::onTestNNBtnClicked);
+
 		auto* lossScene = new QGraphicsScene();
 		ui.lossGraphicsView->setScene(lossScene);
 
@@ -361,6 +364,18 @@ namespace ui
 	void DlgNNCreator::onShowLearningStatsBtnClicked()
 	{
 		LearningStatsDlg dlg(learningStatistics, this);
+		dlg.exec();
+	}
+
+	void DlgNNCreator::onTestNNBtnClicked()
+	{
+		TestNNInfo testInfo;
+		testInfo.nnName = ui.nnNameLineEdit->text();
+		testInfo.inputParamsNumber = info.inputParamsNumber;
+		testInfo.nn = nn;
+		testInfo.outputParamsNumber = 1;
+
+		TestNNDlg dlg(testInfo, this);
 		dlg.exec();
 	}
 
