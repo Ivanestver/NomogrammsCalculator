@@ -31,8 +31,7 @@ namespace ui
 		if (values.empty())
 			return;
 
-		int rowNumber = ui.statsWidget->columnCount();
-		rowNumber--;
+		int rowNumber = ui.statsWidget->columnCount() - 1;
 		ui.statsWidget->insertRow(rowNumber);
 		ui.statsWidget->setItem(rowNumber, 0, createItem(title));
 		ui.statsWidget->setSpan(rowNumber, 0, 1, 2);

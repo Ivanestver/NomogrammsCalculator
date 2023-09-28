@@ -51,9 +51,7 @@ namespace ui
 	{
 		auto tensor = torch::zeros({ (long long)values.size(), 1LL });
 		for (size_t i = 0; i < values.size(); ++i)
-		{
 			tensor[i][0] = values[i];
-		}
 
 		return tensor;
 	}
