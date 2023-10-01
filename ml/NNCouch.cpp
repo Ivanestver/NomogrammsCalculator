@@ -13,10 +13,8 @@ namespace ml
 		optimizer = optimizerInitializer->CreateOptimizer(settings.learningRate, *settings.nn);
 	}
 
-	void NNCouch::Train(const at::Tensor& XTrain, const at::Tensor& YTrue)
+	void NNCouch::Train(const at::Tensor& XTrain, const at::Tensor& YTrue, std::pair<at::Tensor, at::Tensor>&& validationSet)
 	{
-		LearningReply reply;
-
 		if (!isReady())
 			return;
 
@@ -26,6 +24,11 @@ namespace ml
 			return;
 		}
 
+		LearningReply reply;
+
+		at::Tensor XVal(std::move(validationSet.first));
+		at::Tensor YVal(std::move(validationSet.second));
+
 		auto dataset = torch::data::datasets::TensorDataset(torch::stack({ XTrain, YTrue }, 1));
 		auto dataloader = torch::data::make_data_loader(dataset, torch::data::DataLoaderOptions().batch_size(settings.batchSize));
 
@@ -34,20 +37,24 @@ namespace ml
 		auto start = high_resolution_clock::now();
 		try
 		{
-			
 			for (int epoch = 0; epoch < settings.epochsCount; epoch++)
 			{
 				std::vector<at::Tensor> lossesOfEpoch;
 				reply.epochNumber = epoch;
-				if (epoch % settings.epochsCount == 0)
+				if (epoch != 0 && epoch % 10 == 0)
 				{
-					reply.message = QString("Epoch #%1").arg(epoch);
 					if (!lossesOfDecade.empty())
 					{
-						reply.message += QString("\nDecade loss: %1").arg((std::accumulate(lossesOfDecade.begin(), lossesOfDecade.end(), torch::ones_like(*lossesOfDecade.begin())) / (double)lossesOfDecade.size()).item().toDouble());
+						auto avg = std::accumulate(lossesOfDecade.begin(), lossesOfDecade.end(), torch::ones_like(*lossesOfDecade.begin())) / (double)lossesOfDecade.size();
+						reply.message += QString("Decade loss: %1").arg(avg.item().toDouble());
 						lossesOfDecade.clear();
+
+						auto valPredicted = settings.nn->Predict(XVal);
+						auto valLoss = settings.criterion->forward(valPredicted, YVal);
+						reply.valLoss = valLoss.item().toDouble();
+
+						DecadeFinished(reply);
 					}
-					DecadeFinished(reply);
 				}
 
 				for (const auto& batch : *dataloader)

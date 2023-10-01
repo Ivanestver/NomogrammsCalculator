@@ -40,6 +40,7 @@ namespace ml
 		int epochNumber = -1;
 		QString message = "";
 		double avgLoss = 0.0;
+		double valLoss = 0.0;
 	};
 
 	struct LearningStatistics
@@ -60,7 +61,7 @@ namespace ml
 		NNCouch(const NNCouchSettings& settings_);
 		~NNCouch() = default;
 
-		void Train(const at::Tensor& XTrain, const at::Tensor& YTrue);
+		void Train(const at::Tensor& XTrain, const at::Tensor& YTrue, std::pair<at::Tensor, at::Tensor>&& validationSet = {});
 		LearningStatistics GetStatistics() const noexcept;
 
 	Q_SIGNALS:

@@ -2,6 +2,7 @@
 #include <QAbstractItemModel>
 #include <vector>
 #include <deque>
+#include <set>
 #include <QFile>
 #include <QFileDialog>
 #include <QTableWidget>
@@ -257,6 +258,8 @@ namespace ui
 		connect(ui.showStatBtn, &QPushButton::clicked, this, &DlgNNCreator::onShowLearningStatsBtnClicked);
 
 		connect(ui.testBtn, &QPushButton::clicked, this, &DlgNNCreator::onTestNNBtnClicked);
+		//connect(ui.splitCheckBox, &QCheckBox::clicked, this, &DlgNNCreator::onSpliCheckboxClicked);
+		connect(ui.splitCheckBox, &QCheckBox::clicked, ui.trainPercentSpinBox, &QSpinBox::setEnabled);
 
 		auto* lossScene = new QGraphicsScene();
 		ui.lossGraphicsView->setScene(lossScene);
@@ -351,8 +354,8 @@ namespace ui
 			connect(couch.get(), &ml::NNCouch::DecadeFinished, onDecadeFinishedLambda);
 			connect(couch.get(), &ml::NNCouch::ErrorRaised, onErrorRaisedLambda);
 
-			auto [xTrain, yTrue] = thisPtr->splitData();
-			couch->Train(xTrain, yTrue);
+			auto [xTrain, yTrue, xVal, yVal] = thisPtr->splitData();
+			couch->Train(xTrain, yTrue, { xVal, yVal });
 
 			thisPtr->learningStatistics = couch->GetStatistics();
 
@@ -396,11 +399,17 @@ namespace ui
 	void DlgNNCreator::onDecadeFinished(const ml::LearningReply& reply)
 	{
 		ui.logListWidget->addItem(reply.message);
+		ui.logListWidget->addItem(QString::fromLocal8Bit("Лосс на валидации: %1").arg(reply.valLoss));
 	}
 
 	void DlgNNCreator::onErrorRaised(const QString& error)
 	{
 		ui.logListWidget->addItem(error);
+	}
+
+	void DlgNNCreator::onSpliCheckboxClicked(bool checked)
+	{
+		ui.trainPercentSpinBox->setEnabled(checked);
 	}
 
 	void DlgNNCreator::updateMap()
@@ -450,10 +459,10 @@ namespace ui
 		return ml::OptimizerType::Adam;
 	}
 
-	std::pair<at::Tensor, at::Tensor> DlgNNCreator::splitData() const
+	DlgNNCreator::TrainValData DlgNNCreator::splitData() const
 	{
 		if (inputData.empty())
-			return std::pair<at::Tensor, at::Tensor>();
+			return TrainValData();
 
 		at::Tensor xTrain = torch::zeros({(long long)inputData.size(), (long long)inputData[0].size() - 1});
 		auto yTrue = torch::zeros({ (long long)inputData.size(), 1 });
@@ -469,7 +478,51 @@ namespace ui
 			yTrue[row][0] = inputData[row][rowSize].toDouble();
 		}
 
-		return std::pair<at::Tensor, at::Tensor>(xTrain, yTrue);
+		if (ui.splitCheckBox->isChecked())
+		{
+			double percent = ui.trainPercentSpinBox->value();
+			int size = xTrain.size(0);
+			int trainSize = static_cast<int>(percent * size / 100);
+			int valSize = size - trainSize;
+			
+			std::set<int> rowNumbersForVal;
+			while (rowNumbersForVal.size() < valSize)
+			{
+				rowNumbersForVal.insert(torch::randint(size, 1).item().toInt());
+			}
+
+			at::Tensor valX = torch::zeros({ valSize, 1 });
+			at::Tensor valY = torch::zeros({ valSize, 1 });
+
+			int i = 0;
+			for (int rowNumber : rowNumbersForVal)
+			{
+				valX[i][0] = xTrain[rowNumber][0];
+				valY[i][0] = yTrue[rowNumber][0];
+				++i;
+			}
+
+			at::Tensor trainX = torch::zeros({ trainSize, 1 });
+			at::Tensor trainY = torch::zeros({ trainSize, 1 });
+
+			for (int i = 0, j = 0; i < size; ++i)
+			{
+				const auto found = rowNumbersForVal.find(i);
+				if (found != rowNumbersForVal.end())
+				{
+					rowNumbersForVal.erase(found);
+					continue;
+				}
+
+				trainX[j][0] = xTrain[i][0];
+				trainY[j][0] = yTrue[i][0];
+				++j;
+			}
+
+			return TrainValData(xTrain, yTrue, valX, valY);
+		}
+		else
+			return TrainValData(xTrain, yTrue, {}, {});
 	}
 
 	void DlgNNCreator::drawLosses()

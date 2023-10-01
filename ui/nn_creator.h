@@ -6,6 +6,7 @@
 #include "ui/ui_nn_creator.h"
 #include "ml/NNCouch.h"
 #include <ml/AbstractNN.h>
+#include <tuple>
 
 namespace ui
 {
@@ -18,6 +19,7 @@ namespace ui
 	class DlgNNCreator : public QDialog
 	{
 		using Data = std::vector<std::vector<QString>>;
+		using TrainValData = std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor>;
 	public:
 		DlgNNCreator(QWidget* parent = nullptr);
 		~DlgNNCreator() override = default;
@@ -40,6 +42,7 @@ namespace ui
 		void onEpochFinished(const ml::LearningReply& reply);
 		void onDecadeFinished(const ml::LearningReply& reply);
 		void onErrorRaised(const QString& error);
+		void onSpliCheckboxClicked(bool checked);
 
 	private:
 		void updateMap();
@@ -47,7 +50,7 @@ namespace ui
 		std::shared_ptr<ml::FullyConnectedNN> createNN();
 		std::shared_ptr<ml::Criterion> createCriterion() const;
 		ml::OptimizerType createOptimizer() const;
-		std::pair<at::Tensor, at::Tensor> splitData() const;
+		TrainValData splitData() const;
 		void drawLosses();
 
 	private:
