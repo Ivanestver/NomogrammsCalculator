@@ -92,7 +92,6 @@ namespace db
 		if (!var.isValid())
 		{
 			throw exceptions::BadRequestException("Значение невалидно");
-			return QString();
 		}
 
 		closeConnection();
@@ -157,6 +156,27 @@ namespace db
 		closeConnection();
 
 		return true;
+	}
+
+	std::vector<std::pair<QString, QString>> DataBaseWrapper::GetNNModels()
+	{
+		if (!openConnection())
+			return {};
+
+		std::vector<std::pair<QString, QString>> models;
+		QString queryStr("select [net_name], [net_name] from [nets]");
+		QString error;
+		auto response = ExecuteQuery(queryStr, {}, error);
+		for (const auto& row : response)
+		{
+			if (row.size() != 2ull)
+				return models;
+			models.emplace_back(row[0].toString(), row[1].toString());
+		}
+
+		closeConnection();
+
+		return models;
 	}
 
 	bool DataBaseWrapper::ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error)

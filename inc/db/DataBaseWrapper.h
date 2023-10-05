@@ -24,6 +24,7 @@ namespace db
 		std::vector<QString> GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& templateID);
 
 		bool AddNN(const QString& nnName, const QString& nnFileName, QString& error);
+		std::vector<std::pair<QString, QString>> GetNNModels();
 
 		bool ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error);
 		std::vector<std::vector<QVariant>> ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error);
