@@ -347,6 +347,19 @@
         </rect>
        </property>
       </widget>
+      <widget class="QPushButton" name="saveNNBtn">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>530</y>
+         <width>121</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Сохранить</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>

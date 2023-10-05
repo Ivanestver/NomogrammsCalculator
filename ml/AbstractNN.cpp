@@ -3,6 +3,7 @@
 namespace ml
 {
 	FullyConnectedNN::FullyConnectedNN(int inputParamsCount, const std::vector<int>& layers, int outputParamsCount, const QString& nnName)
+		:torch::nn::Module(nnName.toStdString())
 	{
 		if (layers.empty())
 		{

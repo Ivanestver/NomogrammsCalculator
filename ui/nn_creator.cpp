@@ -8,6 +8,8 @@
 #include <QTableWidget>
 #include "ui/learning_stats.h"
 #include "ui/test_nn.h"
+#include "xml/xml.h"
+#include "QMessageBox"
 
 namespace ui
 {
@@ -260,6 +262,7 @@ namespace ui
 		connect(ui.testBtn, &QPushButton::clicked, this, &DlgNNCreator::onTestNNBtnClicked);
 		//connect(ui.splitCheckBox, &QCheckBox::clicked, this, &DlgNNCreator::onSpliCheckboxClicked);
 		connect(ui.splitCheckBox, &QCheckBox::clicked, ui.trainPercentSpinBox, &QSpinBox::setEnabled);
+		connect(ui.saveNNBtn, &QPushButton::clicked, this, &DlgNNCreator::onSaveNNBtnClicked);
 
 		auto* lossScene = new QGraphicsScene();
 		ui.lossGraphicsView->setScene(lossScene);
@@ -382,6 +385,24 @@ namespace ui
 		dlg.exec();
 	}
 
+	void DlgNNCreator::onSaveNNBtnClicked()
+	{
+		const auto* xmlConfiguration = xml::XmlConfiguration::GetInstance();
+		QString modelsPath = xmlConfiguration->GetValueByTag("models_path");
+		torch::serialize::OutputArchive output;
+		nn->save(output);
+		modelsPath += QString::fromStdString(nn->name());
+		modelsPath += ".pt";
+		try
+		{
+			output.save_to(modelsPath.toStdString());
+		}
+		catch (std::exception& e)
+		{
+			QMessageBox::critical(this, QString::fromLocal8Bit("Ошибка!"), e.what());
+		}
+	}
+
 	void DlgNNCreator::onEpochFinished(const ml::LearningReply& reply)
 	{
 		ui.logListWidget->addItems({ QString::fromLocal8Bit("Эпоха №%1").arg(reply.epochNumber),
@@ -445,7 +466,7 @@ namespace ui
 	std::shared_ptr<ml::FullyConnectedNN> DlgNNCreator::createNN()
 	{
 		nn.reset();
-		nn = std::make_shared<ml::FullyConnectedNN>(info.inputParamsNumber, info.hiddenLayers, ui.OutputParamsSpinBox->value());
+		nn = std::make_shared<ml::FullyConnectedNN>(info.inputParamsNumber, info.hiddenLayers, ui.OutputParamsSpinBox->value(), ui.nnNameLineEdit->text());
 		return nn;
 	}
 

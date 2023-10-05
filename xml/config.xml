@@ -2,4 +2,5 @@
 <db>
 	<db_state_type>0</db_state_type>
 	<db_path>D:/VSProjects/NomogrammsCalculator/db.accdb</db_path>
+	<models_path>D:/VSProjects/NomogrammsCalculator/models/</models_path>
 </db>
