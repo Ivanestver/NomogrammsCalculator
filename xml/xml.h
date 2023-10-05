@@ -8,7 +8,7 @@ namespace xml
 	class XmlConfiguration
 	{
 	public:
-		static const QString GetConfigPath();
+		static constexpr const char* GetConfigPath();
 		static const XmlConfiguration* GetInstance();
 
 

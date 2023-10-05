@@ -137,6 +137,28 @@ namespace db
 		return values;
 	}
 
+	bool DataBaseWrapper::AddNN(const QString& nnName, const QString& nnFileName, QString& error)
+	{
+		if (!openConnection())
+			return false;
+
+		QString queryStr = QString("insert into [nets](net_name, net_file) values(:nnName, :nnFileName)");
+		QSqlQuery query(db);
+		query.prepare(queryStr);
+		query.addBindValue(nnName);
+		query.addBindValue(nnFileName);
+
+		if (!query.exec())
+		{
+			error = query.lastError().text();
+			return false;
+		}
+
+		closeConnection();
+
+		return true;
+	}
+
 	bool DataBaseWrapper::ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error)
 	{
 		if (!openConnection())

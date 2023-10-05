@@ -8,9 +8,9 @@ namespace xml
 		readData();
 	}
 
-	const QString XmlConfiguration::GetConfigPath()
+	constexpr const char* XmlConfiguration::GetConfigPath()
 	{
-		return QString("../xml/config.xml").arg(QDir::homePath());
+		return "../xml/config.xml";
 	}
 
 	const XmlConfiguration* XmlConfiguration::GetInstance()
@@ -30,7 +30,6 @@ namespace xml
 
 	void XmlConfiguration::readData()
 	{
-		auto path = GetConfigPath();
 		QFile file(GetConfigPath());
 		if (!file.open(QIODevice::OpenModeFlag::ReadOnly | QIODevice::OpenModeFlag::Text))
 			return;

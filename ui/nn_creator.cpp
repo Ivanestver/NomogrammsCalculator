@@ -9,7 +9,9 @@
 #include "ui/learning_stats.h"
 #include "ui/test_nn.h"
 #include "xml/xml.h"
-#include "QMessageBox"
+#include <QMessageBox>
+#include "db/DataBaseWrapper.h"
+#include <QInputDialog>
 
 namespace ui
 {
@@ -388,14 +390,34 @@ namespace ui
 	void DlgNNCreator::onSaveNNBtnClicked()
 	{
 		const auto* xmlConfiguration = xml::XmlConfiguration::GetInstance();
+		if (!xmlConfiguration)
+		{
+			QMessageBox::warning(this, QString::fromLocal8Bit("Внимание!"), QString::fromLocal8Bit("Ошибка возникла при попытке прочитать кофигурационный файл"));
+			return;
+		}
+
+		auto fileName = QInputDialog::getText(this, QString::fromLocal8Bit("Название файла для сохранения"), QString::fromLocal8Bit("Введите название файла, где сохранить модель"));
+		if (fileName.isEmpty())
+		{
+			QMessageBox::warning(this, QString::fromLocal8Bit("Внимание"), QString::fromLocal8Bit("Введите название файла"));
+			return;
+		}
+
 		QString modelsPath = xmlConfiguration->GetValueByTag("models_path");
 		torch::serialize::OutputArchive output;
 		nn->save(output);
-		modelsPath += QString::fromStdString(nn->name());
+		modelsPath += fileName;
 		modelsPath += ".pt";
 		try
 		{
 			output.save_to(modelsPath.toStdString());
+			auto db = db::DataBaseWrapper::GetDatabase();
+			QString error;
+			if (!db->AddNN(QString::fromStdString(nn->name()), fileName, error))
+			{
+				QMessageBox::critical(this, QString::fromLocal8Bit("Ошибка"), error);
+				return;
+			}
 		}
 		catch (std::exception& e)
 		{

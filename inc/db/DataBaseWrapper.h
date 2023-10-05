@@ -23,6 +23,8 @@ namespace db
 		QString GetPropertyValueByIdAndTemplateID(const QUuid& attributeID, const QUuid& templateID, QString& error);
 		std::vector<QString> GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& templateID);
 
+		bool AddNN(const QString& nnName, const QString& nnFileName, QString& error);
+
 		bool ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error);
 		std::vector<std::vector<QVariant>> ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error);
 
