@@ -158,25 +158,43 @@ namespace db
 		return true;
 	}
 
-	std::vector<std::pair<QString, QString>> DataBaseWrapper::GetNNModels()
+	std::vector<NNModelInfo> DataBaseWrapper::GetNNModels()
 	{
 		if (!openConnection())
 			return {};
 
-		std::vector<std::pair<QString, QString>> models;
-		QString queryStr("select [net_name], [net_name] from [nets]");
+		std::vector<NNModelInfo> models;
+		QString queryStr("select [net_name], [net_file], [net_id] from [nets]");
 		QString error;
 		auto response = ExecuteQuery(queryStr, {}, error);
 		for (const auto& row : response)
 		{
-			if (row.size() != 2ull)
+			if (row.size() != 3ull)
 				return models;
-			models.emplace_back(row[0].toString(), row[1].toString());
+			models.emplace_back(row[0].toString(), row[1].toString(), row[2].toUuid());
 		}
 
 		closeConnection();
 
 		return models;
+	}
+
+	NNModelInfo DataBaseWrapper::GetNNModelInfo(const QUuid& ModelID)
+	{
+		if (!openConnection())
+			return {};
+		
+		QString error;
+		auto response = ExecuteQuery("select * from [nets] where [net_id] = ?", { ModelID }, error);
+
+		if (response.empty())
+			return {};
+		
+		auto& row = response.front();
+		if (row.empty())
+			return {};
+
+		return { row[1].toString(), row[2].toString(), row[0].toUuid() };
 	}
 
 	bool DataBaseWrapper::ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error)

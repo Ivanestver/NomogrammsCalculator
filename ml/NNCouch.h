@@ -25,20 +25,18 @@ namespace ml
 			learningRate = other.learningRate;
 		}
 
-		NNCouchSettings& operator=(const NNCouchSettings& other) = default;
-
 		std::shared_ptr<FullyConnectedNN> nn{ nullptr };
-		OptimizerType optimizerType{ OptimizerType::Adam };
 		std::shared_ptr<Criterion> criterion{ nullptr };
 		int epochsCount = 1;
 		int batchSize = 1;
+		OptimizerType optimizerType{ OptimizerType::Adam };
 		double learningRate = 0.1;
 	};
 
 	struct LearningReply
 	{
-		int epochNumber = -1;
 		QString message = "";
+		int epochNumber = -1;
 		double avgLoss = 0.0;
 		double valLoss = 0.0;
 	};
@@ -46,7 +44,6 @@ namespace ml
 	struct LearningStatistics
 	{
 		LearningStatistics() = default;
-		LearningStatistics(const LearningStatistics& other) = default;
 
 		std::vector<double> epochLosses;
 		std::vector<double> decadeLosses;

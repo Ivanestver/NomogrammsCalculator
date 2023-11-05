@@ -413,7 +413,7 @@ namespace ui
 			output.save_to(modelsPath.toStdString());
 			auto db = db::DataBaseWrapper::GetDatabase();
 			QString error;
-			if (!db->AddNN(QString::fromStdString(nn->name()), fileName, error))
+			if (!db->AddNN(QString::fromStdString(nn->name()), fileName + ".pt", error))
 			{
 				QMessageBox::critical(this, QString::fromLocal8Bit("Ошибка"), error);
 				return;

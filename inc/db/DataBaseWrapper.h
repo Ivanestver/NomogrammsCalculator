@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <vector>
 #include <memory>
+#include <tuple>
 #include "db_state/db_state.h"
 #include <db_state/db_state.h>
 
@@ -12,6 +13,9 @@ namespace db
 {
 	DECL_UNIQUE(DataBaseWrapper);
 	DECL_SHARED(DataBaseWrapper);
+
+	// { net_name, net_file, net_id }
+	using NNModelInfo = std::tuple<QString, QString, QUuid>;
 
 	class DataBaseWrapper
 	{
@@ -24,7 +28,8 @@ namespace db
 		std::vector<QString> GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& templateID);
 
 		bool AddNN(const QString& nnName, const QString& nnFileName, QString& error);
-		std::vector<std::pair<QString, QString>> GetNNModels();
+		std::vector<NNModelInfo> GetNNModels();
+		NNModelInfo GetNNModelInfo(const QUuid& ModelID);
 
 		bool ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error);
 		std::vector<std::vector<QVariant>> ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error);

@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find includes in the build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/inc")
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};D:/Qt/5.11.0/msvc2017_64/lib/cmake")
 
 # Turn on automatic invocation of the MOC, UIC & RCC
 set(CMAKE_AUTOMOC ON)
