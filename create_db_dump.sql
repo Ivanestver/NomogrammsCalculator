@@ -38,6 +38,7 @@ CREATE TABLE `measure` (
 
 LOCK TABLES `measure` WRITE;
 /*!40000 ALTER TABLE `measure` DISABLE KEYS */;
+INSERT INTO `measure` VALUES ('1a9a2d16-694e-4736-a1f0-6c7a7f5faa8e','Масса'),('39a91a58-aac8-404f-aec6-ab7cff90bcf1','Скорость'),('985373dd-cd0e-4570-8318-2a969d2179d8','Высота');
 /*!40000 ALTER TABLE `measure` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -68,6 +69,7 @@ CREATE TABLE `measure_unit` (
 
 LOCK TABLES `measure_unit` WRITE;
 /*!40000 ALTER TABLE `measure_unit` DISABLE KEYS */;
+INSERT INTO `measure_unit` VALUES ('4feb942c-ad0d-4919-b1dd-b13883803306','985373dd-cd0e-4570-8318-2a969d2179d8','e031c8a2-1175-4ff4-923c-da5a3386f6d8','Высота, м'),('7737a84f-0807-40d6-9e68-806e7e23768e','1a9a2d16-694e-4736-a1f0-6c7a7f5faa8e','7a5d44d0-765f-4263-bb0d-8385424e2006','Масса, кг'),('e44132a8-1e72-4c05-a7a5-4293c0e5e625','39a91a58-aac8-404f-aec6-ab7cff90bcf1','6a181dad-2019-4c04-9f36-1e5b8411b55c','Скорость, км');
 /*!40000 ALTER TABLE `measure_unit` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -143,7 +145,62 @@ CREATE TABLE `template` (
 
 LOCK TABLES `template` WRITE;
 /*!40000 ALTER TABLE `template` DISABLE KEYS */;
+INSERT INTO `template` VALUES ('87a78c3e-fce2-4a3c-9c00-819809621c02','f5313633-c8fc-43dc-a92e-88b7ee8df439'),('c5994fca-e751-40ca-9e79-67fbe46f0bbb','6dce13ae-8897-48ec-9b4e-664845d40d73'),('e79013aa-6b7d-42f2-9602-108907de3917','a8a4951d-8542-4cfa-b593-ecba3de727d1');
 /*!40000 ALTER TABLE `template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `template_measure_unit_input`
+--
+
+DROP TABLE IF EXISTS `template_measure_unit_input`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `template_measure_unit_input` (
+  `template_id` varchar(100) DEFAULT NULL,
+  `measure_unit_id` varchar(100) DEFAULT NULL,
+  KEY `template_id` (`template_id`),
+  KEY `measure_unit_id` (`measure_unit_id`),
+  CONSTRAINT `template_measure_unit_input_ibfk_1` FOREIGN KEY (`template_id`) REFERENCES `template` (`template_id`),
+  CONSTRAINT `template_measure_unit_input_ibfk_2` FOREIGN KEY (`measure_unit_id`) REFERENCES `measure_unit` (`measure_unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `template_measure_unit_input`
+--
+
+LOCK TABLES `template_measure_unit_input` WRITE;
+/*!40000 ALTER TABLE `template_measure_unit_input` DISABLE KEYS */;
+INSERT INTO `template_measure_unit_input` VALUES ('87a78c3e-fce2-4a3c-9c00-819809621c02','e44132a8-1e72-4c05-a7a5-4293c0e5e625'),('c5994fca-e751-40ca-9e79-67fbe46f0bbb','4feb942c-ad0d-4919-b1dd-b13883803306');
+/*!40000 ALTER TABLE `template_measure_unit_input` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `template_measure_unit_output`
+--
+
+DROP TABLE IF EXISTS `template_measure_unit_output`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `template_measure_unit_output` (
+  `template_id` varchar(100) DEFAULT NULL,
+  `measure_unit_id` varchar(100) DEFAULT NULL,
+  KEY `template_id` (`template_id`),
+  KEY `measure_unit_id` (`measure_unit_id`),
+  CONSTRAINT `template_measure_unit_output_ibfk_1` FOREIGN KEY (`template_id`) REFERENCES `template` (`template_id`),
+  CONSTRAINT `template_measure_unit_output_ibfk_2` FOREIGN KEY (`measure_unit_id`) REFERENCES `measure_unit` (`measure_unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `template_measure_unit_output`
+--
+
+LOCK TABLES `template_measure_unit_output` WRITE;
+/*!40000 ALTER TABLE `template_measure_unit_output` DISABLE KEYS */;
+INSERT INTO `template_measure_unit_output` VALUES ('c5994fca-e751-40ca-9e79-67fbe46f0bbb','7737a84f-0807-40d6-9e68-806e7e23768e');
+/*!40000 ALTER TABLE `template_measure_unit_output` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -170,6 +227,7 @@ CREATE TABLE `template_property` (
 
 LOCK TABLES `template_property` WRITE;
 /*!40000 ALTER TABLE `template_property` DISABLE KEYS */;
+INSERT INTO `template_property` VALUES ('87a78c3e-fce2-4a3c-9c00-819809621c02','581060f1-2bd0-43aa-9c80-0e9107068890',''),('87a78c3e-fce2-4a3c-9c00-819809621c02','8d7a1e11-c43f-4c67-badb-888aa3f334a9','test nomogramm'),('87a78c3e-fce2-4a3c-9c00-819809621c02','c3aa13ed-4620-4016-a106-7aae653cbfd1',''),('87a78c3e-fce2-4a3c-9c00-819809621c02','ed6368e7-897b-4951-9705-6e7b74fd359d',''),('c5994fca-e751-40ca-9e79-67fbe46f0bbb','8d7a1e11-c43f-4c67-badb-888aa3f334a9','test graphics'),('c5994fca-e751-40ca-9e79-67fbe46f0bbb','c3aa13ed-4620-4016-a106-7aae653cbfd1','test graphics'),('c5994fca-e751-40ca-9e79-67fbe46f0bbb','e67abf23-9e60-49a4-bb5e-dc44f50b649e','test graphics'),('e79013aa-6b7d-42f2-9602-108907de3917','8d7a1e11-c43f-4c67-badb-888aa3f334a9','test');
 /*!40000 ALTER TABLE `template_property` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -197,6 +255,7 @@ CREATE TABLE `template_template` (
 
 LOCK TABLES `template_template` WRITE;
 /*!40000 ALTER TABLE `template_template` DISABLE KEYS */;
+INSERT INTO `template_template` VALUES ('87a78c3e-fce2-4a3c-9c00-819809621c02','c5994fca-e751-40ca-9e79-67fbe46f0bbb',''),('e79013aa-6b7d-42f2-9602-108907de3917','87a78c3e-fce2-4a3c-9c00-819809621c02','');
 /*!40000 ALTER TABLE `template_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -221,6 +280,7 @@ CREATE TABLE `unit` (
 
 LOCK TABLES `unit` WRITE;
 /*!40000 ALTER TABLE `unit` DISABLE KEYS */;
+INSERT INTO `unit` VALUES ('6a181dad-2019-4c04-9f36-1e5b8411b55c','Км'),('7a5d44d0-765f-4263-bb0d-8385424e2006','Кг'),('e031c8a2-1175-4ff4-923c-da5a3386f6d8','М');
 /*!40000 ALTER TABLE `unit` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -233,4 +293,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-11-20 20:55:47
+-- Dump completed on 2023-11-20 21:21:55
