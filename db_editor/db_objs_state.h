@@ -11,10 +11,12 @@ const QUuid methodology_class("A8A4951D-8542-4CFA-B593-ECBA3DE727D1");
 const QUuid nomogramm_class("F5313633-C8FC-43DC-A92E-88B7EE8DF439");
 const QUuid rule_class("BB75693A-4506-47DE-9DE6-6F40C8BC3C74");
 const QUuid graphics_class("6DCE13AE-8897-48EC-9B4E-664845D40D73");
+const QUuid net_class("DD98B7A5-B5A0-4EBF-890A-22F20805651D");
 
 class MethodologyState;
 class NomogrammState;
 class GraphicState;
+class NetState;
 
 class AbstractDBObjState
 {
@@ -22,8 +24,9 @@ public:
 	template<class T>
 	static std::shared_ptr<AbstractDBObjState> CreateState()
 	{
+		static_assert(std::is_base_of<AbstractDBObjState, T>::value, "T должен быть наследником класса AbstractDBObjState");
 		auto ptr = std::make_shared<T>();
-		ptr->fillProperties();
+		ptr->FillProperties();
 		return ptr;
 	}
 
@@ -39,7 +42,7 @@ public:
 		else
 			return ptr;
 
-		ptr->fillProperties();
+		ptr->FillProperties();
 		return ptr;
 	}
 
@@ -48,7 +51,7 @@ public:
 	bool AddNewObjToModelAndThenToDB(QAbstractItemModel* abstractModel, const QModelIndexList& selectedIndexList, QString& error);
 	bool RemoveItem(const QModelIndex& selectedItemIdx, QAbstractItemModel* abstractModel, QString& error) const;
 	const std::set<QUuid>& GetPropertiesIds() const;
-	virtual void fillProperties() = 0;
+	virtual void FillProperties() = 0;
 
 protected:
 	AbstractDBObjState();
@@ -88,7 +91,7 @@ public:
 	MethodologyState() = default;
 	~MethodologyState() override = default;
 
-	virtual void fillProperties() override;
+	virtual void FillProperties() override;
 private:
 	// ”наследовано через AbstractDBObjState
 	virtual bool addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const override;
@@ -104,7 +107,7 @@ public:
 	~NomogrammState() override = default;
 
 	static QUuid GetClassID();
-	virtual void fillProperties() override;
+	virtual void FillProperties() override;
 
 private:
 	// ”наследовано через AbstractDBObjState
@@ -121,7 +124,7 @@ public:
 	~GraphicState() override = default;
 	
 	static QUuid GetClassID();
-	virtual void fillProperties() override;
+	virtual void FillProperties() override;
 private:
 	// ”наследовано через AbstractDBObjState
 	virtual QUuid getClassId() const override;

@@ -19,7 +19,7 @@ DlgObjectMeasureUnit::DlgObjectMeasureUnit(const QUuid& objId_, bool isInput, QW
 	auto db = DBExecutor::GetInstance();
 	if (db)
 	{
-		QString queryString = "select [id], [measure_unit_name] from [measure_unit]";
+		QString queryString = "select measure_unit_id, measure_unit_name from measure_unit";
 		DBExecutor::Response response;
 		QString error;
 		if (!db->ExecSELECT(queryString, {}, response, error))
@@ -35,7 +35,7 @@ DlgObjectMeasureUnit::DlgObjectMeasureUnit(const QUuid& objId_, bool isInput, QW
 		}
 		sortVector(measureInfoVector);
 
-		queryString = QString("select t2.id, t2.measure_unit_name from [%1] as t1 inner join [measure_unit] as t2 on t1.measure_unit_id=t2.id where [template_id] = ?").arg(tableName);
+		queryString = QString("select t2.measure_unit_id, t2.measure_unit_name from %1 as t1 inner join measure_unit as t2 on t1.measure_unit_id=t2.measure_unit_id where template_id = ?").arg(tableName);
 		response.clear();
 		db->ExecSELECT(queryString, { objId }, response, error);
 
@@ -182,7 +182,7 @@ void DlgObjectMeasureUnit::onAccept()
 
 	if (!vectorToDelete.empty())
 	{
-		QString queryString = QString("delete from [%1] where [template_id] = ? and [measure_unit_id] in (").arg(tableName);
+		QString queryString = QString("delete from %1 where template_id = ? and measure_unit_id in (").arg(tableName);
 		for (size_t i = 0; i < vectorToDelete.size(); i++)
 		{
 			queryString += "?,";
@@ -204,7 +204,7 @@ void DlgObjectMeasureUnit::onAccept()
 		for (const auto& item : vectorToAdd)
 		{
 
-			QString queryString = QString("insert into [%1](template_id, measure_unit_id) values (?,?)").arg(tableName);
+			QString queryString = QString("insert into %1(template_id, measure_unit_id) values (?,?)").arg(tableName);
 			std::vector<QVariant> params { objId, item.first };
 			QString error;
 			if (!db->ExecChange(queryString, params, error))

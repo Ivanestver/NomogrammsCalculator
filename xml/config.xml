@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <db>
-	<db_state_type>0</db_state_type>
+	<db_state_type>1</db_state_type>
 	<db_path>D:/VSProjects/NomogrammsCalculator/db.accdb</db_path>
 	<models_path>D:/VSProjects/NomogrammsCalculator/models/</models_path>
 </db>

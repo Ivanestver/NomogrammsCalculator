@@ -134,7 +134,7 @@ bool PropertiesTableModel::setIdOfItem(const QUuid& itemId)
 
     QString error;
     DBExecutor::Response response;
-    if (!db->ExecSELECT("select class_id from [template] where [template_id] = ?", { itemId }, response, error))
+    if (!db->ExecSELECT("select class_id from template where template_id = ?", { itemId }, response, error))
     {
         qDebug() << error;
         return false;
@@ -164,7 +164,7 @@ bool PropertiesTableModel::fillPropertiesContainer(const QUuid& id)
 
     DBExecutor::Response response;
     QString error;
-    if (!db->ExecSELECT("select [class_id] from [template] where [template_id] = ?", { id }, response, error))
+    if (!db->ExecSELECT("select class_id from template where template_id = ?", { id }, response, error))
     {
         qDebug() << error;
         return false;

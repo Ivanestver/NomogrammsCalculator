@@ -1,6 +1,7 @@
 #pragma once
 #include <QString>
 #include <memory>
+#include <QtSql/QSqlDatabase>
 
 namespace db_state
 {
@@ -20,6 +21,7 @@ namespace db_state
 
 		virtual const QString GetDBName() const = 0;
 		virtual const QString GetConnectionString() const = 0;
+		virtual void SetupDatabase(QSqlDatabase& db) const = 0;
 
 	protected:
 		DBState() = default;

@@ -181,15 +181,36 @@ void MainWindow::onAddItem()
 
 	const auto& selected = selectedIdxs.first();
 	const auto* selectedItem = static_cast<const TreeItem*>(selected.internalPointer());
-	auto it = mappingRules.find(selectedItem->classId);
-	if (it == mappingRules.end())
+	if (!selectedItem)
 	{
-		showWarning(QString("Нет правила отражения для класса с ID = %1").arg(selectedItem->classId.toString()));
+		showWarning(QString::fromLocal8Bit("Нет данных в выбранной ячейке"));
 		return;
 	}
 
-	const auto& creator = factoryMap.find(it->second)->second;
+	if (selectedItem->classId == net_class)
+	{
+		return;
+	}
+
+	auto it = mappingRules.find(selectedItem->classId);
+	if (it == mappingRules.end())
+	{
+		showWarning(QString::fromLocal8Bit("Нет правила отражения для класса с ID = %1").arg(selectedItem->classId.toString()));
+		return;
+	}
+
+	const auto itFactory = factoryMap.find(it->second);
+	if (itFactory == factoryMap.end())
+	{
+		showWarning(QString::fromLocal8Bit("Не найден требуемая фабрика объектов"));
+		return;
+	}
+
+	const auto& creator = itFactory->second;
 	auto dbObjState = creator->CreateObj();
+	if (!dbObjState)
+		return;
+
 	QString error;
 	if (!dbObjState->AddNewObjToModelAndThenToDB(model, selectedIdxs, error))
 		showWarning(error);

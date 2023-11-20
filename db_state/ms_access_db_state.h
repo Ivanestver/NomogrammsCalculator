@@ -13,6 +13,7 @@ namespace db_state
 		// Унаследовано через IDBState
 		virtual const QString GetDBName() const override;
 		virtual const QString GetConnectionString() const override;
+		virtual void SetupDatabase(QSqlDatabase& db) const override;
 
 	private:
 		const QString pathToMSAccessFile;

@@ -84,32 +84,32 @@ bool DBExecutor::RemoveTemplate(const QUuid& templateId, QString& error) const
 
 bool DBExecutor::InsertNewTemplate(const QUuid& templateId, const QUuid& classId, QString& error) const
 {
-	int rowsInserted = ExecChange("insert into [template](template_id, class_id) values (?, ?)", { templateId, classId }, error);
+	int rowsInserted = ExecChange("insert into template(template_id, class_id) values (?, ?)", { templateId, classId }, error);
 	return rowsInserted > 0;
 }
 
 bool DBExecutor::InsertProperty(const QUuid& templateId, const QUuid& propertyId, const QVariant& value, QString& error) const
 {
-	int rowsInserted = ExecChange("insert into [template_property](template_id, property_id, property_value) values (?, ?, ?)", { templateId, propertyId, value }, error);
+	int rowsInserted = ExecChange("insert into template_property(template_id, property_id, property_value) values (?, ?, ?)", { templateId, propertyId, value.toString()}, error);
 	return rowsInserted > 0;
 }
 
 bool DBExecutor::UpdateProperty(const QUuid& templateId, const QUuid& propertyId, const QVariant& value, QString& error) const
 {
-	int rowsInserted = ExecChange("update [template_property] set [property_value] = ? where [template_id] = ? and [property_id] = ?", { value, templateId, propertyId }, error);
+	int rowsInserted = ExecChange("update template_property set property_value = ? where template_id = ? and property_id = ?", { value, templateId, propertyId }, error);
 	return rowsInserted > 0;
 }
 
 bool DBExecutor::LinkTemplates(const QUuid& masterObjId, const QUuid& subObjId, QString& error) const
 {
-	int rowsInserted = ExecChange("insert into [template_template](master_id, sub_id, extra) values (?, ?, ?)", { masterObjId, subObjId, QString("") }, error);
+	int rowsInserted = ExecChange("insert into template_template(master_id, sub_id, extra) values (?, ?, ?)", { masterObjId, subObjId, QString("") }, error);
 	return rowsInserted > 0;
 }
 
 bool DBExecutor::ReceivePropertiesOfObj(const QUuid& objId, std::set<PropertyInfo>& properties, QString& error) const
 {
 	Response results;
-	if (!ExecSELECT("select t1.property_id, t1.property_name, t2.property_value from [property] as t1 inner join [template_property] as t2 on t1.property_id=t2.property_id where [template_id] = ?", { objId }, results, error))
+	if (!ExecSELECT("select t1.property_id, t1.property_name, t2.property_value from property as t1 inner join template_property as t2 on t1.property_id=t2.property_id where template_id = ?", { objId }, results, error))
 		return false;
 
 	for (const auto& record : results)
@@ -133,7 +133,7 @@ bool DBExecutor::ReceiveProperties(const std::vector<QUuid>& propertiesId, std::
 
 int DBExecutor::removeTemplateFromTable(const QUuid& templateId, const QString& table, const QString& fieldOfTemplate, QString& error) const
 {
-	QString queryStr = QString("delete from [%1] where [%2] = ?").arg(table).arg(fieldOfTemplate);
+	QString queryStr = QString("delete from %1 where %2 = ?").arg(table).arg(fieldOfTemplate);
 	QSqlQuery query(db);
 	query.prepare(queryStr);
 	query.addBindValue(DBExecutorUtils::TurnUuidToStr(templateId));
@@ -149,8 +149,17 @@ int DBExecutor::removeTemplateFromTable(const QUuid& templateId, const QString& 
 
 DBExecutor::DBExecutor(const db_state::SDBState& state)
 {
-	db = QSqlDatabase::addDatabase(state->GetDBName());
-	db.setDatabaseName(state->GetConnectionString());
+	qDebug() << QSqlDatabase::connectionNames();
+	if (!QSqlDatabase::contains(QSqlDatabase::defaultConnection))
+	{
+		db = QSqlDatabase::addDatabase(state->GetDBName());
+		db.setDatabaseName(state->GetConnectionString());
+		state->SetupDatabase(db);
+	}
+	else
+	{
+		db = QSqlDatabase::database();
+	}
 	qDebug() << db.open();
 }
 

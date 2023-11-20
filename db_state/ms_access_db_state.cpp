@@ -16,4 +16,8 @@ namespace db_state
 		return QString("DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};FIL={MS Access};DBQ=%1")
 			.arg(pathToMSAccessFile);
 	}
+
+	void MSAccessDBState::SetupDatabase(QSqlDatabase& db) const
+	{
+	}
 }

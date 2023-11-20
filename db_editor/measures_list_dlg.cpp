@@ -17,8 +17,8 @@ void DlgMeasuresUnitsList::addMenuBar()
 	auto* menuBar = new QMenuBar();
 	layout()->setMenuBar(menuBar);
 
-	menuBar->addAction(QString::fromLocal8Bit("Добавить новую единицу измерения"), this, &DlgMeasuresUnitsList::onAddNewUnitBtnClicked);
 	menuBar->addAction(QString::fromLocal8Bit("Добавить новый тип данных"), this, &DlgMeasuresUnitsList::onAddNewTypeBtnClicked);
+	menuBar->addAction(QString::fromLocal8Bit("Добавить новую единицу измерения"), this, &DlgMeasuresUnitsList::onAddNewUnitBtnClicked);
 	menuBar->addAction(QString::fromLocal8Bit("Добавить новый тип данных с единицей измерения"), this, &DlgMeasuresUnitsList::onAddNewTypeUnitBtnClicked);
 }
 
@@ -35,7 +35,7 @@ void DlgMeasuresUnitsList::fillTypesTable()
 	if (!db)
 		return;
 
-	QString queryString = "select * from [measure]";
+	QString queryString = "select * from measure";
 	DBExecutor::Response response;
 	QString error;
 	if (!db->ExecSELECT(queryString, {}, response, error))
@@ -60,7 +60,7 @@ void DlgMeasuresUnitsList::fillUnitTable()
 	if (!db)
 		return;
 
-	QString queryString = "select * from [unit]";
+	QString queryString = "select * from unit";
 	DBExecutor::Response response;
 	QString error;
 	if (!db->ExecSELECT(queryString, {}, response, error))
@@ -85,7 +85,7 @@ void DlgMeasuresUnitsList::fillTypeUnitTable()
 	if (!db)
 		return;
 
-	QString queryString = "select * from [measure_unit]";
+	QString queryString = "select * from measure_unit";
 	DBExecutor::Response response;
 	QString error;
 	if (!db->ExecSELECT(queryString, {}, response, error))
@@ -116,7 +116,7 @@ void DlgMeasuresUnitsList::onAddNewUnitBtnClicked()
 	if (!db)
 		return;
 
-	QString queryString = "insert into [unit] values (?, ?)";
+	QString queryString = "insert into unit values (?, ?)";
 	QString error;
 	if (!db->ExecChange(queryString, { newUnit.id, newUnit.name }, error))
 	{
@@ -139,7 +139,7 @@ void DlgMeasuresUnitsList::onAddNewTypeBtnClicked()
 	if (!db)
 		return;
 
-	QString queryString = "insert into [measure] values (?, ?)";
+	QString queryString = "insert into measure values (?, ?)";
 	QString error;
 	if (!db->ExecChange(queryString, { newUnit.id, newUnit.name }, error))
 	{
@@ -178,7 +178,7 @@ void DlgMeasuresUnitsList::onAddNewTypeUnitBtnClicked()
 	if (!db)
 		return;
 
-	QString queryString = "insert into [measure_unit] values (?, ?, ?, ?)";
+	QString queryString = "insert into measure_unit values (?, ?, ?, ?)";
 	QString error;
 	if (!db->ExecChange(queryString, { newUnit.id, newUnit.measureId, newUnit.unitId, newUnit.measureUnitName }, error))
 	{

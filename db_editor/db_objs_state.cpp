@@ -120,8 +120,8 @@ TreeItem* AbstractDBObjState::insertRowToModelAndGetItem(QAbstractItemModel* mod
 bool AbstractDBObjState::addObjAndAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const
 {
 	const auto* item = getItemToAdd();
-	int rowsInserted = executor->ExecChange("insert into [template](template_id, class_id) values (?, ?)", { item->id, item->classId }, error);
-	if (rowsInserted == 0)
+	int rowsInserted = executor->ExecChange("insert into template(template_id, class_id) values (?, ?)", { item->id, item->classId}, error);
+	if (rowsInserted < 0)
 		return false;
 
 	return addAttrsToDB(executor, error);
@@ -186,7 +186,7 @@ QUuid MethodologyState::GetClassID()
 	return methodology_class;
 }
 
-void MethodologyState::fillProperties()
+void MethodologyState::FillProperties()
 {
 }
 
@@ -228,7 +228,7 @@ std::pair<QString, QString> NomogrammState::getMessageAndTitleWhenAdding() const
 	return { QString::fromLocal8Bit("Введите название номограммы") , QString::fromLocal8Bit("Название номограммы") };
 }
 
-void NomogrammState::fillProperties()
+void NomogrammState::FillProperties()
 {
 	addProperty(db_state::properties::nomogramm_bypassRule);
 	addProperty(db_state::properties::nomogramm_bypassRule_List);
@@ -270,7 +270,7 @@ QUuid GraphicState::GetClassID()
 	return graphics_class;
 }
 
-void GraphicState::fillProperties()
+void GraphicState::FillProperties()
 {
 	addProperty(db_state::properties::dbobject_name);
 	addProperty(db_state::properties::data_type_with_unit);

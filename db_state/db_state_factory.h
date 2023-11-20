@@ -3,6 +3,7 @@
 #include "db_state.h"
 #include "xml/xml.h"
 #include "ms_access_db_state.h"
+#include "mysql_db_state.h"
 
 namespace db_state
 {
@@ -25,7 +26,7 @@ namespace db_state
 				return std::make_shared<MSAccessDBState>(pathTofile);
 			}
 			case db_state::MySQL:
-				return SDBState();
+				return std::make_shared<MySQLDBState>();
 			case db_state::MSSQLServer:
 				return SDBState();
 			default:
