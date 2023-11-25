@@ -26,6 +26,7 @@ namespace db
 	{
 		db = QSqlDatabase::addDatabase(dbState->GetDBName());
 		db.setDatabaseName(dbState->GetConnectionString());
+		dbState->SetupDatabase(db);
 		return db.open();
 	}
 
@@ -52,7 +53,7 @@ namespace db
 		sID = sID.right(sID.length() - 1).toUpper();
 
 		QSqlQuery query(db);
-		query.prepare("select [template_id] from [template] where [class_id] in (?)");
+		query.prepare("select template_id from template where class_id in (?)");
 		query.addBindValue(sID);
 		if (!query.exec())
 			return query.lastError().text();
@@ -79,7 +80,7 @@ namespace db
 		}
 
 		QSqlQuery query(db);
-		query.prepare("select [property_value] from [template_property] where [property_id] in (?) and [template_id] in (?)");
+		query.prepare("select property_value from template_property where property_id in (?) and template_id in (?)");
 		query.addBindValue(turnIDToStr(propertyID));
 		query.addBindValue(turnIDToStr(templateID));
 		if (!query.exec())
@@ -141,9 +142,10 @@ namespace db
 		if (!openConnection())
 			return false;
 
-		QString queryStr = QString("insert into [nets](net_name, net_file) values(:nnName, :nnFileName)");
+		QString queryStr = QString("insert into nets values(?, ?, ?)");
 		QSqlQuery query(db);
 		query.prepare(queryStr);
+		query.addBindValue(turnIDToStr(QUuid::createUuid()));
 		query.addBindValue(nnName);
 		query.addBindValue(nnFileName);
 
@@ -164,7 +166,7 @@ namespace db
 			return {};
 
 		std::vector<NNModelInfo> models;
-		QString queryStr("select [net_name], [net_file], [net_id] from [nets]");
+		QString queryStr("select net_name, net_file, net_id from nets");
 		QString error;
 		auto response = ExecuteQuery(queryStr, {}, error);
 		for (const auto& row : response)
@@ -185,7 +187,7 @@ namespace db
 			return {};
 		
 		QString error;
-		auto response = ExecuteQuery("select * from [nets] where [net_id] = ?", { ModelID }, error);
+		auto response = ExecuteQuery("select * from nets where net_id = ?", { ModelID }, error);
 
 		if (response.empty())
 			return {};
