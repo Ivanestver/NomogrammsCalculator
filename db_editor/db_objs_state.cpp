@@ -3,6 +3,7 @@
 #include "TreeViewModel.h"
 #include "db_state/properties.h"
 #include "choose_item_type_dlg.h"
+#include "choose_nn.h"
 
 AbstractDBObjState::AbstractDBObjState()
 {
@@ -284,4 +285,55 @@ std::shared_ptr<AbstractDBObjState> NomogrammGraphicStateCreator::CreateObj() co
 		return dlg.IsNomogramm() ? StateCreator<NomogrammState>().CreateObj() : StateCreator<GraphicState>().CreateObj();
 
 	return nullptr;
+}
+
+QUuid NNState::GetClassID()
+{
+	return net_class;
+}
+
+void NNState::FillProperties()
+{
+	addProperty(db_state::properties::dbobject_name);
+}
+
+QUuid NNState::getClassId() const
+{
+	return NNState::GetClassID();
+}
+
+QModelIndex NNState::getParentIndex(const QModelIndexList& selectedIndexList) const
+{
+	return selectedIndexList.isEmpty() ? QModelIndex() : selectedIndexList.first();
+}
+
+bool NNState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const
+{
+	const auto* item = getItemToAdd();
+	if (!item)
+		return false;
+
+	if (!executor->InsertProperty(item->id, db_state::properties::dbobject_name, getObjectName(), error))
+		return false;
+
+	return true;
+}
+
+std::pair<QString, QString> NNState::getMessageAndTitleWhenAdding() const
+{
+	return std::pair<QString, QString>();
+}
+
+QString NNState::openInputNameDlgAndGetDlg() const
+{
+	DlgChooseNN dlg;
+	if (dlg.exec() == QDialog::Accepted)
+		return dlg.GetChosenNNName();
+
+	return QString();
+}
+
+std::shared_ptr<AbstractDBObjState> NNStateCreator::CreateObj() const
+{
+	return StateCreator<NNState>().CreateObj();
 }

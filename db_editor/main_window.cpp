@@ -13,7 +13,7 @@
 MainWindow::MainWindow(QWidget* parent)
 	: QDialog(parent)
 {
-	ui.setupUi(this);
+	m_ui.setupUi(this);
 	initTree();
 	addToolBar();
 	addContextMenuToTree();
@@ -21,14 +21,17 @@ MainWindow::MainWindow(QWidget* parent)
 	factoryMap.insert({ methodology_class, std::make_shared<StateCreator<MethodologyState>>()});
 	factoryMap.insert({ nomogramm_class, std::make_shared<NomogrammGraphicStateCreator>()});
 	factoryMap.insert({ graphics_class, std::make_shared<NomogrammGraphicStateCreator>()});
+	factoryMap.insert({ net_class, std::make_shared<StateCreator<NNState>>()});
 
 	factoryMapIndependent.insert({ methodology_class, std::make_shared<StateCreator<MethodologyState>>()});
 	factoryMapIndependent.insert({ nomogramm_class, std::make_shared<StateCreator<NomogrammState>>()});
 	factoryMapIndependent.insert({ graphics_class, std::make_shared<StateCreator<GraphicState>>()});
+	factoryMapIndependent.insert({ net_class, std::make_shared<StateCreator<NNState>>()});
 
 	mappingRules.insert({QUuid(), methodology_class});
 	mappingRules.insert({methodology_class, nomogramm_class});
 	mappingRules.insert({ nomogramm_class, nomogramm_class });
+	mappingRules.insert({ graphics_class, net_class });
 }
 
 void MainWindow::initTree()
@@ -61,8 +64,8 @@ void MainWindow::initTree()
 		ids.push_back(item);
 	}
 
-	ui.treeView->setModel(new TreeItemModel(ids));
-	ui.treeView->selectAll();
+	m_ui.treeView->setModel(new TreeItemModel(ids));
+	m_ui.treeView->selectAll();
 }
 
 void MainWindow::addToolBar()
@@ -76,10 +79,10 @@ void MainWindow::addToolBar()
 
 void MainWindow::addContextMenuToTree()
 {
-	ui.treeView->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-	connect(ui.treeView, &QTreeView::customContextMenuRequested, this, &MainWindow::onCustomMenuRequested);
+	m_ui.treeView->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+	connect(m_ui.treeView, &QTreeView::customContextMenuRequested, this, &MainWindow::onCustomMenuRequested);
 
-	treeContextMenu = new QMenu(ui.treeView);
+	treeContextMenu = new QMenu(m_ui.treeView);
 	treeContextMenu->addAction(QString::fromLocal8Bit("Удалить выбранный объект"), this, &MainWindow::onRemoveItem);
 	treeContextMenu->addAction(QString::fromLocal8Bit("Свойства"), this, &MainWindow::onPropertiesMenuActionClicked);
 }
@@ -91,7 +94,7 @@ QMessageBox::StandardButton MainWindow::showWarning(const QString& message)
 
 void MainWindow::onAddMethodology()
 {
-	auto* model = dynamic_cast<TreeItemModel*>(ui.treeView->model());
+	auto* model = dynamic_cast<TreeItemModel*>(m_ui.treeView->model());
 	if (!model)
 	{
 		showWarning(QString::fromLocal8Bit("Ошибка при получении модели дерева"));
@@ -107,7 +110,7 @@ void MainWindow::onAddMethodology()
 
 void MainWindow::onRemoveItem()
 {
-	const auto selectedIdxs = ui.treeView->selectionModel()->selectedIndexes();
+	const auto selectedIdxs = m_ui.treeView->selectionModel()->selectedIndexes();
 	if (selectedIdxs.isEmpty())
 	{
 		showWarning(QString::fromLocal8Bit("Выберите объект для удаления"));
@@ -131,21 +134,21 @@ void MainWindow::onRemoveItem()
 	}
 
 	QString error;
-	if (!state->RemoveItem(selected, ui.treeView->model(), error))
+	if (!state->RemoveItem(selected, m_ui.treeView->model(), error))
 		showWarning(error);
 }
 
 void MainWindow::onCustomMenuRequested(const QPoint& point)
 {
-	QModelIndex index = ui.treeView->indexAt(point);
+	QModelIndex index = m_ui.treeView->indexAt(point);
 	if (index.isValid()) {
-		treeContextMenu->exec(ui.treeView->viewport()->mapToGlobal(point));
+		treeContextMenu->exec(m_ui.treeView->viewport()->mapToGlobal(point));
 	}
 }
 
 void MainWindow::onPropertiesMenuActionClicked()
 {
-	const auto selectedIdxs = ui.treeView->selectionModel()->selectedIndexes();
+	const auto selectedIdxs = m_ui.treeView->selectionModel()->selectedIndexes();
 	assert(!selectedIdxs.isEmpty());
 
 	const auto& selectedItemIdx = selectedIdxs.first();
@@ -165,14 +168,14 @@ void MainWindow::onOpenTypesWindowBtnClicked()
 
 void MainWindow::onAddItem()
 {
-	auto* model = ui.treeView->model();
+	auto* model = m_ui.treeView->model();
 	if (!model)
 	{
 		showWarning(QString::fromLocal8Bit("Ошибка при получении модели дерева"));
 		return;
 	}
 
-	const auto selectedIdxs = ui.treeView->selectionModel()->selectedIndexes();
+	const auto selectedIdxs = m_ui.treeView->selectionModel()->selectedIndexes();
 	if (selectedIdxs.isEmpty())
 	{
 		showWarning(QString::fromLocal8Bit("Выберите родительский элемент!"));

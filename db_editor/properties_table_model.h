@@ -4,9 +4,12 @@
 #include <QObject>
 #include <QUuid>
 #include "properties_table_item.h"
+#include "common_macros.h"
 
 class PropertiesTableModel : public QAbstractItemModel
 {
+	DECLARE_NO_COPY_NO_MOVE(PropertiesTableModel);
+
 public:
 	PropertiesTableModel(const QUuid& itemId, QObject* parent = nullptr);
 	~PropertiesTableModel() override = default;

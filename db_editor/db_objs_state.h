@@ -16,7 +16,7 @@ const QUuid net_class("DD98B7A5-B5A0-4EBF-890A-22F20805651D");
 class MethodologyState;
 class NomogrammState;
 class GraphicState;
-class NetState;
+class NNState;
 
 class AbstractDBObjState
 {
@@ -133,6 +133,25 @@ private:
 	virtual std::pair<QString, QString> getMessageAndTitleWhenAdding() const override;
 };
 
+class NNState : public AbstractDBObjState
+{
+public:
+	NNState() = default;
+	~NNState() override = default;
+
+	static QUuid GetClassID();
+
+	// Унаследовано через AbstractDBObjState
+	void FillProperties() override;
+
+private:
+	QUuid getClassId() const override;
+	QModelIndex getParentIndex(const QModelIndexList& selectedIndexList) const override;
+	bool addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const override;
+	std::pair<QString, QString> getMessageAndTitleWhenAdding() const override;
+	QString openInputNameDlgAndGetDlg() const override;
+};
+
 class IStateCreator
 {
 public:
@@ -159,4 +178,13 @@ public:
 
 	// Унаследовано через IStateCreator
 	virtual std::shared_ptr<AbstractDBObjState> CreateObj() const override;
+};
+
+class NNStateCreator : public IStateCreator
+{
+public:
+	~NNStateCreator() override = default;
+
+	// Унаследовано через IStateCreator
+	std::shared_ptr<AbstractDBObjState> CreateObj() const override;
 };

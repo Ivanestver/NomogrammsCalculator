@@ -13,5 +13,5 @@ public:
 	bool IsNomogramm() const;
 
 private:
-	Ui::ChooseItemTypeDlg ui;
+	Ui::ChooseItemTypeDlg m_ui;
 };

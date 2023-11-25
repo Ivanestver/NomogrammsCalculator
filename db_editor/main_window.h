@@ -8,10 +8,12 @@
 #include <QPoint>
 #include <QMenu>
 #include "db_objs_state.h"
+#include "common_macros.h"
 
 class MainWindow : public QDialog
 {
 	Q_OBJECT;
+	DECLARE_NO_COPY_NO_MOVE(MainWindow);
 
 	using FactoryMap = std::map<QUuid, std::shared_ptr<IStateCreator>>;
 
@@ -34,7 +36,7 @@ private Q_SLOTS:
 	void onOpenTypesWindowBtnClicked();
 
 private:
-	Ui::MainWindow ui;
+	Ui::MainWindow m_ui;
 	FactoryMap factoryMap;
 	FactoryMap factoryMapIndependent;
 	std::map<QUuid, QUuid> mappingRules;

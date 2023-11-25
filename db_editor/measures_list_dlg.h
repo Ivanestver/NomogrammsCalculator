@@ -5,6 +5,7 @@
 #include "ui_measures_list_dlg.h"
 #include "qobjectdefs.h"
 #include <QUuid>
+#include "common_macros.h"
 
 class DlgMeasuresUnitsList : public QDialog
 {
@@ -33,6 +34,8 @@ class DlgMeasuresUnitsList : public QDialog
 	};
 
 	Q_OBJECT;
+	DECLARE_NO_COPY_NO_MOVE(DlgMeasuresUnitsList);
+
 public:
 	DlgMeasuresUnitsList(QWidget* parent = nullptr);
 	~DlgMeasuresUnitsList() override = default;
@@ -50,7 +53,7 @@ private Q_SLOTS:
 	void onAddNewTypeUnitBtnClicked();
 
 private:
-	Ui::DlgMeasuresUnitsList ui;
+	Ui::DlgMeasuresUnitsList m_ui;
 	std::vector<ItemModel> measures;
 	std::vector<ItemModel> units;
 	std::vector<MeasureUnitModel> measuresUnits;

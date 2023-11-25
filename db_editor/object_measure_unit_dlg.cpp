@@ -7,14 +7,14 @@ DlgObjectMeasureUnit::DlgObjectMeasureUnit(const QUuid& objId_, bool isInput, QW
 	: QDialog(parent)
 	, objId(objId_)
 {
-	ui.setupUi(this);
+	m_ui.setupUi(this);
 
 	tableName = isInput ? "template_measure_unit_input" : "template_measure_unit_output";
 	
-	connect(ui.addMeasureUnit, &QPushButton::clicked, this, &DlgObjectMeasureUnit::onAddMeasureUnitBtnClicked);
-	connect(ui.removeMeasureUnit, &QPushButton::clicked, this, &DlgObjectMeasureUnit::onRemoveMeasureUnitBtnClicked);
-	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &DlgObjectMeasureUnit::onAccept);
-	connect(ui.buttonBox, &QDialogButtonBox::rejected, this, &DlgObjectMeasureUnit::onReject);
+	connect(m_ui.addMeasureUnit, &QPushButton::clicked, this, &DlgObjectMeasureUnit::onAddMeasureUnitBtnClicked);
+	connect(m_ui.removeMeasureUnit, &QPushButton::clicked, this, &DlgObjectMeasureUnit::onRemoveMeasureUnitBtnClicked);
+	connect(m_ui.buttonBox, &QDialogButtonBox::accepted, this, &DlgObjectMeasureUnit::onAccept);
+	connect(m_ui.buttonBox, &QDialogButtonBox::rejected, this, &DlgObjectMeasureUnit::onReject);
 
 	auto db = DBExecutor::GetInstance();
 	if (db)
@@ -59,19 +59,19 @@ void DlgObjectMeasureUnit::fillLists()
 
 void DlgObjectMeasureUnit::fillAllMeasuresUnits()
 {
-	ui.listAvailableMeasuresUnits->clear();
+	m_ui.listAvailableMeasuresUnits->clear();
 	for (const auto& info : measureInfoVector)
 	{
-		ui.listAvailableMeasuresUnits->addItem(info.second);
+		m_ui.listAvailableMeasuresUnits->addItem(info.second);
 	}
 }
 
 void DlgObjectMeasureUnit::fillMeasuresUnitsOfObj()
 {
-	ui.listChosenMeasuresUnits->clear();
+	m_ui.listChosenMeasuresUnits->clear();
 	for (const auto& info : measureInfoOfObjVector)
 	{
-		ui.listChosenMeasuresUnits->addItem(info.second);
+		m_ui.listChosenMeasuresUnits->addItem(info.second);
 	}
 }
 
@@ -104,7 +104,7 @@ void DlgObjectMeasureUnit::sortMeasureUnitInfoVectors()
 
 void DlgObjectMeasureUnit::onAddMeasureUnitBtnClicked()
 {
-	const auto selectedItems = ui.listAvailableMeasuresUnits->selectionModel()->selectedIndexes();
+	const auto selectedItems = m_ui.listAvailableMeasuresUnits->selectionModel()->selectedIndexes();
 	if (selectedItems.isEmpty())
 	{
 		QMessageBox::warning(this, QString::fromLocal8Bit("Внимание!"), QString::fromLocal8Bit("Необходимо выбрать элемент(-ы)"));
@@ -123,7 +123,7 @@ void DlgObjectMeasureUnit::onAddMeasureUnitBtnClicked()
 
 void DlgObjectMeasureUnit::onRemoveMeasureUnitBtnClicked()
 {
-	const auto selectedItems = ui.listChosenMeasuresUnits->selectionModel()->selectedIndexes();
+	const auto selectedItems = m_ui.listChosenMeasuresUnits->selectionModel()->selectedIndexes();
 	if (selectedItems.isEmpty())
 	{
 		QMessageBox::warning(this, QString::fromLocal8Bit("Внимание!"), QString::fromLocal8Bit("Необходимо выбрать элемент(-ы)"));

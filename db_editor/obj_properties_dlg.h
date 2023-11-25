@@ -15,5 +15,5 @@ public:
 	QString GetChangedName() const;
 
 private:
-	std::unique_ptr<Ui::DlgObjProperties> ui;
+	std::unique_ptr<Ui::DlgObjProperties> m_ui;
 };

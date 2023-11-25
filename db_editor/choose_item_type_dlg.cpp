@@ -3,10 +3,10 @@
 DlgChooseItemType::DlgChooseItemType(QWidget* parent)
 	: QDialog(parent)
 {
-	ui.setupUi(this);
+	m_ui.setupUi(this);
 }
 
 bool DlgChooseItemType::IsNomogramm() const
 {
-	return ui.nomogrammRadioBtn->isChecked();
+	return m_ui.nomogrammRadioBtn->isChecked();
 }

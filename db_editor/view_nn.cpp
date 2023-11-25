@@ -3,12 +3,12 @@
 #include <QMenu>
 #include <QListWidget>
 
-namespace ui
+namespace m_ui
 {
 	DlgViewNN::DlgViewNN(QWidget* parent)
 		: QDialog(parent)
 	{
-		ui.setupUi(this);
+		m_ui.setupUi(this);
 		/*fillNNList();
 
 		connect(ui.NNNamesListWidget, &QListWidget::itemClicked, this, &DlgViewNN::onCurrentNNNameChanged);
@@ -48,7 +48,7 @@ namespace ui
 	void DlgViewNN::onShowContextMenu(const QPoint& point)
 	{ 
 		// Handle global position
-		QPoint globalPos = ui.NNNamesListWidget->mapToGlobal(point);
+		QPoint globalPos = m_ui.NNNamesListWidget->mapToGlobal(point);
 
 		// Create menu and insert some actions
 		QMenu myMenu;

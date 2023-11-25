@@ -3,9 +3,9 @@
 
 DlgSetBypassRuleArgs::DlgSetBypassRuleArgs(const QUuid& id, QWidget* parent)
 	: QDialog(parent)
-	, ui(new Ui::DlgSetBypassRuleArgs())
+	, m_ui(new Ui::DlgSetBypassRuleArgs())
 {
-	ui->setupUi(this);
-	ui->tableView->setModel(new BypassRuleArgsModel(id));
-	ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Stretch);
+	m_ui->setupUi(this);
+	m_ui->tableView->setModel(new BypassRuleArgsModel(id));
+	m_ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Stretch);
 }

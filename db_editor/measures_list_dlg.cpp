@@ -7,7 +7,7 @@
 DlgMeasuresUnitsList::DlgMeasuresUnitsList(QWidget* parent)
 	: QDialog(parent)
 {
-	ui.setupUi(this);
+	m_ui.setupUi(this);
 	addMenuBar();
 	fillTables();
 }
@@ -44,13 +44,13 @@ void DlgMeasuresUnitsList::fillTypesTable()
 		return;
 	}
 	
-	ui.listMeasures->clear();
+	m_ui.listMeasures->clear();
 	measures.clear();
 	for (const auto& record : response)
 	{
 		ItemModel item(record[0].toUuid(), record[1].toString());
 		measures.push_back(item);
-		ui.listMeasures->addItem(item.name);
+		m_ui.listMeasures->addItem(item.name);
 	}
 }
 
@@ -69,13 +69,13 @@ void DlgMeasuresUnitsList::fillUnitTable()
 		return;
 	}
 
-	ui.listUnits->clear();
+	m_ui.listUnits->clear();
 	units.clear();
 	for (const auto& record : response)
 	{
 		ItemModel item(record[0].toUuid(), record[1].toString());
 		units.push_back(item);
-		ui.listUnits->addItem(item.name);
+		m_ui.listUnits->addItem(item.name);
 	}
 }
 
@@ -94,13 +94,13 @@ void DlgMeasuresUnitsList::fillTypeUnitTable()
 		return;
 	}
 
-	ui.listMeasureUnit->clear();
+	m_ui.listMeasureUnit->clear();
 	measuresUnits.clear();
 	for (const auto& record : response)
 	{
 		MeasureUnitModel item(record[0].toUuid(), record[1].toUuid(), record[2].toUuid(), record[3].toString());
 		measuresUnits.push_back(item);
-		ui.listMeasureUnit->addItem(item.measureUnitName);
+		m_ui.listMeasureUnit->addItem(item.measureUnitName);
 	}
 }
 
@@ -124,7 +124,7 @@ void DlgMeasuresUnitsList::onAddNewUnitBtnClicked()
 		return;
 	}
 	units.push_back(newUnit);
-	ui.listUnits->addItem(newUnit.name);
+	m_ui.listUnits->addItem(newUnit.name);
 }
 
 void DlgMeasuresUnitsList::onAddNewTypeBtnClicked()
@@ -147,19 +147,19 @@ void DlgMeasuresUnitsList::onAddNewTypeBtnClicked()
 		return;
 	}
 	measures.push_back(newUnit);
-	ui.listMeasures->addItem(newUnit.name);
+	m_ui.listMeasures->addItem(newUnit.name);
 }
 
 void DlgMeasuresUnitsList::onAddNewTypeUnitBtnClicked()
 {
-	const auto selectedMeasures = ui.listMeasures->selectedItems();
+	const auto selectedMeasures = m_ui.listMeasures->selectedItems();
 	if (selectedMeasures.isEmpty())
 	{
 		QMessageBox::warning(this, QString::fromLocal8Bit("Внимание"), QString::fromLocal8Bit("Необходимо выбрать тип данных"));
 		return;
 	}
 
-	const auto selectedUnits = ui.listUnits->selectedItems();
+	const auto selectedUnits = m_ui.listUnits->selectedItems();
 	if (selectedUnits.isEmpty())
 	{
 		QMessageBox::warning(this, QString::fromLocal8Bit("Внимание"), QString::fromLocal8Bit("Необходимо выбрать единицу измерения"));
@@ -170,8 +170,8 @@ void DlgMeasuresUnitsList::onAddNewTypeUnitBtnClicked()
 
 	MeasureUnitModel newUnit;
 	newUnit.id = QUuid::createUuid();
-	newUnit.measureId = measures[ui.listMeasures->row(selectedMeasures.first())].id;
-	newUnit.unitId = units[ui.listUnits->row(selectedUnits.first())].id;
+	newUnit.measureId = measures[m_ui.listMeasures->row(selectedMeasures.first())].id;
+	newUnit.unitId = units[m_ui.listUnits->row(selectedUnits.first())].id;
 	newUnit.measureUnitName = text;
 
 	auto db = DBExecutor::GetInstance();
@@ -186,5 +186,5 @@ void DlgMeasuresUnitsList::onAddNewTypeUnitBtnClicked()
 		return;
 	}
 	measuresUnits.push_back(newUnit);
-	ui.listMeasureUnit->addItem(newUnit.measureUnitName);
+	m_ui.listMeasureUnit->addItem(newUnit.measureUnitName);
 }

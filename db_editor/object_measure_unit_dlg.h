@@ -4,10 +4,13 @@
 #include <QObject>
 #include <QUuid>
 #include <QString>
+#include "common_macros.h"
 
 class DlgObjectMeasureUnit : public QDialog
 {
 	Q_OBJECT;
+	DECLARE_NO_COPY_NO_MOVE(DlgObjectMeasureUnit);
+
 	using MeasureUnitInfo = std::pair<QUuid, QString>;
 
 public:
@@ -29,7 +32,7 @@ private:
 		{
 			if (j == v2.size())
 			{
-				diff.insert(diff.begin(), std::next(v1.begin(), i), v1.end());
+				diff.insert(diff.begin(), std::next(v1.begin(), (int)i), v1.end());
 				return;
 			}
 
@@ -54,7 +57,7 @@ private Q_SLOTS:
 	void onReject();
 
 private:
-	Ui::DlgObjectMeasureUnit ui;
+	Ui::DlgObjectMeasureUnit m_ui;
 	QUuid objId;
 	std::vector<MeasureUnitInfo> measureInfoVector;
 	std::vector<MeasureUnitInfo> measureInfoVectorOrigin;

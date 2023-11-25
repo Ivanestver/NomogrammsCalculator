@@ -2,12 +2,14 @@
 #include "ui_view_nn.h"
 #include <QDialog>
 #include <QWidget>
+#include "common_macros.h"
 
-namespace ui
+namespace m_ui
 {
 	class DlgViewNN : public QDialog
 	{
 		Q_OBJECT;
+		DECLARE_NO_COPY_NO_MOVE(DlgViewNN);
 	public:
 		DlgViewNN(QWidget* parent = nullptr);
 		~DlgViewNN() override = default;
@@ -23,6 +25,6 @@ namespace ui
 		void fillByNetInfo();
 
 	private:
-		Ui::DlgViewNN ui;
+		Ui::DlgViewNN m_ui;
 	};
 }

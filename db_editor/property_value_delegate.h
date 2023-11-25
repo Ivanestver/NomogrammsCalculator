@@ -3,10 +3,13 @@
 #include <QStyledItemDelegate>
 #include <QObject>
 #include <QUuid>
+#include "common_macros.h"
 
 class PropertyValueDelegate : public QStyledItemDelegate
 {
 	Q_OBJECT;
+    DECLARE_NO_COPY_NO_MOVE(PropertyValueDelegate);
+
 public:
     PropertyValueDelegate(QObject* parent = nullptr);
     ~PropertyValueDelegate() override = default;
@@ -22,6 +25,6 @@ private Q_SLOTS:
     void onOpenMeasureUnitsClicked();
 
 private:
-    mutable QUuid id;
     mutable bool isInput = true;
+    mutable QUuid id;
 };

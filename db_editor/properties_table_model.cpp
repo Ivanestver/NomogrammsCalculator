@@ -13,6 +13,7 @@ PropertiesTableModel::PropertiesTableModel(const QUuid& itemId, QObject* parent/
 
 Q_INVOKABLE QModelIndex PropertiesTableModel::index(int row, int column, const QModelIndex& parent) const
 {
+    Q_UNUSED(parent);
     if (rowCount(QModelIndex()) <= row)
         return Q_INVOKABLE QModelIndex();
 
@@ -27,21 +28,25 @@ Q_INVOKABLE QModelIndex PropertiesTableModel::index(int row, int column, const Q
 
 Q_INVOKABLE QModelIndex PropertiesTableModel::parent(const QModelIndex& child) const
 {
+    Q_UNUSED(child);
     return Q_INVOKABLE QModelIndex();
 }
 
 Q_INVOKABLE int PropertiesTableModel::rowCount(const QModelIndex& parent) const
 {
+    Q_UNUSED(parent);
     return Q_INVOKABLE (int)propertiesContainer.properties.size();
 }
 
 Q_INVOKABLE int PropertiesTableModel::columnCount(const QModelIndex& parent) const
 {
+    Q_UNUSED(parent);
     return Q_INVOKABLE 2;
 }
 
 Q_INVOKABLE QVariant PropertiesTableModel::data(const QModelIndex& index, int role) const
 {
+    Q_UNUSED(role);
     if (!index.isValid())
         return Q_INVOKABLE QVariant();
 
@@ -191,13 +196,13 @@ bool PropertiesTableModel::fillPropertiesContainer(const QUuid& id)
         return false;
     }
 
-    for (const auto& id : propertiesIds)
+    for (const auto& propertyId : propertiesIds)
     {
         PropertiesTableItem item;
-        item.id = id;
-        const auto it = std::find_if(propertiesInfo.begin(), propertiesInfo.end(), [&id](const auto& info)
+        item.id = propertyId;
+        const auto it = std::find_if(propertiesInfo.begin(), propertiesInfo.end(), [&propertyId](const auto& info)
             {
-                return std::get<0>(info) == id;
+                return std::get<0>(info) == propertyId;
             });
 
         if (it != propertiesInfo.end())
