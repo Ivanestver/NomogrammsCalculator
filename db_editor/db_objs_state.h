@@ -39,6 +39,8 @@ public:
 			ptr = AbstractDBObjState::CreateState<NomogrammState>();
 		else if (classId == graphics_class)
 			ptr = AbstractDBObjState::CreateState<GraphicState>();
+		else if (classId == net_class)
+			ptr = AbstractDBObjState::CreateState<NNState>();
 		else
 			return ptr;
 
@@ -47,6 +49,10 @@ public:
 	}
 
 	virtual ~AbstractDBObjState() = default;
+	AbstractDBObjState(const AbstractDBObjState&) = default;
+	AbstractDBObjState(AbstractDBObjState&&) = default;
+	AbstractDBObjState& operator=(const AbstractDBObjState&) = default;
+	AbstractDBObjState& operator=(AbstractDBObjState&&) = default;
 
 	bool AddNewObjToModelAndThenToDB(QAbstractItemModel* abstractModel, const QModelIndexList& selectedIndexList, QString& error);
 	bool RemoveItem(const QModelIndex& selectedItemIdx, QAbstractItemModel* abstractModel, QString& error) const;
@@ -63,12 +69,13 @@ protected:
 protected:
 	const QString& getObjectName() const;
 	const TreeItem* getItemToAdd() const;
+	virtual const QUuid& getCustomItemId() const;
 	void addProperty(const QUuid& propertyId);
 
 private:
 	void setObjectName(const QString& objectName_);
 	void setItemToAdd(TreeItem* itemToAdd_);
-	virtual QString openInputNameDlgAndGetDlg() const;
+	virtual QString openInputNameDlgAndGetDlg();
 	// Вспомогательные функции для добавления
 	TreeItem* insertRowToModelAndGetItem(QAbstractItemModel* model, const QModelIndexList& selectedIndexList, QString& error);
 	bool addObjAndAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const;
@@ -149,13 +156,18 @@ private:
 	QModelIndex getParentIndex(const QModelIndexList& selectedIndexList) const override;
 	bool addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const override;
 	std::pair<QString, QString> getMessageAndTitleWhenAdding() const override;
-	QString openInputNameDlgAndGetDlg() const override;
+	QString openInputNameDlgAndGetDlg() override;
+	const QUuid& getCustomItemId() const override;
+
+private:
+	QUuid m_id;
 };
 
 class IStateCreator
 {
 public:
 	virtual ~IStateCreator() = default;
+
 	virtual std::shared_ptr<AbstractDBObjState> CreateObj() const = 0;
 };
 

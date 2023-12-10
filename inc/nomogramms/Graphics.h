@@ -38,6 +38,6 @@ namespace nomogramms
 
 	private:
 		std::map<ParameterType, std::vector<SMeasureUnit>> parametersList;
-		//std::shared_ptr<ml::FullyConnectedNN> network{ nullptr };
+		ml::SFullyConnectedNN network{ nullptr };
 	};
 }

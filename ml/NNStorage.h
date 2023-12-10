@@ -11,7 +11,7 @@ namespace ml
 	public:
 		static NNStorage& GetInstance();
 
-		SFullyConnectedNN GetNet(const QUuid& NetID);
+		SFullyConnectedNN GetNet(const QUuid& NetID) const;
 		bool RemoveNet(const QUuid& NetID);
 
 	public:
@@ -20,9 +20,9 @@ namespace ml
 	private:
 		NNStorage() = default;
 
-		SFullyConnectedNN loadNN(const QUuid& NetID);
+		SFullyConnectedNN loadNN(const QUuid& NetID) const;
 
 	private:
-		std::map<QUuid, SFullyConnectedNN> nets;
+		mutable std::map<QUuid, SFullyConnectedNN> nets;
 	};
 }

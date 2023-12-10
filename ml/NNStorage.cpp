@@ -11,7 +11,7 @@ namespace ml
 		return instance;
 	}
 
-	SFullyConnectedNN NNStorage::GetNet(const QUuid& NetID)
+	SFullyConnectedNN NNStorage::GetNet(const QUuid& NetID) const
 	{
 		const auto it = nets.find(NetID);
 		if (it == nets.end())
@@ -49,7 +49,7 @@ namespace ml
 		}
 	}
 
-	SFullyConnectedNN NNStorage::loadNN(const QUuid& NetID)
+	SFullyConnectedNN NNStorage::loadNN(const QUuid& NetID) const
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
 		if (!db)

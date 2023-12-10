@@ -172,7 +172,8 @@ namespace db
 		for (const auto& row : response)
 		{
 			if (row.size() != 3ull)
-				return models;
+				continue;
+
 			models.emplace_back(row[0].toString(), row[1].toString(), row[2].toUuid());
 		}
 

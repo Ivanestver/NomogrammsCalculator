@@ -10,8 +10,12 @@ class TreeItemModel : public QAbstractItemModel
 public:
 	enum ModelRole
 	{
-		NameRole = Qt::UserRole + 1,
-		ClassIDRole
+		StartingUserRole = Qt::UserRole + 1,
+		NameRole = StartingUserRole,
+		ClassIDRole,
+		ItemIDRole,
+		
+		UserRolesCount
 	};
 
 public:

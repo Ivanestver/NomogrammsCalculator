@@ -51,7 +51,7 @@ Q_INVOKABLE bool BypassRuleArgsModel::setData(const QModelIndex& index, const QV
 
     auto& itemInfo = items[index.row()];
     QString error;
-    if (!db->ExecChange("update [template_template] set [extra] = ? where [master_id] = ? and [sub_id] = ?", { value.toString(), nomogrammId, std::get<0>(itemInfo)}, error))
+    if (!db->ExecChange("update template_template set extra = ? where master_id = ? and sub_id = ?", { value.toString(), nomogrammId, std::get<0>(itemInfo)}, error))
     {
         qDebug() << error;
         return Q_INVOKABLE false;
@@ -85,7 +85,7 @@ void BypassRuleArgsModel::fetchSubs()
 
     DBExecutor::Response response;
     QString error;
-    QString queryStr = "select t1.sub_id, t2.property_value, t1.extra from [template_template] as t1 inner join [template_property] as t2 on t1.sub_id=t2.template_id where [master_id] = ? and [property_id] = ?";
+    QString queryStr = "select t1.sub_id, t2.property_value, t1.extra from template_template as t1 inner join template_property as t2 on t1.sub_id=t2.template_id where master_id = ? and property_id = ?";
     if (!db->ExecSELECT(queryStr, { nomogrammId, db_state::properties::dbobject_name }, response, error))
     {
         qDebug() << error;

@@ -1,6 +1,7 @@
 #include "nomogramms/Graphics.h"
 #include <QVariant>
 #include "db/DataBaseWrapper.h"
+#include "ml/NNStorage.h"
 
 namespace nomogramms
 {
@@ -50,7 +51,7 @@ namespace nomogramms
         if (!db)
             return;
 
-        QString queryString = "select [measure_unit_id] from [template_measure_unit_input] where [template_id] = ?";
+        QString queryString = "select measure_unit_id from template_measure_unit_input where template_id = ?";
         QString error;
         auto response = db->ExecuteQuery(queryString, { GetId() }, error);
         for (const auto& record : response)
@@ -59,13 +60,23 @@ namespace nomogramms
             parametersList[ParameterType::Input].push_back(measureUnit);
         }
 
-        queryString = "select [measure_unit_id] from [template_measure_unit_output] where [template_id] = ?";
+        queryString = "select measure_unit_id from template_measure_unit_output where template_id = ?";
         response = db->ExecuteQuery(queryString, { GetId() }, error);
         for (const auto& record : response)
         {
             auto measureUnit = std::make_shared<MeasureUnit>(record[0].toUuid());
             parametersList[ParameterType::Output].push_back(measureUnit);
         }
+        
+        queryString = "select sub_id from template_template where master_id = ?";
+        response = db->ExecuteQuery(queryString, { GetId() }, error);
+        if (response.empty() || response.front().empty())
+            return;
+
+        QUuid nnId = response.front().front().toUuid();
+
+        const auto& nnStorage = ml::NNStorage::GetInstance();
+        network = nnStorage.GetNet(nnId);
     }
 
     bool Graphics::Calculate(const IOData& inputData, IOData& outputData, QString& error) const

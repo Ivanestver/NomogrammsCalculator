@@ -80,6 +80,11 @@ const TreeItem* AbstractDBObjState::getItemToAdd() const
 	return itemToAdd;
 }
 
+const QUuid& AbstractDBObjState::getCustomItemId() const
+{
+	return QUuid();
+}
+
 void AbstractDBObjState::addProperty(const QUuid& propertyId)
 {
 	propertiesIds.insert(propertyId);
@@ -90,7 +95,7 @@ void AbstractDBObjState::setItemToAdd(TreeItem* itemToAdd_)
 	this->itemToAdd = itemToAdd_;
 }
 
-QString AbstractDBObjState::openInputNameDlgAndGetDlg() const
+QString AbstractDBObjState::openInputNameDlgAndGetDlg()
 {
 	const auto messageAndTitle = getMessageAndTitleWhenAdding();
 	return QInputDialog::getText(nullptr, messageAndTitle.first, messageAndTitle.second);
@@ -110,6 +115,10 @@ TreeItem* AbstractDBObjState::insertRowToModelAndGetItem(QAbstractItemModel* mod
 	{
 		model->setData(added, getObjectName(), TreeItemModel::ModelRole::NameRole);
 		model->setData(added, getClassId(), TreeItemModel::ModelRole::ClassIDRole);
+
+		const QUuid& customId = getCustomItemId();
+		if (!customId.isNull())
+			model->setData(added, customId, TreeItemModel::ModelRole::ItemIDRole);
 
 		return static_cast<TreeItem*>(added.internalPointer());
 	}
@@ -316,7 +325,7 @@ bool NNState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString&
 	if (!executor->InsertProperty(item->id, db_state::properties::dbobject_name, getObjectName(), error))
 		return false;
 
-	return true;
+	return executor->LinkTemplates(item->parent->id, item->id, error);
 }
 
 std::pair<QString, QString> NNState::getMessageAndTitleWhenAdding() const
@@ -324,13 +333,22 @@ std::pair<QString, QString> NNState::getMessageAndTitleWhenAdding() const
 	return std::pair<QString, QString>();
 }
 
-QString NNState::openInputNameDlgAndGetDlg() const
+QString NNState::openInputNameDlgAndGetDlg()
 {
 	DlgChooseNN dlg;
 	if (dlg.exec() == QDialog::Accepted)
-		return dlg.GetChosenNNName();
+	{
+		auto [nnName, nnId] = dlg.GetChosenItemInfo();
+		m_id = nnId;
+		return nnName;
+	}
 
 	return QString();
+}
+
+const QUuid& NNState::getCustomItemId() const
+{
+	return m_id;
 }
 
 std::shared_ptr<AbstractDBObjState> NNStateCreator::CreateObj() const

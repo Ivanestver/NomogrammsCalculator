@@ -5,6 +5,7 @@
 #include "common_macros.h"
 #include <QDialog>
 #include <vector>
+#include <QUuid>
 
 class DlgChooseNN : public QDialog 
 {
@@ -14,15 +15,16 @@ public:
 	DlgChooseNN(QWidget* parent = nullptr);
 	~DlgChooseNN() override = default;
 
-	const QString& GetChosenNNName() const;
+	const std::pair<QString, QUuid>& GetChosenItemInfo() const;
 
 private Q_SLOTS:
-	void onListItemClicked(const QString& currentText);
+	void onListItemClicked(int row);
 
 private:
 	void loadNets();
 
 private:
 	Ui::DlgChooseNN m_ui;
-	QString m_chosenNNName;
+	std::vector<std::pair<QString, QUuid>> m_items;
+	int chosenRow{ -1 };
 };

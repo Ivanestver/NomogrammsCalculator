@@ -6,18 +6,24 @@ DlgChooseNN::DlgChooseNN(QWidget* parent)
 	: QDialog(parent)
 {
 	m_ui.setupUi(this);
-	connect(m_ui.nnListWidget, &QListWidget::currentTextChanged, this, &DlgChooseNN::onListItemClicked);
+	connect(m_ui.nnListWidget, &QListWidget::currentRowChanged, this, &DlgChooseNN::onListItemClicked);
 	loadNets();
 }
 
-const QString& DlgChooseNN::GetChosenNNName() const
+const std::pair<QString, QUuid>& DlgChooseNN::GetChosenItemInfo() const
 {
-	return m_chosenNNName;
+	if (chosenRow == -1)
+		return {};
+
+	return m_items[chosenRow];
 }
 
-void DlgChooseNN::onListItemClicked(const QString& currentText)
+void DlgChooseNN::onListItemClicked(int row)
 {
-	m_chosenNNName = currentText;
+	if (row < 0 || row >= m_items.size())
+		return;
+	
+	chosenRow = row;
 }
 
 void DlgChooseNN::loadNets()
@@ -31,7 +37,7 @@ void DlgChooseNN::loadNets()
 
 	DBExecutor::Response response;
 	QString error;
-	if (!dbExecutor->ExecSELECT("select net_name from nets", {}, response, error))
+	if (!dbExecutor->ExecSELECT("select net_name, net_id from nets", {}, response, error))
 	{
 		QMessageBox::warning(this, QString::fromLocal8Bit("Внимание"), QString::fromLocal8Bit("Не удалось получить список нейронных сетей"));
 		return;
@@ -42,7 +48,9 @@ void DlgChooseNN::loadNets()
 		if (record.empty())
 			continue;
 
-		auto nnName = record.front().toString();
+		auto nnName = record[0].toString();
 		m_ui.nnListWidget->addItem(nnName);
+
+		m_items.emplace_back(nnName, record[1].toUuid());
 	}
 }

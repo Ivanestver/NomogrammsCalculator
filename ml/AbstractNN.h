@@ -14,7 +14,6 @@ namespace ml
 	{
 	public:
 		FullyConnectedNN(int inputParamsCount, const std::vector<int>& layers, int outputParamsCount, const QString& nnName = QString::fromLocal8Bit("NN"));
-		~FullyConnectedNN() override = default;
 
 		virtual at::Tensor Predict(const at::Tensor& X);
 

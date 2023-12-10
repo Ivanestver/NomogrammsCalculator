@@ -73,8 +73,8 @@ Q_INVOKABLE QVariant TreeItemModel::data(const QModelIndex& index, int role) con
 Q_INVOKABLE bool TreeItemModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (role != Qt::DisplayRole
-     && role != ModelRole::NameRole
-     && role != ModelRole::ClassIDRole)
+     && (role < ModelRole::StartingUserRole
+     && role >= ModelRole::UserRolesCount))
         return Q_INVOKABLE false;
 
     switch (role)
@@ -96,6 +96,15 @@ Q_INVOKABLE bool TreeItemModel::setData(const QModelIndex& index, const QVariant
 
         auto* item = getItem(index);
         item->classId = value.toUuid();
+        break;
+    }
+    case ModelRole::ItemIDRole:
+    {
+        if (value.type() != QVariant::Type::Uuid)
+            return Q_INVOKABLE false;
+
+        auto* item = getItem(index);
+        item->id = value.toUuid();
         break;
     }
     default:
@@ -259,7 +268,7 @@ bool TreeItemModel::saveMasterIdForSubId(const TreeItem* item, QString& error) c
         return true;
 
     auto executor = DBExecutor::GetInstance();
-    int rowsAffected = executor->ExecChange("insert into [template_template](master_id, sub_id) values (?, ?)", { item->parent->id, item->id }, error);
+    int rowsAffected = executor->ExecChange("insert into template_template(master_id, sub_id) values (?, ?)", { item->parent->id, item->id }, error);
 
     return rowsAffected != 0;
 }

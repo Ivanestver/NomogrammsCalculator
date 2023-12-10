@@ -31,7 +31,7 @@ namespace nomogramms
 	void Methodology::initFromDB()
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();
-		QString queryString = "select [sub_id] from [template_template] where [master_id] = ?";
+		QString queryString = "select sub_id from template_template where master_id = ?";
 		std::vector<QVariant> params{ QVariant(GetId()) };
 		QString error;
 		auto result = db->ExecuteQuery(queryString, params, error);

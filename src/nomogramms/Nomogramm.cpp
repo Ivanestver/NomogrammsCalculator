@@ -88,7 +88,7 @@ namespace nomogramms
 		QString error;
 		bypassRule = db->GetPropertyValueByIdAndTemplateID(db_state::properties::nomogramm_bypassRule, GetId(), error);
 
-		QString queryString = "select class_id, sub_id, extra from ([template] as t1 inner join [template_template] as t2 on t1.template_id=t2.sub_id) where [master_id] = ?";
+		QString queryString = "select class_id, sub_id, extra from (template as t1 inner join template_template as t2 on t1.template_id=t2.sub_id) where master_id = ?";
 		std::vector<QVariant> params { GetId() };
 
 		auto result = db->ExecuteQuery(queryString, params, error);
@@ -105,7 +105,7 @@ namespace nomogramms
 			graphics.insert({ label, g });
 		}
 
-		queryString = "select [measure_unit_id] from [template_measure_unit_input] where [template_id] = ?";
+		queryString = "select measure_unit_id from template_measure_unit_input where template_id = ?";
 		result = db->ExecuteQuery(queryString, params, error);
 		if (result.empty() || result[0].empty())
 			return;
