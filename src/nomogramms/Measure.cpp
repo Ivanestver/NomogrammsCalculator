@@ -22,7 +22,7 @@ namespace nomogramms
 		if (!db)
 			return;
 
-		QString queryStr = "select [measure_name] from [measure] where [measure_id] = ?";
+		QString queryStr = "select measure_name from measure where measure_id = ?";
 		QString error;
 		auto response = db->ExecuteQuery(queryStr, { GetId() }, error);
 		if (response.empty() || response[0].empty())

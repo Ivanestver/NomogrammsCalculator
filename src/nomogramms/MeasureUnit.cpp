@@ -47,14 +47,14 @@ namespace nomogramms
 		if (!db)
 			return;
 
-		QString queryStr = "select [measure_unit_name] from [measure_unit] where [id] = ?";
+		QString queryStr = "select measure_unit_name from measure_unit where measure_unit_id = ?";
 		QString error;
 		auto response = db->ExecuteQuery(queryStr, {GetId()}, error);
 		if (response.empty() || response[0].empty())
 			return;
 		setName(response.front().front().toString());
 
-		queryStr = "select [measure_id], [unit_id] from [measure_unit] where [id] = ?";
+		queryStr = "select measure_id, unit_id from measure_unit where measure_unit_id = ?";
 		response = db->ExecuteQuery(queryStr, { GetId() }, error);
 		if (response.empty() || response[0].empty())
 			return;
