@@ -43,7 +43,7 @@ namespace nomogramms
 
 	bool ExpressionExecutor::Exec()
 	{
-		if (!luaL_dostring(L, expression.toLocal8Bit().constData()))
+		if (luaL_dostring(L, expression.toLocal8Bit().constData()) == 1)
 		{
 			error = lua_tostring(L, -1);
 			return false;

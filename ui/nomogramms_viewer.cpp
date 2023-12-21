@@ -171,8 +171,8 @@ namespace ui
 
 	void NomogrammsViewer::setInputTable(const ValuesMap& params)
 	{
-		ui->inputTable->clear();
-		ui->outputTable->clear();
+		ui->inputTable->setRowCount(0);
+		ui->outputTable->setRowCount(0);
 
 		ui->inputTable->setColumnCount(2);
 		ui->outputTable->setColumnCount(2);
@@ -276,6 +276,7 @@ namespace ui
 			values.insert({ pair.first, valuesVector });
 		}
 
+		disconnect(ui->inputTable, &QTableWidget::itemChanged, this, &NomogrammsViewer::onItemChanged);
 		setInputTable(values);
 	}
 
