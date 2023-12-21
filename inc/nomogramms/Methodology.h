@@ -15,14 +15,11 @@ namespace nomogramms
 		DECL_DBCLASS(Methodology);
 	public:
 		Methodology(const QUuid& id);
-		Methodology(const Methodology& other);
-		~Methodology() override = default;
 
 		bool GetChildren(std::vector<SDBObject>& children) const override;
 
-		bool operator==(const DBObject& other) override;
-		bool operator!=(const DBObject& other) override;
-		Methodology& operator=(const DBObject& other) override;
+		bool operator==(const DBObject& other) const override;
+		bool operator!=(const DBObject& other) const override;
 
 		const std::vector<SNomogramm>& GetNomogramms() const;
 

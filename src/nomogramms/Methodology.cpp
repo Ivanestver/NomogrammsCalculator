@@ -11,12 +11,6 @@ namespace nomogramms
 		initFromDB();
 	}
 
-	Methodology::Methodology(const Methodology& other)
-		: base(other)
-	{
-		this->nomogramms.insert(this->nomogramms.begin(), other.nomogramms.begin(), other.nomogramms.end());
-	}
-
 	bool Methodology::GetChildren(std::vector<SDBObject>& children) const
 	{
 		if (nomogramms.empty())
@@ -48,28 +42,16 @@ namespace nomogramms
 		}
 	}
 
-	bool Methodology::operator==(const DBObject& other)
+	bool Methodology::operator==(const DBObject& other) const
 	{
 		const auto& o = static_cast<const Methodology&>(other);
 		return base::operator==(other)
 			&& this->nomogramms == o.nomogramms;
 	}
 
-	bool Methodology::operator!=(const DBObject& other)
+	bool Methodology::operator!=(const DBObject& other) const
 	{
 		return !operator==(other);
-	}
-
-	Methodology& Methodology::operator=(const DBObject& other)
-	{
-		if (*this == other)
-			return *this;
-
-		base::operator=(other);
-		const auto& o = static_cast<const Methodology&>(other);
-		this->nomogramms = o.nomogramms;
-
-		return *this;
 	}
 
 	const std::vector<SNomogramm>& Methodology::GetNomogramms() const

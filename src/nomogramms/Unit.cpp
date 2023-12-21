@@ -9,11 +9,6 @@ namespace nomogramms
 		initFromDB();
 	}
 
-	DBObject& Unit::operator=(const DBObject& other)
-	{
-		return base::operator=(other);
-	}
-
 	void Unit::initFromDB()
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();

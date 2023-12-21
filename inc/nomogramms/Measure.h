@@ -12,9 +12,6 @@ namespace nomogramms
 		DECL_DBCLASS(Measure)
 	public:
 		Measure(const QUuid& id);
-		~Measure() override = default;
-
-		DBObject& operator=(const DBObject& other) override;
 
 	private:
 		void initFromDB() override;

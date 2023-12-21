@@ -17,12 +17,9 @@ namespace nomogramms
 		DECL_DBCLASS(BypassRule);
 	public:
 		BypassRule(const QUuid& id);
-		BypassRule(const BypassRule& other);
-		virtual ~BypassRule() override;
 
-		bool operator==(const DBObject& other) override;
-		bool operator!=(const DBObject& other) override;
-		BypassRule& operator=(const DBObject& other) override;
+		bool operator==(const DBObject& other) const override;
+		bool operator!=(const DBObject& other) const override;
 
 		virtual bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const override;
 		virtual void GetParameters(std::map<ParameterType, std::vector<SMeasureUnit> >& parameters) const override;

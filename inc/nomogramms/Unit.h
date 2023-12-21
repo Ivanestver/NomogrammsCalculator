@@ -14,9 +14,6 @@ namespace nomogramms
 
 	public:
 		Unit(const QUuid& id);
-		~Unit() override = default;
-
-		DBObject& operator=(const DBObject& other) override;
 
 	private:
 		void initFromDB() override;

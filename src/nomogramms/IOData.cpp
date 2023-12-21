@@ -4,27 +4,27 @@ namespace nomogramms
 {
 	IOData::IOData(const IOData& other)
 	{
-		this->data = other.data;
+		this->m_data = other.m_data;
 	}
 
 	IOData::IOData(IOData&& other) noexcept
-		: data(std::move(other.data))
+		: m_data(std::move(other.m_data))
 	{
 	}
 
 	void IOData::AddValue(const nomogramms::SMeasureUnit& measure, double value)
 	{
-		auto it = data.find(measure);
-		if (it != data.end())
+		auto it = m_data.find(measure);
+		if (it != m_data.end())
 			return;
 
-		data.insert({ measure, value });
+		m_data.insert({ measure, value });
 	}
 
 	double IOData::GetValue(const nomogramms::SMeasureUnit& measure) const
 	{
-		auto it = data.find(measure);
-		if (it == data.end())
+		auto it = m_data.find(measure);
+		if (it == m_data.end())
 			return 0.0;
 
 		return it->second;
@@ -35,8 +35,8 @@ namespace nomogramms
 		if (*this == other)
 			return *this;
 
-		this->data.clear();
-		this->data.insert(other.data.begin(), other.data.end());
+		this->m_data.clear();
+		this->m_data.insert(other.m_data.begin(), other.m_data.end());
 
 		return *this;
 	}
@@ -46,8 +46,8 @@ namespace nomogramms
 		if (*this == other)
 			return *this;
 
-		this->data.clear();
-		this->data = std::move(other.data);
+		this->m_data.clear();
+		this->m_data = std::move(other.m_data);
 
 		return *this;
 	}
@@ -57,15 +57,15 @@ namespace nomogramms
 		if (*this == other)
 			return *this;
 
-		data.insert(other.data.begin(), other.data.end());
+		m_data.insert(other.m_data.begin(), other.m_data.end());
 
 		return *this;
 	}
 
 	bool IOData::operator==(const IOData& other)
 	{
-		return data.size() == other.data.size()
-			&& std::equal(data.begin(), data.end(), other.data.begin(), other.data.end());
+		return m_data.size() == other.m_data.size()
+			&& std::equal(m_data.begin(), m_data.end(), other.m_data.begin(), other.m_data.end());
 	}
 
 	bool IOData::operator!=(const IOData& other)
@@ -75,6 +75,11 @@ namespace nomogramms
 
 	void IOData::Clear()
 	{
-		data.clear();
+		m_data.clear();
+	}
+
+	bool IOData::IsEmpty() const noexcept
+	{
+		return m_data.empty();
 	}
 }

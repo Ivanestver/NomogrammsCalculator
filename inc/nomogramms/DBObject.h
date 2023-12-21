@@ -13,16 +13,18 @@ class DBObject : public QObject
 protected:
 	using base = DBObject;
 public:
-	DBObject(const QUuid& id);
-	DBObject(const DBObject& other);
-	virtual ~DBObject() = 0;
+	explicit DBObject(const QUuid& id);
+	virtual ~DBObject() override = default;
+	DBObject(const DBObject&) = default;
+	DBObject(DBObject&&) noexcept = default;
+	DBObject& operator=(const DBObject&) = default;
+	DBObject& operator=(DBObject&&) noexcept = default;
 
 	const QString& GetName() const;
 	const QUuid& GetId() const;
 
-	virtual bool operator==(const DBObject& other);
-	virtual bool operator!=(const DBObject& other);
-	virtual DBObject& operator=(const DBObject& other);
+	virtual bool operator==(const DBObject& other) const;
+	virtual bool operator!=(const DBObject& other) const;
 
 	virtual bool GetChildren(std::vector<SDBObject>& children) const;
 

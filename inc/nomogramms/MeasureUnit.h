@@ -15,12 +15,9 @@ namespace nomogramms
 		DECL_DBCLASS(MeasureUnit)
 	public:
 		MeasureUnit(const QUuid& id);
-		MeasureUnit(const MeasureUnit& other);
-		~MeasureUnit() override;
 
-		bool operator==(const DBObject& other) override;
-		bool operator!=(const DBObject& other) override;
-		DBObject& operator=(const DBObject& other) override;
+		bool operator==(const DBObject& other) const override;
+		bool operator!=(const DBObject& other) const override;
 
 
 	protected:

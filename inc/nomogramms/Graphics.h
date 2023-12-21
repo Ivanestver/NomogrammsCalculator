@@ -11,6 +11,7 @@
 #include "nomogramms/IOData.h"
 #include "nomogramms/ICalculeable.h"
 #include "ml/AbstractNN.h"
+#include "NNWrapper.h"
 
 namespace nomogramms
 {
@@ -22,13 +23,11 @@ namespace nomogramms
 		DECL_DBCLASS(Graphics);
 	public:
 		Graphics(const QUuid& id);
-		Graphics(const Graphics& other);
 
 		const std::vector<SMeasureUnit>& GetParametersByType(ParameterType type) const;
 
-		bool operator==(const DBObject& other) override;
-		bool operator!=(const DBObject& other) override;
-		Graphics& operator=(const DBObject& other) override;
+		bool operator==(const DBObject& other) const override;
+		bool operator!=(const DBObject& other) const override;
 
 		bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const override;
 		void GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const override;
@@ -37,7 +36,8 @@ namespace nomogramms
 		virtual void initFromDB() override;
 
 	private:
-		std::map<ParameterType, std::vector<SMeasureUnit>> parametersList;
-		ml::SFullyConnectedNN network{ nullptr };
+		std::map<ParameterType, std::vector<SMeasureUnit>> m_parametersList;
+		ml::SFullyConnectedNN m_network{ nullptr };
+		NNWrapper m_wrapper;
 	};
 }

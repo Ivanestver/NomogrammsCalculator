@@ -11,11 +11,6 @@ namespace nomogramms
 		initFromDB();
 	}
 
-	DBObject& Measure::operator=(const DBObject& other)
-	{
-		return base::operator=(other);
-	}
-
 	void Measure::initFromDB()
 	{
 		auto db = db::DataBaseWrapper::GetDatabase();

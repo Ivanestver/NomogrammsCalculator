@@ -12,11 +12,7 @@ namespace nomogramms
 		initFromDB();
 	}
 
-	Nomogramm::Nomogramm(const Nomogramm& other)
-		: base(other)
-	{}
-
-	bool Nomogramm::operator==(const DBObject& other)
+	bool Nomogramm::operator==(const DBObject& other) const
 	{
 		const auto& o = static_cast<const Nomogramm&>(other);
 
@@ -24,24 +20,9 @@ namespace nomogramms
 			&& this->bypassRule == o.bypassRule;
 	}
 
-	bool Nomogramm::operator!=(const DBObject& other)
+	bool Nomogramm::operator!=(const DBObject& other) const
 	{
 		return !operator==(other);
-	}
-
-	Nomogramm& Nomogramm::operator=(const DBObject& other)
-	{
-		if (*this == other)
-			return *this;
-
-		base::operator=(other);
-		const auto& o = static_cast<const Nomogramm&>(other);
-
-		graphics = o.graphics;
-		bypassRule = o.bypassRule;
-		parameters = o.parameters;
-
-		return *this;
 	}
 
 	bool Nomogramm::Calculate(const IOData& inputData, IOData& outputData, QString& error) const
@@ -60,6 +41,10 @@ namespace nomogramms
 		}
 
 		executor.WriteResultsTo(outputData);
+
+		//Nomogramm n1{ QUuid{} };
+		//Nomogramm n2 = n1;
+		//Nomogramm n3 = std::move(n1);
 
 		return true;
 	}

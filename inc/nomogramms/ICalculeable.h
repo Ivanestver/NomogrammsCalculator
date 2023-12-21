@@ -15,11 +15,16 @@ namespace nomogramms
 	public:
 		using ParametersDict = std::map<ParameterType, std::vector<SMeasureUnit>>;
 	public:
-		virtual ~ICalculeable() = 0 {};
+		virtual ~ICalculeable() = default;
+		ICalculeable(const ICalculeable&) = default;
+		ICalculeable(ICalculeable&&) noexcept = default;
+		ICalculeable& operator=(const ICalculeable&) = default;
+		ICalculeable& operator=(ICalculeable&&) noexcept = default;
+
 		virtual bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const = 0;
 		virtual void GetParameters(ParametersDict& parameters) const = 0;
 
-	protected:
+	//protected:
 		ICalculeable() = default;
 	};
 }

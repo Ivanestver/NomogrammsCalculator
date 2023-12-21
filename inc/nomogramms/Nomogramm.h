@@ -17,11 +17,10 @@ namespace nomogramms
 
 	public:
 		Nomogramm(const QUuid& id);
-		Nomogramm(const Nomogramm& other);
+		//Nomogramm(const Nomogramm&) = default;
 
-		bool operator==(const DBObject& other) override;
-		bool operator!=(const DBObject& other) override;
-		Nomogramm& operator=(const DBObject& other) override;
+		bool operator==(const DBObject& other) const override;
+		bool operator!=(const DBObject& other) const override;
 
 		bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const override;
 		void GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const override;

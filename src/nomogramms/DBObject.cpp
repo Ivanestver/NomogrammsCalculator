@@ -16,14 +16,6 @@ DBObject::DBObject(const QUuid& id)
 	initFromDB();
 }
 
-DBObject::DBObject(const DBObject& other)
-{
-	this->id = other.id;
-	this->name = other.name;
-}
-
-DBObject::~DBObject() = default;
-
 const QString& DBObject::GetName() const
 {
 	return name;
@@ -34,26 +26,15 @@ const QUuid& DBObject::GetId() const
 	return id;
 }
 
-bool DBObject::operator==(const DBObject& other)
+bool DBObject::operator==(const DBObject& other) const
 {
 	return this->id == other.id
 		&& this->name == other.name;
 }
 
-bool DBObject::operator!=(const DBObject& other)
+bool DBObject::operator!=(const DBObject& other) const
 {
 	return !operator==(other);
-}
-
-DBObject& DBObject::operator=(const DBObject& other)
-{
-	if (*this == other)
-		return *this;
-
-	this->id = other.id;
-	this->name = other.name;
-
-	return *this;
 }
 
 bool DBObject::GetChildren(std::vector<SDBObject>& children) const

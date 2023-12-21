@@ -23,8 +23,9 @@ namespace nomogramms
 		bool operator!=(const IOData& other);
 
 		void Clear();
+		bool IsEmpty() const noexcept;
 
 	private:
-		std::map<SMeasureUnit, double> data;
+		std::map<SMeasureUnit, double> m_data;
 	};
 }

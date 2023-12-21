@@ -188,7 +188,14 @@ namespace db
 			return {};
 		
 		QString error;
-		auto response = ExecuteQuery("select * from nets where net_id = ?", { ModelID }, error);
+
+		auto response = ExecuteQuery("select sub_id from template_template where master_id = ?", { ModelID }, error);
+		if (response.empty() || response.front().empty())
+			return {};
+
+		const auto modelId = response.front().front();
+
+		response = ExecuteQuery("select * from nets where net_id = ?", { modelId }, error);
 
 		if (response.empty())
 			return {};

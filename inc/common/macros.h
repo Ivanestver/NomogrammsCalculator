@@ -17,4 +17,11 @@ protected: \
 #define DECL_DBCLASS(__class__) \
 public: \
 	static const QUuid GetCID() { return __class__##Class_ID; } \
-	const QUuid GetClassID() const override { return __class__::GetCID(); }
+	const QUuid GetClassID() const override { return __class__::GetCID(); } \
+	\
+	~__class__() override = default;\
+	__class__(const __class__&) = default;\
+	__class__(__class__&&) noexcept = default;\
+	__class__& operator=(const __class__&) = default;\
+	__class__& operator=(__class__&&) noexcept = default;
+	
