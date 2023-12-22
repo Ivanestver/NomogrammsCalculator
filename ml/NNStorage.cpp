@@ -30,7 +30,13 @@ namespace ml
 		if (!db)
 			return false;
 
+		QString error;
+		const auto response = db->ExecuteQuery("select count(*) from template where template_id in (?)", { NetID }, error);
+		if (!response.empty() || !response.front().empty())
+			return false;
+
 		auto nnInfo = db->GetNNModelInfo(NetID);
+		bool ok = false;
 		try
 		{
 			const auto* xmlConfig = xml::XmlConfiguration::GetInstance();
@@ -40,13 +46,16 @@ namespace ml
 			if (!fileToRemove.exists())
 				return false;
 
-			return fileToRemove.remove();
+			ok = fileToRemove.remove();
+			fileToRemove.close();
 		}
 		catch (std::exception& e)
 		{
 			qDebug() << e.what();
-			return false;
+			ok = false;
 		}
+
+		return ok;
 	}
 
 	SFullyConnectedNN NNStorage::loadNN(const QUuid& NetID) const

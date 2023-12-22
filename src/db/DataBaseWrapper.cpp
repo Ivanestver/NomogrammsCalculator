@@ -190,10 +190,15 @@ namespace db
 		QString error;
 
 		auto response = ExecuteQuery("select sub_id from template_template where master_id = ?", { ModelID }, error);
+		QUuid modelId;
 		if (response.empty() || response.front().empty())
-			return {};
-
-		const auto modelId = response.front().front();
+		{
+			modelId = ModelID;
+		}
+		else
+		{
+			modelId = response.front().front().toUuid();
+		}
 
 		response = ExecuteQuery("select * from nets where net_id = ?", { modelId }, error);
 
