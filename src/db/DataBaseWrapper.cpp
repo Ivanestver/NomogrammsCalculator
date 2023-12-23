@@ -22,7 +22,7 @@ namespace db
 		return s;
 	}
 
-	bool DataBaseWrapper::openConnection()
+	bool DataBaseWrapper::openConnection() const
 	{
 		db = QSqlDatabase::addDatabase(dbState->GetDBName());
 		db.setDatabaseName(dbState->GetConnectionString());
@@ -30,7 +30,7 @@ namespace db
 		return db.open();
 	}
 
-	void DataBaseWrapper::closeConnection()
+	void DataBaseWrapper::closeConnection() const
 	{
 		if (db.isOpen())
 			db.close();
@@ -43,10 +43,10 @@ namespace db
 		return SDataBaseWrapper(new DataBaseWrapper(state));
 	}
 
-	QString DataBaseWrapper::GetTemplateIDsByClassID(const QUuid& classID, std::vector<QUuid>& ids)
+	std::vector<QUuid> DataBaseWrapper::GetTemplateIDsByClassID(const QUuid& classID) const
 	{
 		if (!openConnection())
-			return QString::fromLocal8Bit("Не удалость открыть подключение");
+			throw std::exception("Не удалось открыть подключение");
 
 		QString sID = classID.toString();
 		sID = sID.left(sID.length() - 1);
@@ -56,8 +56,9 @@ namespace db
 		query.prepare("select template_id from template where class_id in (?)");
 		query.addBindValue(sID);
 		if (!query.exec())
-			return query.lastError().text();
+			throw std::exception(query.lastError().text().toLocal8Bit());
 
+		std::vector<QUuid> ids;
 		while (query.next())
 		{
 			auto var = query.value(0);
@@ -68,32 +69,27 @@ namespace db
 
 		closeConnection();
 
-		return "";
+		return ids;
 	}
 
 	QString DataBaseWrapper::GetPropertyValueByIdAndTemplateID(const QUuid& propertyID, const QUuid& templateID, QString& error)
 	{
 		if (!openConnection())
-		{
-			error = QString::fromLocal8Bit("Не удалость открыть подключение");
-			return QString();
-		}
+			throw std::exception("Не удалось открыть подключение");
 
 		QSqlQuery query(db);
 		query.prepare("select property_value from template_property where property_id in (?) and template_id in (?)");
 		query.addBindValue(turnIDToStr(propertyID));
 		query.addBindValue(turnIDToStr(templateID));
 		if (!query.exec())
-			throw exceptions::BadRequestException(query.lastError().text());
+			throw std::exception(query.lastError().text().toLocal8Bit());
 
 		if (!query.next())
 			return "";
 
 		auto var = query.value(0);
 		if (!var.isValid())
-		{
-			throw exceptions::BadRequestException("Значение невалидно");
-		}
+			throw std::exception("Значение невалидно");
 
 		closeConnection();
 
@@ -103,7 +99,7 @@ namespace db
 	std::vector<QString> DataBaseWrapper::GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& objID)
 	{
 		if (!openConnection())
-			return {};
+			throw std::exception("Не удалось открыть подключение");
 
 		std::vector<QString> values;
 		QString queryStr = QString("select property_value from template_property where template_id = :tID and property_id in (");
@@ -122,7 +118,7 @@ namespace db
 			query.bindValue(QString(":%1").arg(i), turnIDToStr(attributes[i].toString()));
 
 		if (!query.exec())
-			throw exceptions::BadRequestException(query.lastError().text());
+			throw std::exception(query.lastError().text().toLocal8Bit());
 
 		while (query.next())
 		{
@@ -140,7 +136,7 @@ namespace db
 	bool DataBaseWrapper::AddNN(const QString& nnName, const QString& nnFileName, QString& error)
 	{
 		if (!openConnection())
-			return false;
+			throw std::exception("Не удалось открыть подключение");
 
 		QString queryStr = QString("insert into nets values(?, ?, ?)");
 		QSqlQuery query(db);
@@ -163,7 +159,7 @@ namespace db
 	std::vector<NNModelInfo> DataBaseWrapper::GetNNModels()
 	{
 		if (!openConnection())
-			return {};
+			throw std::exception("Не удалось открыть подключение");
 
 		std::vector<NNModelInfo> models;
 		QString queryStr("select net_name, net_file, net_id from nets");
@@ -185,7 +181,7 @@ namespace db
 	NNModelInfo DataBaseWrapper::GetNNModelInfo(const QUuid& ModelID)
 	{
 		if (!openConnection())
-			return {};
+			throw std::exception("Не удалось открыть подключение");
 		
 		QString error;
 
@@ -203,11 +199,11 @@ namespace db
 		response = ExecuteQuery("select * from nets where net_id = ?", { modelId }, error);
 
 		if (response.empty())
-			return {};
+			throw std::exception(QString::fromLocal8Bit("Не удалось найти нейронную сеть с таким Id: %1").arg(modelId.toString()).toLocal8Bit());
 		
 		auto& row = response.front();
 		if (row.empty())
-			return {};
+			throw std::exception(QString::fromLocal8Bit("Не удалось найти нейронную сеть с таким Id: %1").arg(modelId.toString()).toLocal8Bit());
 
 		return { row[1].toString(), row[2].toString(), row[0].toUuid() };
 	}
@@ -239,10 +235,8 @@ namespace db
 	std::vector<std::vector<QVariant>> DataBaseWrapper::ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error)
 	{
 		if (!openConnection())
-		{
-			error = QString::fromLocal8Bit("Не удалость открыть подключение");
-			return {};
-		}
+			throw std::exception("Не удалось открыть подключение");
+
 		std::vector<std::vector<QVariant> > result;
 		QSqlQuery q(db);
 		if (!q.prepare(query))
@@ -260,18 +254,14 @@ namespace db
 		}
 
 		if (!q.exec())
-		{
-			error = q.lastError().text();
-			return result;
-		}
+			throw std::exception(q.lastError().text().toLocal8Bit());
 
 		int columnsCount = 0;
 		{
 			auto record = q.record();
 			if (record.isEmpty())
 			{
-				error = "No result has been obtained";
-				return result;
+				throw std::exception("No result has been obtained");
 			}
 			columnsCount = record.count();
 		}

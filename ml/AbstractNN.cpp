@@ -24,7 +24,7 @@ namespace ml
 		}
 	}
 
-	at::Tensor FullyConnectedNN::Predict(const at::Tensor& X)
+	at::Tensor FullyConnectedNN::Predict(const at::Tensor& X) noexcept
 	{
 		at::Tensor Y(X);
 		for (auto& linearLayer : linearLayers)
@@ -36,7 +36,7 @@ namespace ml
 		return lastLinearLayer(Y);
 	}
 
-	void FullyConnectedNN::Print(QStringList& modules) const
+	void FullyConnectedNN::Print(QStringList& modules) const noexcept
 	{
 		QList<QString> list;
 		for (const auto& layer : linearLayers)

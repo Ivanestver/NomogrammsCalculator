@@ -151,11 +151,13 @@ namespace ui
 	{
 		auto dbWrapper = db::DataBaseWrapper::GetDatabase();
 		std::vector<QUuid> idsOfMethodologies;
-		auto error = dbWrapper->GetTemplateIDsByClassID(nomogramms::Methodology::GetCID(), idsOfMethodologies);
-		if (!error.isEmpty())
+		try
 		{
-			QMessageBox::critical(this, tr("Ошибка!"), error);
-			return;
+			idsOfMethodologies = dbWrapper->GetTemplateIDsByClassID(nomogramms::Methodology::GetCID());
+		}
+		catch (const std::exception& e)
+		{
+			QMessageBox::critical(this, tr("Ошибка!"), tr(e.what()));
 		}
 
 		dbWrapper.reset();

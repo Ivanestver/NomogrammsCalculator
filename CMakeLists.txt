@@ -27,7 +27,7 @@ find_package(Qt5 COMPONENTS Core Widgets Gui)
 #endif(NOT CMAKE_PREFIX_PATH AND NOT Qt5Widgets_DIR)
 
 # Add a compiler flag
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 # Make this a GUI application on Windows
 if(WIN32)

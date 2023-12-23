@@ -15,9 +15,9 @@ namespace ml
 	public:
 		FullyConnectedNN(int inputParamsCount, const std::vector<int>& layers, int outputParamsCount, const QString& nnName = QString::fromLocal8Bit("NN"));
 
-		virtual at::Tensor Predict(const at::Tensor& X);
+		virtual at::Tensor Predict(const at::Tensor& X) noexcept;
 
-		void Print(QStringList& modules) const;
+		void Print(QStringList& modules) const noexcept;
 
 		std::pair<int, int> GetInputOutputParamsCount() const noexcept;
 

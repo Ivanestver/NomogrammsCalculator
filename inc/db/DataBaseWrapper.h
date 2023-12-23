@@ -7,7 +7,6 @@
 #include <memory>
 #include <tuple>
 #include "db_state/db_state.h"
-#include <db_state/db_state.h>
 
 namespace db
 {
@@ -23,26 +22,26 @@ namespace db
 		static SDataBaseWrapper GetDatabase();
 		~DataBaseWrapper() = default;
 
-		QString GetTemplateIDsByClassID(const QUuid& classID, std::vector<QUuid>& ids);
-		QString GetPropertyValueByIdAndTemplateID(const QUuid& attributeID, const QUuid& templateID, QString& error);
-		std::vector<QString> GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& templateID);
+		_NODISCARD std::vector<QUuid> GetTemplateIDsByClassID(const QUuid& classID) const;
+		_NODISCARD QString GetPropertyValueByIdAndTemplateID(const QUuid& attributeID, const QUuid& templateID, QString& error);
+		_NODISCARD std::vector<QString> GetPropertiesByIDsAndObjID(const std::vector<QUuid>& attributes, const QUuid& templateID);
 
 		bool AddNN(const QString& nnName, const QString& nnFileName, QString& error);
-		std::vector<NNModelInfo> GetNNModels();
-		NNModelInfo GetNNModelInfo(const QUuid& ModelID);
+		_NODISCARD std::vector<NNModelInfo> GetNNModels();
+		_NODISCARD NNModelInfo GetNNModelInfo(const QUuid& ModelID);
 
 		bool ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error);
-		std::vector<std::vector<QVariant>> ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error);
+		_NODISCARD 	std::vector<std::vector<QVariant>> ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error);
 
 	private: 
 		QString turnIDToStr(const QUuid& id) const;
 
-		bool openConnection();
-		void closeConnection();
+		bool openConnection() const;
+		void closeConnection() const;
 
 	private:
-		QSqlDatabase db;
-		db_state::SDBState dbState = nullptr;
+		mutable QSqlDatabase db;
+		db_state::SDBState dbState{ nullptr };
 		DataBaseWrapper(const db_state::SDBState& state);
 	};
 
