@@ -32,10 +32,14 @@ namespace ml
 
 		QString error;
 		const auto response = db->ExecuteQuery("select count(*) from template where template_id in (?)", { NetID }, error);
-		if (!response.empty() || !response.front().empty())
+		if (!response.empty() && response.front().front().toInt() != 0)
 			return false;
 
 		auto nnInfo = db->GetNNModelInfo(NetID);
+
+		if (!db->ExecuteUpdate("delete from nets where net_id = ?", { NetID }, error))
+			return false;
+
 		bool ok = false;
 		try
 		{

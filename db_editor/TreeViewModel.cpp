@@ -230,7 +230,7 @@ bool TreeItemModel::saveTemplate(const TreeItem* item, QString& error) const
     error = "";
 
     auto executor = DBExecutor::GetInstance();
-    int rowsInserted = executor->ExecChange("insert into [template](template_id, class_id) values (?, ?)", { item->id, item->classId }, error);
+    int rowsInserted = executor->ExecChange("insert into template(template_id, class_id) values (?, ?)", { item->id, item->classId }, error);
     return rowsInserted != 0;
 }
 
@@ -244,7 +244,7 @@ bool TreeItemModel::saveProperties(const TreeItem* item, const std::map<QUuid, Q
     error = "";
 
     auto executor = DBExecutor::GetInstance();
-    QString queryStr = "insert into [template_property](template_id, property_id, property_value) values (?, ?, ?)";
+    QString queryStr = "insert into template_property(template_id, property_id, property_value) values (?, ?, ?)";
     size_t rowsAffected = 0;
     for (const auto& pair : properties)
     {

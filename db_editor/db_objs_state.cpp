@@ -156,7 +156,10 @@ bool AbstractDBObjState::removeItemFromDatabase(const QUuid& itemId, QString& er
 	if (!removeItemFromTable(itemId, "template_property", "template_id", error))
 		return false;
 
-	return removeItemFromTable(itemId, "template", "template_id", error);
+	if (!removeItemFromTable(itemId, "template", "template_id", error))
+		return false;
+
+	return commitAdditionalDeletes(itemId, error);
 }
 
 bool AbstractDBObjState::removeItemFromTable(const QUuid& itemId, const QString& tableName, const QString& columnName, QString& error) const
@@ -165,8 +168,14 @@ bool AbstractDBObjState::removeItemFromTable(const QUuid& itemId, const QString&
 	if (!dbExecutor)
 		return false;
 
-	QString queryStr = QString("delete from [%1] where [%2] = ?").arg(tableName).arg(columnName);
+	QString queryStr = QString("delete from %1 where %2 = ?").arg(tableName).arg(columnName);
 	return dbExecutor->ExecChange(queryStr, { itemId }, error) > 0;
+}
+
+bool AbstractDBObjState::commitAdditionalDeletes(const QUuid& itemId, QString& error) const
+{
+	Q_UNUSED(itemId);
+	return true;
 }
 
 bool MethodologyState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const
@@ -273,6 +282,14 @@ bool GraphicState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QSt
 std::pair<QString, QString> GraphicState::getMessageAndTitleWhenAdding() const
 {
 	return { QString::fromLocal8Bit("Введите название графика") , QString::fromLocal8Bit("Название графика") };
+}
+
+bool GraphicState::commitAdditionalDeletes(const QUuid& itemId, QString& error) const
+{
+	if (!removeItemFromTable(itemId, "template_measure_unit_input", "template_id", error))
+		return false;
+
+	return removeItemFromTable(itemId, "template_measure_unit_output", "template_id", error);
 }
 
 QUuid GraphicState::GetClassID()

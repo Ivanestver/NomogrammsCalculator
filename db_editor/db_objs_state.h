@@ -80,9 +80,12 @@ private:
 	TreeItem* insertRowToModelAndGetItem(QAbstractItemModel* model, const QModelIndexList& selectedIndexList, QString& error);
 	bool addObjAndAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const;
 	// Вспомогательные функции для удаления
+
+protected:
 	bool removeItemFromModel(const QModelIndex& selectedItemIdx, QAbstractItemModel* model, QString& error) const;
 	bool removeItemFromDatabase(const QUuid& itemId, QString& error) const;
 	bool removeItemFromTable(const QUuid& itemId, const QString& tableName, const QString& columnName, QString& error) const;
+	virtual bool commitAdditionalDeletes(const QUuid& itemId, QString& error) const;
 
 private:
 	QString objectName;
@@ -138,6 +141,7 @@ private:
 	virtual QModelIndex getParentIndex(const QModelIndexList& selectedIndexList) const override;
 	virtual bool addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const override;
 	virtual std::pair<QString, QString> getMessageAndTitleWhenAdding() const override;
+	bool commitAdditionalDeletes(const QUuid& itemId, QString& error) const override;
 };
 
 class NNState : public AbstractDBObjState
