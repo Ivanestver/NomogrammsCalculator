@@ -11,7 +11,7 @@
 	using U##__class__ = std::unique_ptr<__class__>
 
 #define DECL_DCBASECLASS \
-protected: \
+public: \
 	virtual const QUuid GetClassID() const = 0;
 
 #define DECL_DBCLASS(__class__) \

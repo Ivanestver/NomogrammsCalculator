@@ -227,6 +227,9 @@ QModelIndex NomogrammState::getParentIndex(const QModelIndexList& selectedIndexL
 bool NomogrammState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, QString& error) const
 {
 	const auto* item = getItemToAdd();
+	if (!executor->LinkTemplates(item->parent->id, item->id, error))
+		return false;
+
 	if (!executor->InsertProperty(item->id, db_state::properties::dbobject_name, item->name, error))
 		return false;
 
@@ -239,7 +242,7 @@ bool NomogrammState::addAttrsToDB(const std::shared_ptr<DBExecutor>& executor, Q
 	if (!executor->InsertProperty(item->id, db_state::properties::data_type_with_unit, QString(""), error))
 		return false;
 
-	return executor->LinkTemplates(item->parent->id, item->id, error);
+	return addPictureToDB(executor, item->id, error);
 }
 
 std::pair<QString, QString> NomogrammState::getMessageAndTitleWhenAdding() const
@@ -252,6 +255,15 @@ void NomogrammState::FillProperties()
 	addProperty(db_state::properties::nomogramm_bypassRule);
 	addProperty(db_state::properties::nomogramm_bypassRule_List);
 	addProperty(db_state::properties::data_type_with_unit);
+	addProperty(db_state::properties::nomogramm_picture);
+}
+
+bool NomogrammState::addPictureToDB(const std::shared_ptr<DBExecutor>& executor, const QUuid& itemId, QString& error) const
+{
+	if (!executor->InsertProperty(itemId, db_state::properties::nomogramm_picture, QString(""), error))
+		return false;
+
+	return executor->ExecChange("insert into nomogramms_images(template_id) values (?)", { itemId }, error) > 0;
 }
 
 QUuid GraphicState::getClassId() const

@@ -8,6 +8,7 @@
 #include <TreeItem.h>
 #include <vector>
 #include <map>
+#include <QGraphicsPixmapItem>
 
 using namespace nomogramms;
 
@@ -97,6 +98,12 @@ namespace ui
 			return std::dynamic_pointer_cast<ICalculeable>(item->item);
 		}
 
+		const QUuid GetItemClassIdFromIndex(const QModelIndex& index) const
+		{
+			const auto* item = static_cast<const TreeItem*>(index.internalPointer());
+			return item->item->GetClassID();
+		}
+
 	private:
 		void initItem(TreeItem& itemToInit)
 		{
@@ -142,9 +149,10 @@ namespace ui
 		, ui(new Ui::NomogrammViewer())
 	{
 		ui->setupUi(this);
-		connect(ui->inputSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &NomogrammsViewer::onSpinBoxValueChanged);
+		ui->graphicsView->setScene(new QGraphicsScene());
 
 		setTree();
+		setGraphicsTabViewMode(false);
 	}
 
 	void NomogrammsViewer::setTree()
@@ -157,7 +165,7 @@ namespace ui
 		}
 		catch (const std::exception& e)
 		{
-			QMessageBox::critical(this, tr("Ошибка!"), tr(e.what()));
+			QMessageBox::critical(this, QString::fromLocal8Bit("Ошибка!"), QString::fromLocal8Bit(e.what()));
 		}
 
 		dbWrapper.reset();
@@ -253,6 +261,33 @@ namespace ui
 		}
 	}
 
+	void NomogrammsViewer::setGraphicsTabViewMode(bool show)
+	{
+		ui->graphicsTab->setVisible(show);
+	}
+
+	void NomogrammsViewer::showNomogramm(const SNomogramm& Nomogramm)
+	{
+		setGraphicsTabViewMode(true);
+		auto db = db::DataBaseWrapper::GetDatabase();
+		if (!db)
+			return;
+
+		QString error;
+		auto image = db->LoadNomogrammPicture(Nomogramm->GetId(), error);
+		if (image.isNull())
+		{
+			QMessageBox::warning(this, QString::fromLocal8Bit("Внимание"), error);
+			return;
+		}
+
+		auto* item = new QGraphicsPixmapItem();
+		item->setPixmap(QPixmap::fromImage(image));
+
+		ui->graphicsView->scene()->clear();
+		ui->graphicsView->scene()->addItem(item);
+	}
+
 	void NomogrammsViewer::onCurrentItemTreeChanged(const QModelIndex& current, const QModelIndex& previous)
 	{
 		Q_UNUSED(previous);
@@ -266,6 +301,17 @@ namespace ui
 		currentCalculeable = model->GetICalculableFromIndex(current);
 		if (!currentCalculeable)
 			return;
+
+		const auto itemClassId = model->GetItemClassIdFromIndex(current);
+		if (itemClassId.isNull())
+			return;
+
+		if (itemClassId == Nomogramm::GetCID())
+		{
+			showNomogramm(std::dynamic_pointer_cast<Nomogramm>(currentCalculeable));
+		}
+		else
+			setGraphicsTabViewMode(false);
 
 		ICalculeable::ParametersDict parameters;
 		currentCalculeable->GetParameters(parameters);

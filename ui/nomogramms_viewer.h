@@ -9,6 +9,7 @@
 #include "nomogramms/ICalculeable.h"
 #include <vector>
 #include "nomogramms/MeasureUnit.h"
+#include "nomogramms/Nomogramm.h"
 
 namespace ui
 {
@@ -31,6 +32,8 @@ namespace ui
 		void setValue(const QTableWidgetItem* item);
 		nomogramms::IOData createInputData() const;
 		void setOutputData(const nomogramms::IOData& outputData);
+		void setGraphicsTabViewMode(bool show);
+		void showNomogramm(const nomogramms::SNomogramm& Nomogramm);
 
 	private:
 		NomogrammsViewer(const NomogrammsViewer&) = delete;

@@ -5,6 +5,7 @@
 #include "properties_table_model.h"
 #include "set_bypass_rule_args_dlg.h"
 #include "object_measure_unit_dlg.h"
+#include "choose_nomogramm_picture_dlg.h"
 
 PropertyValueDelegate::PropertyValueDelegate(QObject* parent/* = nullptr*/)
 	: QStyledItemDelegate(parent)
@@ -46,6 +47,15 @@ QWidget* PropertyValueDelegate::createEditor(QWidget* parent, const QStyleOption
 		connect(btn, &QPushButton::clicked, this, &PropertyValueDelegate::onOpenMeasureUnitsClicked);
 		return btn;
 	}
+	else if (item.id == db_state::properties::nomogramm_picture)
+	{
+		const auto& idItem = model->GetTableItemByIdx(model->index(0, 1, QModelIndex()));
+		id = idItem.value.toUuid();
+		auto* btn = new QPushButton(parent);
+		btn->setText(QString::fromLocal8Bit("Выбрать изображение"));
+		connect(btn, &QPushButton::clicked, this, &PropertyValueDelegate::onOpenNomogrammImageClicked);
+		return btn;
+	}
 	else
 	{
 		return QStyledItemDelegate::createEditor(parent, option, index);
@@ -61,6 +71,12 @@ void PropertyValueDelegate::setModelData(QWidget* editor, QAbstractItemModel* mo
 void PropertyValueDelegate::onOpenMeasureUnitsClicked()
 {
 	DlgObjectMeasureUnit dlg(id, isInput, nullptr);
+	dlg.exec();
+}
+
+void PropertyValueDelegate::onOpenNomogrammImageClicked()
+{
+	ChooseNomogrammPictureDlg dlg(id);
 	dlg.exec();
 }
 

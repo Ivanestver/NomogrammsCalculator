@@ -237,7 +237,7 @@ namespace db
 		return true;
 	}
 
-	std::vector<std::vector<QVariant>> DataBaseWrapper::ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error)
+	std::vector<std::vector<QVariant>> DataBaseWrapper::ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error) const
 	{
 		if (!openConnection())
 			throw std::exception("Не удалось открыть подключение");
@@ -285,5 +285,24 @@ namespace db
 		closeConnection();
 
 		return result;
+	}
+
+	QImage DataBaseWrapper::LoadNomogrammPicture(const QUuid& NomogrammId, QString& error) const
+	{
+		std::vector<std::vector<QVariant>> response = ExecuteQuery("select picture, picture_format from nomogramms_images where template_id = ?", { NomogrammId }, error);
+
+		if (response.empty() || response[0].empty())
+		{
+			error = QString::fromLocal8Bit("Не удалось получить данные");
+			return {};
+		}
+
+		auto pictureAsVariant = response.front()[0];
+		if (pictureAsVariant.isNull())
+			return {};
+
+		auto pictureFormat = response.front()[1].toString();
+
+		return QImage::fromData(QByteArray::fromBase64(pictureAsVariant.toByteArray()), pictureFormat.toLocal8Bit().constData());
 	}
 }

@@ -11,6 +11,7 @@ namespace db_state
 		const QUuid measure_value("8F8F8660-6AE1-4C79-8B96-0832903C5772");
 		const QUuid data_type_with_unit("C3AA13ED-4620-4016-A106-7AAE653CBFD1");
 		const QUuid data_output_type_with_unit("E67ABF23-9E60-49A4-BB5E-DC44F50B649E");
+		const QUuid nomogramm_picture("DF8A4254-F4EC-4587-95F7-A090E9D8F236");
 	}
 
 	namespace db_ids

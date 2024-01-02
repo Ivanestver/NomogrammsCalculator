@@ -7,6 +7,7 @@
 #include <memory>
 #include <tuple>
 #include "db_state/db_state.h"
+#include <QtGui/QImage>
 
 namespace db
 {
@@ -15,6 +16,7 @@ namespace db
 
 	// { net_name, net_file, net_id }
 	using NNModelInfo = std::tuple<QString, QString, QUuid>;
+	using Image = std::pair<QByteArray, const char*>;
 
 	class DataBaseWrapper
 	{
@@ -31,7 +33,9 @@ namespace db
 		_NODISCARD NNModelInfo GetNNModelInfo(const QUuid& ModelID);
 
 		bool ExecuteUpdate(const QString& query, const std::vector<QVariant>& params, QString& error);
-		_NODISCARD 	std::vector<std::vector<QVariant>> ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error);
+		_NODISCARD std::vector<std::vector<QVariant>> ExecuteQuery(const QString& query, const std::vector<QVariant>& params, QString& error) const;
+
+		_NODISCARD QImage LoadNomogrammPicture(const QUuid& NomogrammId, QString& error) const;
 
 	private: 
 		QString turnIDToStr(const QUuid& id) const;

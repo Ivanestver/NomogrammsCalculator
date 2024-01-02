@@ -4,6 +4,8 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QSqlError>
+#include <QPixmap>
+#include <QBuffer>
 
 std::shared_ptr<DBExecutor> DBExecutor::GetInstance()
 {
@@ -131,6 +133,52 @@ bool DBExecutor::ReceiveProperties(const std::vector<QUuid>& propertiesId, std::
 	return true;
 }
 
+bool DBExecutor::SavePicture(const QUuid& nomogrammId, const Picture& nomogrammPicture, QString& error) const
+{
+	QPixmap pixmap = QPixmap::fromImage(nomogrammPicture.first);
+	if (pixmap.isNull())
+	{
+		error = QString::fromLocal8Bit("Не удалось получить изображение");
+		return false;
+	}
+
+	if (nomogrammPicture.second.isEmpty())
+	{
+		error = QString::fromLocal8Bit("Не удалось определить формат изображения");
+		return false;
+	}
+
+	QByteArray byteArray;
+	QBuffer buffer(&byteArray);
+	buffer.open(QIODevice::WriteOnly);
+	pixmap.save(&buffer, nomogrammPicture.second.toLocal8Bit().constData());
+	byteArray = byteArray.toBase64();
+
+	QString queryStr = QString("update nomogramms_images set picture = ?, picture_format = ? where template_id = ?");
+	return ExecChange(queryStr, { QVariant::fromValue(byteArray), nomogrammPicture.second, nomogrammId }, error);
+}
+
+QImage DBExecutor::LoadPicture(const QUuid& nomogrammId, QString& error) const
+{
+	Response response;
+	if (!ExecSELECT("select picture, picture_format from nomogramms_images where template_id = ?", { nomogrammId }, response, error))
+		return {};
+
+	if (response.empty() || response[0].empty())
+	{
+		error = QString::fromLocal8Bit("Не удалось получить данные");
+		return {};
+	}
+
+	auto pictureAsVariant = response.front()[0];
+	if (pictureAsVariant.isNull())
+		return {};
+
+	auto pictureFormat = response.front()[1].toString();
+
+	return QImage::fromData(QByteArray::fromBase64(pictureAsVariant.toByteArray()), pictureFormat.toLocal8Bit().constData());
+}
+
 int DBExecutor::removeTemplateFromTable(const QUuid& templateId, const QString& table, const QString& fieldOfTemplate, QString& error) const
 {
 	QString queryStr = QString("delete from %1 where %2 = ?").arg(table).arg(fieldOfTemplate);
@@ -149,7 +197,6 @@ int DBExecutor::removeTemplateFromTable(const QUuid& templateId, const QString& 
 
 DBExecutor::DBExecutor(const db_state::SDBState& state)
 {
-	qDebug() << QSqlDatabase::connectionNames();
 	if (!QSqlDatabase::contains(QSqlDatabase::defaultConnection))
 	{
 		db = QSqlDatabase::addDatabase(state->GetDBName());

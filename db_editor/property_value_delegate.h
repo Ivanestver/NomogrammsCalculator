@@ -23,6 +23,7 @@ public:
 private Q_SLOTS:
     void onOpenBypassRuleListClicked();
     void onOpenMeasureUnitsClicked();
+    void onOpenNomogrammImageClicked();
 
 private:
     mutable bool isInput = true;

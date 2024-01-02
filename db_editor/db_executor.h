@@ -16,6 +16,7 @@ public:
 	using Record = std::vector<QVariant>;
 	using Response = std::vector<Record>;
 	using PropertyInfo = std::tuple<QUuid, QString, QVariant>;
+	using Picture = std::pair<QImage, QString>; // <picture, picture format>
 
 	struct DBExecutorUtils
 	{
@@ -39,6 +40,9 @@ public:
 
 	bool ReceivePropertiesOfObj(const QUuid& objId, std::set<PropertyInfo>& properties, QString& error) const;
 	bool ReceiveProperties(const std::vector<QUuid>& propertiesId, std::set<PropertyInfo>& properoties, QString& error) const;
+
+	bool SavePicture(const QUuid& nomogrammId, const Picture& nomogrammPicture, QString& error) const;
+	QImage LoadPicture(const QUuid& nomogrammId, QString& error) const;
 
 private:
 	int removeTemplateFromTable(const QUuid& templateId, const QString& table, const QString& fieldOfTemplate, QString& error) const;

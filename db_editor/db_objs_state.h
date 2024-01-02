@@ -98,9 +98,6 @@ class MethodologyState : public AbstractDBObjState
 public:
 	static QUuid GetClassID();
 
-	MethodologyState() = default;
-	~MethodologyState() override = default;
-
 	virtual void FillProperties() override;
 private:
 	// Унаследовано через AbstractDBObjState
@@ -113,13 +110,12 @@ private:
 class NomogrammState : public AbstractDBObjState
 {
 public:
-	NomogrammState() = default;
-	~NomogrammState() override = default;
-
 	static QUuid GetClassID();
 	virtual void FillProperties() override;
 
 private:
+	bool addPictureToDB(const std::shared_ptr<DBExecutor>& executor, const QUuid& itemId, QString& error) const;
+
 	// Унаследовано через AbstractDBObjState
 	virtual QUuid getClassId() const override;
 	virtual QModelIndex getParentIndex(const QModelIndexList& selectedIndexList) const override;
@@ -130,11 +126,9 @@ private:
 class GraphicState : public AbstractDBObjState
 {
 public:
-	GraphicState() = default;
-	~GraphicState() override = default;
-	
 	static QUuid GetClassID();
 	virtual void FillProperties() override;
+
 private:
 	// Унаследовано через AbstractDBObjState
 	virtual QUuid getClassId() const override;
@@ -147,9 +141,6 @@ private:
 class NNState : public AbstractDBObjState
 {
 public:
-	NNState() = default;
-	~NNState() override = default;
-
 	static QUuid GetClassID();
 
 	// Унаследовано через AbstractDBObjState
