@@ -2,6 +2,11 @@
 
 namespace ml
 {
+	FullyConnectedNN::FullyConnectedNN(const QString& nnName)
+		: torch::nn::Module(nnName.toStdString())
+	{
+	}
+	
 	FullyConnectedNN::FullyConnectedNN(int inputParamsCount, const std::vector<int>& layers, int outputParamsCount, const QString& nnName)
 		: torch::nn::Module(nnName.toStdString())
 	{
@@ -24,7 +29,7 @@ namespace ml
 		}
 	}
 
-	at::Tensor FullyConnectedNN::Predict(const at::Tensor& X) noexcept
+	at::Tensor FullyConnectedNN::Predict(const at::Tensor& X) noexcept(false)
 	{
 		at::Tensor Y(X);
 		for (auto& linearLayer : linearLayers)
@@ -38,6 +43,9 @@ namespace ml
 
 	void FullyConnectedNN::Print(QStringList& modules) const noexcept
 	{
+		if (linearLayers.empty())
+			return;
+
 		QList<QString> list;
 		for (const auto& layer : linearLayers)
 		{
@@ -61,10 +69,12 @@ namespace ml
 		if (!modules.empty())
 		{
 			const auto& first = modules.front();
-			input = getParamsCountOfModule(first);
+			auto linearInput = std::dynamic_pointer_cast<torch::nn::LinearImpl>(first);
+			input = linearInput->options.in_features();
 
 			const auto& last = modules.back();
-			output = getParamsCountOfModule(last);
+			linearInput = std::dynamic_pointer_cast<torch::nn::LinearImpl>(last);
+			output = linearInput->options.out_features();
 		}
 
 		return { input, output };
@@ -79,6 +89,6 @@ namespace ml
 		if (paramsOfLast.empty())
 			return 0;
 
-		return paramsOfLast[0].size(0);
+		return paramsOfLast[0].size(1);
 	}
 }

@@ -6,75 +6,49 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>708</width>
-    <height>535</height>
+    <width>1021</width>
+    <height>726</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>350</x>
-     <y>480</y>
-     <width>341</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="choosePictureBtn">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>20</y>
-     <width>131</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Выбрать изображение</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="pictureName">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>60</y>
-     <width>161</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Изображение не выбрано</string>
-   </property>
-  </widget>
-  <widget class="QGraphicsView" name="newPicture">
-   <property name="geometry">
-    <rect>
-     <x>300</x>
-     <y>10</y>
-     <width>391</width>
-     <height>361</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QGraphicsView" name="currentPicture">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>130</y>
-     <width>256</width>
-     <height>192</height>
-    </rect>
-   </property>
-  </widget>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QPushButton" name="choosePictureBtn">
+       <property name="text">
+        <string>Выбрать изображение</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="pictureName">
+       <property name="text">
+        <string>Изображение не выбрано</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QGraphicsView" name="currentPicture"/>
+   </item>
+   <item row="1" column="1">
+    <widget class="QGraphicsView" name="newPicture"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections>

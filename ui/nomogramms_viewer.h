@@ -43,6 +43,8 @@ namespace ui
 		void onSpinBoxValueChanged(int value);
 		void onCurrentItemTreeChanged(const QModelIndex& current, const QModelIndex& previous);
 		void onItemChanged(QTableWidgetItem* item);
+		void onCalcBtnClicked();
+		void onResetBtnClicked();
 
 	private:
 		std::shared_ptr<Ui::NomogrammViewer> ui;

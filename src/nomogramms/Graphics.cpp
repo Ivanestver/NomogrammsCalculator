@@ -70,9 +70,15 @@ namespace nomogramms
         return m_wrapper.Calc(inputData, outputData, error);
     }
 
-    void Graphics::GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const
+    void Graphics::GetParameters(ICalculeable::ParametersDict& parameters) const
     {
         for (const auto& pair : m_parametersList)
-            parameters.insert(pair);
+        {
+            auto& set = parameters[pair.first];
+            for (const auto& item : pair.second)
+            {
+                set.insert(item);
+            }
+        }
     }
 }

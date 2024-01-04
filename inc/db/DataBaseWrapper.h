@@ -8,15 +8,33 @@
 #include <tuple>
 #include "db_state/db_state.h"
 #include <QtGui/QImage>
+#include <vector>
 
 namespace db
 {
 	DECL_UNIQUE(DataBaseWrapper);
 	DECL_SHARED(DataBaseWrapper);
 
-	// { net_name, net_file, net_id }
-	using NNModelInfo = std::tuple<QString, QString, QUuid>;
 	using Image = std::pair<QByteArray, const char*>;
+
+	struct NNModelInfo
+	{
+		NNModelInfo(const QString& name, const QString& netFile, const QUuid& id, int inp, int outp, const std::vector<int>& hidden)
+			: NetName(name)
+			, NetFile(netFile)
+			, NetId(id)
+			, inputFeatures(inp)
+			, outputFeatures(outp)
+			, hiddenFeatures(hidden)
+		{}
+
+		QString NetName;
+		QString NetFile;
+		QUuid NetId;
+		int inputFeatures;
+		int outputFeatures;
+		std::vector<int> hiddenFeatures;
+	};
 
 	class DataBaseWrapper
 	{
@@ -39,6 +57,8 @@ namespace db
 
 	private: 
 		QString turnIDToStr(const QUuid& id) const;
+
+		std::tuple<int, std::vector<int>, int> readNNStruct(const QString& netStruct) const;
 
 		bool openConnection() const;
 		void closeConnection() const;

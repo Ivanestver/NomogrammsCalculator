@@ -153,6 +153,9 @@ namespace ui
 
 		setTree();
 		setGraphicsTabViewMode(false);
+
+		connect(ui->calcBtn, &QPushButton::clicked, this, &NomogrammsViewer::onCalcBtnClicked);
+		connect(ui->resetBtn, &QPushButton::clicked, this, &NomogrammsViewer::onResetBtnClicked);
 	}
 
 	void NomogrammsViewer::setTree()
@@ -183,9 +186,6 @@ namespace ui
 	{
 		ui->inputTable->setRowCount(0);
 		ui->outputTable->setRowCount(0);
-
-		ui->inputTable->setColumnCount(2);
-		ui->outputTable->setColumnCount(2);
 
 		addParameterTypeToInputTable(ParameterType::Input, params);
 		addParameterTypeToInputTable(ParameterType::Output, params);
@@ -315,6 +315,7 @@ namespace ui
 
 		ICalculeable::ParametersDict parameters;
 		currentCalculeable->GetParameters(parameters);
+		values.clear();
 
 		for (const auto& pair : parameters)
 		{
@@ -334,6 +335,10 @@ namespace ui
 			return;
 
 		setValue(item);
+	}
+
+	void NomogrammsViewer::onCalcBtnClicked()
+	{
 		const auto inputData = createInputData();
 		IOData outputData;
 
@@ -347,6 +352,17 @@ namespace ui
 		disconnect(ui->inputTable, &QTableWidget::itemChanged, this, &NomogrammsViewer::onItemChanged);
 		setOutputData(outputData);
 		setInputTable(values);
+	}
+
+	void NomogrammsViewer::onResetBtnClicked()
+	{
+		for (auto& value : values)
+		{
+			for (auto& item : value.second)
+			{
+				item.second = 0.0;
+			}
+		}
 	}
 
 	void NomogrammsViewer::onSpinBoxValueChanged(int value)

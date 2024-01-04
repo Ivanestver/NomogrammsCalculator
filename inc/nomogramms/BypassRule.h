@@ -22,7 +22,7 @@ namespace nomogramms
 		bool operator!=(const DBObject& other) const override;
 
 		virtual bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const override;
-		virtual void GetParameters(std::map<ParameterType, std::vector<SMeasureUnit> >& parameters) const override;
+		virtual void GetParameters(ICalculeable::ParametersDict& parameters) const override;
 
 	protected:
 		virtual void initFromDB() override;

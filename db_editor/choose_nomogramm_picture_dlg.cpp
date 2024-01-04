@@ -38,6 +38,7 @@ void ChooseNomogrammPictureDlg::showCurrentPicture()
 		return;
 	}
 
+	//image = image.scaled(ui.currentPicture->size());
 	ui.currentPicture->scene()->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(image)));
 }
 
@@ -67,6 +68,7 @@ void ChooseNomogrammPictureDlg::onChoosePictureBtnClicked()
 	}
 
 	chosenImage = QImage(filePath);
+	chosenImage = chosenImage.scaled(ui.newPicture->size());
 
 	ui.newPicture->scene()->removeItem(item);
 	item = new QGraphicsPixmapItem();

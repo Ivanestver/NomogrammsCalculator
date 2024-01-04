@@ -31,7 +31,7 @@ namespace nomogramms
 		return false;
 	}
 
-	void BypassRule::GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const
+	void BypassRule::GetParameters(ICalculeable::ParametersDict& parameters) const
 	{
 		for (const auto& g : graphics)
 			g->GetParameters(parameters);

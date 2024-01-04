@@ -50,13 +50,22 @@ namespace nomogramms
 			inputValues.push_back(value);
 		}
 
-		at::Tensor inputTensor = torch::zeros({(long long)inputValues.size(), 1});
+		at::Tensor inputTensor = torch::zeros({1ULL, (long long)inputValues.size()});
 		for (size_t row = 0; row < inputValues.size(); ++row)
 		{
-			inputTensor[row][0] = inputValues[row];
+			inputTensor[0][row] = inputValues[row];
 		}
 
-		auto outputTensor = m_nn->Predict(inputTensor);
+		at::Tensor outputTensor;
+		try
+		{
+			outputTensor = m_nn->Predict(inputTensor);
+		}
+		catch (const std::exception& e)
+		{
+			error = QString::fromLocal8Bit(e.what());
+			return false;
+		}
 
 		size_t outputTensorSize = outputTensor.size(0);
 		size_t outputParametersListSize = itOutput->second.size();

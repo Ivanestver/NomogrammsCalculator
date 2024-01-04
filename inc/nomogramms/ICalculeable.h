@@ -5,6 +5,7 @@
 #include "common/macros.h"
 #include "nomogramms/NomogrammsEnums.h"
 #include "nomogramms/MeasureUnit.h"
+#include <set>
 
 namespace nomogramms
 {
@@ -13,7 +14,16 @@ namespace nomogramms
 	class ICalculeable
 	{
 	public:
-		using ParametersDict = std::map<ParameterType, std::vector<SMeasureUnit>>;
+		struct SMeasureUnitLess
+		{
+		public:
+			bool operator()(const SMeasureUnit& left, const SMeasureUnit& right) const
+			{
+				return *left < *right;
+			}
+		};
+
+		using ParametersDict = std::map<ParameterType, std::set<SMeasureUnit, SMeasureUnitLess>>;
 	public:
 		virtual ~ICalculeable() = default;
 		ICalculeable(const ICalculeable&) = default;

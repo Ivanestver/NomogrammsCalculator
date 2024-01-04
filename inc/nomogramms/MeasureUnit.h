@@ -27,4 +27,6 @@ namespace nomogramms
 		SMeasure measure = nullptr;
 		SUnit unit = nullptr;
 	};
+
+	bool operator<(const MeasureUnit& left, const MeasureUnit& right);
 }

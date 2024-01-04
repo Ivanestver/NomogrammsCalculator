@@ -104,8 +104,8 @@ namespace ui
 		auto nnsInfo = db->GetNNModels();
 		for (const auto& pair : nnsInfo)
 		{
-			auto* item = new QListWidgetItem(std::get<0>(pair));
-			item->setData(Qt::UserRole, std::get<2>(pair));
+			auto* item = new QListWidgetItem(pair.NetName);
+			item->setData(Qt::UserRole, pair.NetId);
 			ui.NNNamesListWidget->addItem(item);
 		}
 	}
@@ -120,6 +120,7 @@ namespace ui
 		QStringList modules;
 		nn->Print(modules);
 
+		ui.layoutsListWidget->clear();
 		for (const auto& module : modules)
 			ui.layoutsListWidget->addItem(module);
 	}

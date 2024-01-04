@@ -13,9 +13,10 @@ namespace ml
 	class FullyConnectedNN : public torch::nn::Module
 	{
 	public:
+		explicit FullyConnectedNN(const QString& nnName);
 		FullyConnectedNN(int inputParamsCount, const std::vector<int>& layers, int outputParamsCount, const QString& nnName = QString::fromLocal8Bit("NN"));
 
-		virtual at::Tensor Predict(const at::Tensor& X) noexcept;
+		virtual at::Tensor Predict(const at::Tensor& X) noexcept(false);
 
 		void Print(QStringList& modules) const noexcept;
 

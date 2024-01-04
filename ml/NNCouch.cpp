@@ -1,6 +1,7 @@
 #include "NNCouch.h"
 #include "ml/optimizer.h"
 #include <chrono>
+#include "ml/dataset.h"
 
 using namespace std::chrono;
 
@@ -29,14 +30,15 @@ namespace ml
 		at::Tensor XVal(std::move(validationSet.first));
 		at::Tensor YVal(std::move(validationSet.second));
 
-		auto dataset = torch::data::datasets::TensorDataset(torch::stack({ XTrain, YTrue }, 1));
-		auto dataloader = torch::data::make_data_loader(dataset, torch::data::DataLoaderOptions().batch_size(settings.batchSize));
 
-		std::vector<at::Tensor> lossesOfDecade;
-
-		auto start = high_resolution_clock::now();
+		decltype(high_resolution_clock::now()) start;
 		try
 		{
+			auto dataset = DataSet(XTrain, YTrue);
+			auto dataloader = torch::data::make_data_loader(dataset, torch::data::DataLoaderOptions().batch_size(settings.batchSize));
+
+			start = high_resolution_clock::now();
+			std::vector<at::Tensor> lossesOfDecade;
 			for (int epoch = 0; epoch < settings.epochsCount; epoch++)
 			{
 				std::vector<at::Tensor> lossesOfEpoch;
@@ -63,8 +65,8 @@ namespace ml
 
 					for (const auto& sample : batch)
 					{
-						auto x = sample.data[0].reshape({ -1, 1 });
-						auto yReal = sample.data[1].reshape({ -1, 1 });
+						auto x = sample.data.reshape({ -1, sample.data.size(0)});
+						auto yReal = sample.target.reshape({ -1, 1 });
 
 						auto yPred = settings.nn->Predict(x);
 						auto loss = settings.criterion->forward(yPred, yReal);

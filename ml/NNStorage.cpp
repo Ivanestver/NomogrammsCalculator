@@ -45,7 +45,7 @@ namespace ml
 		{
 			const auto* xmlConfig = xml::XmlConfiguration::GetInstance();
 			QString path = xmlConfig->GetValueByTag("models_path");
-			path += std::get<1>(nnInfo);
+			path += nnInfo.NetFile;
 			QFile fileToRemove(path);
 			if (!fileToRemove.exists())
 				return false;
@@ -68,16 +68,19 @@ namespace ml
 		if (!db)
 			return {};
 
-		auto nnInfo = db->GetNNModelInfo(NetID);
-
-		SFullyConnectedNN nn = std::make_shared<FullyConnectedNN>(1, std::vector<int>(), 1, std::get<0>(nnInfo));
-		torch::serialize::InputArchive inputArchive;
+		SFullyConnectedNN nn;
 
 		try
 		{
+			auto nnInfo = db->GetNNModelInfo(NetID);
+
+			nn = std::make_shared<FullyConnectedNN>(nnInfo.inputFeatures, nnInfo.hiddenFeatures, nnInfo.outputFeatures, nnInfo.NetName);
+			//nn = std::make_shared<FullyConnectedNN>(nnInfo.NetName);
+			torch::serialize::InputArchive inputArchive;
+
 			const auto* xmlConfig = xml::XmlConfiguration::GetInstance();
 			QString path = xmlConfig->GetValueByTag("models_path");
-			path += std::get<1>(nnInfo);
+			path += nnInfo.NetFile;
 			inputArchive.load_from(path.toStdString());
 			nn->load(inputArchive);
 			nets.insert({ NetID, nn });

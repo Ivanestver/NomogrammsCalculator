@@ -41,4 +41,9 @@ namespace nomogramms
 		measure = std::make_shared<Measure>(record[0].toUuid());
 		unit = std::make_shared<Unit>(record[1].toUuid());
 	}
+
+	bool operator<(const MeasureUnit& left, const MeasureUnit& right)
+	{
+		return left.GetId() < right.GetId();
+	}
 }

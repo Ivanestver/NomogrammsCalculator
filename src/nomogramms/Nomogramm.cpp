@@ -42,17 +42,43 @@ namespace nomogramms
 
 		executor.WriteResultsTo(outputData);
 
-		//Nomogramm n1{ QUuid{} };
-		//Nomogramm n2 = n1;
-		//Nomogramm n3 = std::move(n1);
-
 		return true;
 	}
 
-	void Nomogramm::GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const
+	void Nomogramm::GetParameters(ICalculeable::ParametersDict& parameters) const
 	{
 		for (const auto& pair : graphics)
 			pair.second->GetParameters(parameters);
+
+		auto& input = parameters[ParameterType::Input];
+		auto& output = parameters[ParameterType::Output];
+
+		std::vector<SMeasureUnit> intersection;
+		std::set_intersection(input.begin(), input.end(), output.begin(), output.end(), std::back_inserter(intersection), SMeasureUnitLess());
+
+		for (const auto& item : intersection)
+		{
+			const auto itInput = std::find_if(input.begin(), input.end(), [&item](const auto& inpItem)
+				{
+					return *inpItem == *item;
+				});
+			if (itInput == input.end())
+				break;
+
+			input.erase(itInput);
+		}
+		
+		for (const auto& item : intersection)
+		{
+			const auto itOutput = std::find_if(output.begin(), output.end(), [&item](const auto& outItem)
+				{
+					return *outItem == *item;
+				});
+			if (itOutput == output.end())
+				break;
+
+			output.erase(itOutput);
+		}
 	}
 
 	bool Nomogramm::GetChildren(std::vector<SDBObject>& children) const

@@ -415,16 +415,16 @@
     <Points MF="9">4465,4525,4513,4579,4561,4633,4612,4683,4663,4734,4713,4788,4768,4830,946,840,896,788,843,738</Points>
     <Points MF="9">792,687,756,630,4742,4802</Points>
   </Line>
-  <CurrentLine>27</CurrentLine>
-  <Xmin MF="9">5233,4837,0.000000e+000</Xmin>
-  <Xmax MF="9">5233,166,1.000000e+000</Xmax>
-  <Ymin MF="9">5242,4846,0.000000e+000</Ymin>
-  <Ymax MF="9">715,4846,5.000000e+000</Ymax>
+  <CurrentLine>0</CurrentLine>
+  <Xmin MF="9">5440,4855,3.000000e+000</Xmin>
+  <Xmax MF="9">10255,4819,1.200000e+001</Xmax>
+  <Ymin MF="9">5449,4855,0.000000e+000</Ymin>
+  <Ymax MF="9">5431,166,1.000000e+000</Ymax>
   <XScale>linear</XScale>
   <YScale>linear</YScale>
-  <Position>69,528</Position>
+  <Position>593,8</Position>
   <Zoom>
-    <Scale>70.0</Scale>
+    <Scale>150.0</Scale>
   </Zoom>
   <Digitize>
     <IgnorePixels>1</IgnorePixels>

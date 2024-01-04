@@ -23,7 +23,7 @@ namespace nomogramms
 		bool operator!=(const DBObject& other) const override;
 
 		bool Calculate(const IOData& inputData, IOData& outputData, QString& error) const override;
-		void GetParameters(std::map<ParameterType, std::vector<SMeasureUnit>>& parameters) const override;
+		void GetParameters(ICalculeable::ParametersDict& parameters) const override;
 		bool GetChildren(std::vector<SDBObject>& children) const override;
 
 	protected:

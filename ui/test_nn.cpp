@@ -1,5 +1,6 @@
 #include "test_nn.h"
 #include <QListWidget>
+#include <QMessageBox>
 
 namespace ui
 {
@@ -49,9 +50,9 @@ namespace ui
 
 	at::Tensor TestNNDlg::makeTensorFromVector(const std::vector<double>& values) const
 	{
-		auto tensor = torch::zeros({ (long long)values.size(), 1LL });
+		auto tensor = torch::zeros({ 1LL, (long long)values.size() });
 		for (size_t i = 0; i < values.size(); ++i)
-			tensor[i][0] = values[i];
+			tensor[0][i] = values[i];
 
 		return tensor;
 	}
@@ -85,8 +86,15 @@ namespace ui
 
 	void TestNNDlg::onCalcBtnClicked()
 	{
-		auto inputData = gatherInputData();
-		auto result = info.nn->Predict(makeTensorFromVector(inputData));
-		showResult(result);
+		try
+		{
+			auto inputData = gatherInputData();
+			auto result = info.nn->Predict(makeTensorFromVector(inputData));
+			showResult(result);
+		}
+		catch (const std::exception& e)
+		{
+			QMessageBox::critical(this, QString::fromLocal8Bit("Ошибка"), QString::fromLocal8Bit(e.what()));
+		}
 	}
 }

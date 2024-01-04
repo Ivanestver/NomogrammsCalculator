@@ -308,6 +308,12 @@ namespace ui
 			auto line = file.readLine();
 			auto items = line.split(',');
 			std::vector<QString> row;
+			if (items.size() == 1 || items[0].isEmpty() || std::any_of(items.begin(), items.end(), [](const QString& item)
+				{
+					return item.isEmpty();
+				}))
+				continue;
+
 			for (const auto& item : items)
 			{
 				row.push_back(QString(item));
