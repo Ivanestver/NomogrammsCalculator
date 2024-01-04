@@ -67,7 +67,14 @@ namespace nomogramms
 
     bool Graphics::Calculate(const IOData& inputData, IOData& outputData, QString& error) const
     {
-        return m_wrapper.Calc(inputData, outputData, error);
+        const auto inputParamsIt = m_parametersList.find(ParameterType::Input);
+        IOData processedData;
+        for (const auto& measureUnit : inputParamsIt->second)
+        {
+            double value = inputData.GetValue(measureUnit);
+            processedData.AddValue(measureUnit, value);
+        }
+        return m_wrapper.Calc(processedData, outputData, error);
     }
 
     void Graphics::GetParameters(ICalculeable::ParametersDict& parameters) const
