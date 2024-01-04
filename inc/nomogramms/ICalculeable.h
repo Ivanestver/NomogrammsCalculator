@@ -14,16 +14,7 @@ namespace nomogramms
 	class ICalculeable
 	{
 	public:
-		struct SMeasureUnitLess
-		{
-		public:
-			bool operator()(const SMeasureUnit& left, const SMeasureUnit& right) const
-			{
-				return *left < *right;
-			}
-		};
-
-		using ParametersDict = std::map<ParameterType, std::set<SMeasureUnit, SMeasureUnitLess>>;
+		using ParametersDict = std::map<ParameterType, std::vector<SMeasureUnit>>;
 	public:
 		virtual ~ICalculeable() = default;
 		ICalculeable(const ICalculeable&) = default;

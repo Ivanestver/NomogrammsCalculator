@@ -77,7 +77,7 @@ namespace nomogramms
             auto& set = parameters[pair.first];
             for (const auto& item : pair.second)
             {
-                set.insert(item);
+                set.push_back(item);
             }
         }
     }

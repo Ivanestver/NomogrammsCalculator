@@ -3,6 +3,7 @@
 #include "db/DataBaseWrapper.h"
 #include "db_state/properties.h"
 #include "nomogramms/ExpressionExecutor.h"
+#include <QDebug>
 
 namespace nomogramms
 {
@@ -54,20 +55,19 @@ namespace nomogramms
 		auto& output = parameters[ParameterType::Output];
 
 		std::vector<SMeasureUnit> intersection;
-		std::set_intersection(input.begin(), input.end(), output.begin(), output.end(), std::back_inserter(intersection), SMeasureUnitLess());
-
-		for (const auto& item : intersection)
+		for (const auto& outputItem : output)
 		{
-			const auto itInput = std::find_if(input.begin(), input.end(), [&item](const auto& inpItem)
+			const auto it = std::find_if(input.begin(), input.end(), [&outputItem](const auto& inputItem)
 				{
-					return *inpItem == *item;
+					return *inputItem == *outputItem;
 				});
-			if (itInput == input.end())
+			if (it == input.end())
 				break;
 
-			input.erase(itInput);
+			input.erase(it);
+			intersection.push_back(outputItem);
 		}
-		
+
 		for (const auto& item : intersection)
 		{
 			const auto itOutput = std::find_if(output.begin(), output.end(), [&item](const auto& outItem)
