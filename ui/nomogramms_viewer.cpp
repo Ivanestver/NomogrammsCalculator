@@ -363,6 +363,8 @@ namespace ui
 				item.second = 0.0;
 			}
 		}
+
+		setInputTable(values);
 	}
 
 	void NomogrammsViewer::onSpinBoxValueChanged(int value)
