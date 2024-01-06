@@ -12,6 +12,7 @@
 
 using namespace nomogramms;
 
+Q_DECLARE_SMART_POINTER_METATYPE(std::shared_ptr)
 namespace ui
 {
 	class NomogrammTreeModel : public QAbstractItemModel
@@ -214,6 +215,8 @@ namespace ui
 
 		auto* item = new QTableWidgetItem(measureUnit.first->GetName());
 		item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+		item->setData(Qt::UserRole + 1, QVariant::fromValue(measureUnit.first));
+
 		int insertedRowNumber = tableWidget->rowCount();
 		tableWidget->insertRow(insertedRowNumber);
 		tableWidget->setItem(insertedRowNumber, 0, item);
@@ -238,12 +241,15 @@ namespace ui
 	nomogramms::IOData NomogrammsViewer::createInputData() const
 	{
 		IOData inputData;
-		const auto it = values.find(ParameterType::Input);
-		assert(it != values.end());
-		
-		for (const auto& pair : it->second)
+		for (int i = 0; i < ui->inputTable->rowCount(); ++i)
 		{
-			inputData.AddValue(pair.first, pair.second);
+			const auto* item = ui->inputTable->item(i, 0);
+			const auto measureUnit = item->data(Qt::UserRole + 1).value<SMeasureUnit>();
+
+			item = ui->inputTable->item(i, 1);
+			double value = item->text().toDouble();
+
+			inputData.AddValue(measureUnit, value);
 		}
 
 		return inputData;

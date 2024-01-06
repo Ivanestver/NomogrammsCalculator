@@ -23,7 +23,6 @@ private:
 	void fillMeasuresUnitsOfObj();
 	void intersectVectors(const std::vector<MeasureUnitInfo>& intersected, std::vector<MeasureUnitInfo>& reduced);
 	void sortVector(std::vector<MeasureUnitInfo>& v);
-	void sortMeasureUnitInfoVectors();
 
 private:
 	void setDifference(const std::vector<MeasureUnitInfo>& v1, const std::vector<MeasureUnitInfo>& v2, std::vector<MeasureUnitInfo>& diff)
@@ -50,11 +49,15 @@ private:
 		}
 	}
 
+	void moveItem(int direction, int borderValue);
+
 private Q_SLOTS:
 	void onAddMeasureUnitBtnClicked();
 	void onRemoveMeasureUnitBtnClicked();
 	void onAccept();
 	void onReject();
+	void onMoveUpBtnClicked();
+	void onMoveDownBtnClicked();
 
 private:
 	Ui::DlgObjectMeasureUnit m_ui;

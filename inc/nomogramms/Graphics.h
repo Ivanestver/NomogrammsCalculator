@@ -41,4 +41,5 @@ namespace nomogramms
 		ml::SFullyConnectedNN m_network{ nullptr };
 		NNWrapper m_wrapper;
 	};
+
 }

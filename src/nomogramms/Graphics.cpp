@@ -16,7 +16,11 @@ namespace nomogramms
 
     const std::vector<SMeasureUnit>& Graphics::GetParametersByType(ParameterType type) const
     {
-        return m_parametersList.find(type)->second;
+        const auto it = m_parametersList.find(type);
+        if (it == m_parametersList.end())
+            return {};
+
+        return it->second;
     }
 
     bool Graphics::operator==(const DBObject& other) const
@@ -37,7 +41,7 @@ namespace nomogramms
         if (!db)
             return;
 
-        QString queryString = "select measure_unit_id from template_measure_unit_input where template_id = ?";
+        QString queryString = "select measure_unit_id from template_measure_unit_input where template_id = ? order by mu_order";
         QString error;
         auto response = db->ExecuteQuery(queryString, { GetId() }, error);
         for (const auto& record : response)
@@ -46,7 +50,7 @@ namespace nomogramms
             m_parametersList[ParameterType::Input].push_back(measureUnit);
         }
 
-        queryString = "select measure_unit_id from template_measure_unit_output where template_id = ?";
+        queryString = "select measure_unit_id from template_measure_unit_output where template_id = ? order by mu_order";
         response = db->ExecuteQuery(queryString, { GetId() }, error);
         for (const auto& record : response)
         {

@@ -2,6 +2,7 @@
 #include <memory>
 #include <QUuid>
 
+
 #define DECL_SHARED(__class__) \
 	class __class__; \
 	using S##__class__ = std::shared_ptr<__class__>

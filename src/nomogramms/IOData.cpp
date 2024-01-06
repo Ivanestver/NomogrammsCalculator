@@ -23,7 +23,10 @@ namespace nomogramms
 
 	double IOData::GetValue(const nomogramms::SMeasureUnit& measure) const
 	{
-		auto it = m_data.find(measure);
+		const auto it = std::find_if(m_data.begin(), m_data.end(), [&measure](const std::pair<SMeasureUnit, double>& item)
+			{
+				return *item.first == *measure;
+			});
 		if (it == m_data.end())
 			return 0.0;
 

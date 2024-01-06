@@ -15,6 +15,8 @@ DlgObjectMeasureUnit::DlgObjectMeasureUnit(const QUuid& objId_, bool isInput, QW
 	connect(m_ui.removeMeasureUnit, &QPushButton::clicked, this, &DlgObjectMeasureUnit::onRemoveMeasureUnitBtnClicked);
 	connect(m_ui.buttonBox, &QDialogButtonBox::accepted, this, &DlgObjectMeasureUnit::onAccept);
 	connect(m_ui.buttonBox, &QDialogButtonBox::rejected, this, &DlgObjectMeasureUnit::onReject);
+	connect(m_ui.moveUpBtn, &QPushButton::clicked, this, &DlgObjectMeasureUnit::onMoveUpBtnClicked);
+	connect(m_ui.moveDownBtn, &QPushButton::clicked, this, &DlgObjectMeasureUnit::onMoveDownBtnClicked);
 
 	auto db = DBExecutor::GetInstance();
 	if (db)
@@ -35,9 +37,13 @@ DlgObjectMeasureUnit::DlgObjectMeasureUnit(const QUuid& objId_, bool isInput, QW
 		}
 		sortVector(measureInfoVector);
 
-		queryString = QString("select t2.measure_unit_id, t2.measure_unit_name from %1 as t1 inner join measure_unit as t2 on t1.measure_unit_id=t2.measure_unit_id where template_id = ?").arg(tableName);
+		queryString = QString("select t2.measure_unit_id, t2.measure_unit_name from %1 as t1 inner join measure_unit as t2 on t1.measure_unit_id=t2.measure_unit_id where template_id = ? order by mu_order").arg(tableName);
 		response.clear();
-		db->ExecSELECT(queryString, { objId }, response, error);
+		if (!db->ExecSELECT(queryString, { objId }, response, error))
+		{
+			QMessageBox::critical(this, QString::fromLocal8Bit("Ошибка"), error);
+			return;
+		}
 
 		for (const auto& record : response)
 		{
@@ -46,7 +52,6 @@ DlgObjectMeasureUnit::DlgObjectMeasureUnit(const QUuid& objId_, bool isInput, QW
 		}
 
 		intersectVectors(measureInfoOfObjVector, measureInfoVector);
-		sortMeasureUnitInfoVectors();
 		fillLists();
 	}
 }
@@ -96,12 +101,6 @@ void DlgObjectMeasureUnit::sortVector(std::vector<MeasureUnitInfo>& v)
 		});
 }
 
-void DlgObjectMeasureUnit::sortMeasureUnitInfoVectors()
-{
-	sortVector(measureInfoVector);
-	sortVector(measureInfoOfObjVector);
-}
-
 void DlgObjectMeasureUnit::onAddMeasureUnitBtnClicked()
 {
 	const auto selectedItems = m_ui.listAvailableMeasuresUnits->selectionModel()->selectedIndexes();
@@ -117,8 +116,33 @@ void DlgObjectMeasureUnit::onAddMeasureUnitBtnClicked()
 		measureInfoOfObjVector.push_back(measureInfoVector[rowNumber]);
 		measureInfoVector.erase(std::next(measureInfoVector.begin(), rowNumber));
 	}
-	sortMeasureUnitInfoVectors();
 	fillLists();
+}
+
+void DlgObjectMeasureUnit::moveItem(int direction, int borderValue)
+{
+	const auto* selectionModel = m_ui.listChosenMeasuresUnits->selectionModel();
+	if (!selectionModel)
+	{
+		QMessageBox::warning(this, QString::fromLocal8Bit("Внимание"), QString::fromLocal8Bit("Необходимо выделить элемент"));
+		return;
+	}
+
+	const auto selectedIndexes = selectionModel->selectedIndexes();
+	if (selectedIndexes.empty())
+	{
+		QMessageBox::warning(this, QString::fromLocal8Bit("Внимание"), QString::fromLocal8Bit("Необходимо выделить элемент"));
+		return;
+	}
+
+	const auto& idx = selectedIndexes.constFirst();
+
+	const int selectedRow = idx.row();
+	if (selectedRow == borderValue)
+		return;
+
+	std::swap(measureInfoOfObjVector[selectedRow], measureInfoOfObjVector[selectedRow + direction]);
+	fillMeasuresUnitsOfObj();
 }
 
 void DlgObjectMeasureUnit::onRemoveMeasureUnitBtnClicked()
@@ -136,13 +160,12 @@ void DlgObjectMeasureUnit::onRemoveMeasureUnitBtnClicked()
 		measureInfoVector.push_back(measureInfoOfObjVector[rowNumber]);
 		measureInfoOfObjVector.erase(std::next(measureInfoOfObjVector.begin(), rowNumber));
 	}
-	sortMeasureUnitInfoVectors();
 	fillLists();
 }
 
 void DlgObjectMeasureUnit::onAccept()
 {
-	std::vector<MeasureUnitInfo> difference;
+	/*std::vector<MeasureUnitInfo> difference;
 	if (measureInfoOfObjVectorOrigin.empty())
 		difference = measureInfoOfObjVector;
 	else if (measureInfoOfObjVector.empty())
@@ -175,7 +198,7 @@ void DlgObjectMeasureUnit::onAccept()
 			vectorToDelete.push_back(item);
 		}
 	}
-	
+
 	auto db = DBExecutor::GetInstance();
 	if (!db)
 		return;
@@ -212,12 +235,57 @@ void DlgObjectMeasureUnit::onAccept()
 				QMessageBox::warning(this, QString::fromLocal8Bit("Внимание!"), QString::fromLocal8Bit("При удалении произошла следующая ошибка \n") + error);
 			}
 		}
+	}*/
+
+	auto db = DBExecutor::GetInstance();
+	if (!db)
+	{
+		QMessageBox::warning(this, QString::fromLocal8Bit("Внимание"), QString::fromLocal8Bit("Нет подключения к БД"));
+		return;
 	}
 
+	QString error;
+	if (!db->ExecChange(QString("delete from %1 where template_id = ?").arg(tableName), { objId }, error))
+	{
+		QMessageBox::warning(this, QString::fromLocal8Bit("Внимание"), error);
+		return;
+	}
+
+	QString queryStr = QString("insert into %1 values ").arg(tableName);
+	std::vector<QVariant> params;
+	for (size_t i = 0; i < measureInfoOfObjVector.size(); ++i)
+	{
+		queryStr += "(?,?,?)";
+
+		if (i + 1 != measureInfoOfObjVector.size())
+			queryStr += ",";
+
+		params.push_back(objId);
+		params.push_back(measureInfoOfObjVector[i].first);
+		params.push_back(i);
+	}
+
+	if (!db->ExecChange(queryStr, params, error))
+	{
+		QMessageBox::warning(this, QString::fromLocal8Bit("Внимание"), error);
+		return;
+	}
+
+	QMessageBox::information(this, QString::fromLocal8Bit("Внимание"), QString::fromLocal8Bit("Сохранение прошло успешно"));
 	close();
 }
 
 void DlgObjectMeasureUnit::onReject()
 {
 	close();
+}
+
+void DlgObjectMeasureUnit::onMoveUpBtnClicked()
+{
+	moveItem(-1, 0);
+}
+
+void DlgObjectMeasureUnit::onMoveDownBtnClicked()
+{
+	moveItem(1, measureInfoOfObjVector.size());
 }

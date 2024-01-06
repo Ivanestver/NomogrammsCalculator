@@ -70,6 +70,7 @@ namespace nomogramms
 
 		error.clear();
 		IOData input(*inputData), output;
+		input += outputData;
 		for (int i = 2; i <= args; ++i)
 		{
 			output.Clear();
